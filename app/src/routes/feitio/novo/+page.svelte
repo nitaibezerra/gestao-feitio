@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import BtnPill from '../../../ui/componentes/primitivos/BtnPill.svelte';
   import FieldGroup from '../../../ui/componentes/primitivos/FieldGroup.svelte';
   import Pill from '../../../ui/componentes/primitivos/Pill.svelte';
   import PillRow from '../../../ui/componentes/primitivos/PillRow.svelte';
+  import { comandos, novoId } from '../../../app/runtime';
 
   let nome = $state(
     `Feitio de ${new Date().toLocaleString('pt-BR', { month: 'long' })}/${new Date().getFullYear()}`
@@ -11,6 +13,30 @@
   let foguista = $state('');
   let casinha = $state('Casinha da Sede');
   let qtdBocas = $state(5);
+  let erro = $state<string | null>(null);
+  let enviando = $state(false);
+
+  async function enviar(e: SubmitEvent) {
+    e.preventDefault();
+    if (enviando) return;
+    enviando = true;
+    erro = null;
+    const feitioId = novoId();
+    const r = await comandos().iniciarFeitio({
+      feitioId,
+      nome,
+      feitor,
+      foguista: foguista || undefined,
+      casinha: casinha || undefined,
+      qtdBocas
+    });
+    enviando = false;
+    if (r.ok) {
+      await goto('/feitio/atual');
+    } else {
+      erro = r.motivo;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -29,29 +55,33 @@
     </div>
   </header>
 
-  <form
-    class="formulario"
-    onsubmit={(e) => {
-      e.preventDefault();
-      // Fase 4 aciona comando iniciarFeitio. Por ora redireciona para o dashboard.
-      window.location.assign('/feitio/atual');
-    }}
-  >
+  <form class="formulario" onsubmit={enviar}>
     <FieldGroup label="nome do feitio">
-      <input type="text" bind:value={nome} />
+      <input type="text" bind:value={nome} aria-label="nome do feitio" />
     </FieldGroup>
 
     <div class="linha">
       <FieldGroup label="feitor">
-        <input type="text" bind:value={feitor} placeholder="quem comanda" required />
+        <input
+          type="text"
+          bind:value={feitor}
+          placeholder="quem comanda"
+          aria-label="feitor"
+          required
+        />
       </FieldGroup>
       <FieldGroup label="foguista">
-        <input type="text" bind:value={foguista} placeholder="quem cuida do fogo" />
+        <input
+          type="text"
+          bind:value={foguista}
+          placeholder="quem cuida do fogo"
+          aria-label="foguista"
+        />
       </FieldGroup>
     </div>
 
     <FieldGroup label="casinha">
-      <input type="text" bind:value={casinha} />
+      <input type="text" bind:value={casinha} aria-label="casinha" />
     </FieldGroup>
 
     <FieldGroup label="bocas da fornalha">
@@ -61,6 +91,10 @@
         {/each}
       </PillRow>
     </FieldGroup>
+
+    {#if erro}
+      <div class="erro mono" role="alert">{erro}</div>
+    {/if}
 
     <div class="acoes">
       <BtnPill variante="ghost" href="/">Cancelar</BtnPill>
@@ -132,6 +166,15 @@
   input[type='text']:focus {
     outline: none;
     border-color: var(--azul);
+  }
+
+  .erro {
+    font-size: 12px;
+    color: #b23a48;
+    padding: 10px 14px;
+    border: 1px solid #e7c3c8;
+    border-radius: 8px;
+    background: #fdf6f6;
   }
 
   .acoes {

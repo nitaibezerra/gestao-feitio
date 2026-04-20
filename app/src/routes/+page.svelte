@@ -1,11 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { bootstrapAtivo } from '../app/runtime';
 
-  // v1: único feitio ativo (mock). Redireciona direto para o dashboard.
-  // Fase 4 passa a verificar se existe feitio em_andamento no IndexedDB.
-  onMount(() => {
-    goto('/feitio/atual', { replaceState: true });
+  // Bootstrap da raiz: se existe feitio ativo, vai ao dashboard; senão,
+  // ao formulário de criar um novo.
+  onMount(async () => {
+    const id = await bootstrapAtivo();
+    if (id) {
+      await goto('/feitio/atual', { replaceState: true });
+    } else {
+      await goto('/feitio/novo', { replaceState: true });
+    }
   });
 </script>
 

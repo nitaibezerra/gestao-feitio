@@ -1,44 +1,49 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function limparDb(page: Page): Promise<void> {
+  await page.goto('/');
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const req = indexedDB.deleteDatabase('gestao-feitio');
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+        req.onblocked = () => resolve();
+      })
+  );
+}
 
 test.describe('Dashboard Luz Branca', () => {
-  test('/ redireciona para /feitio/atual e mostra header', async ({ page }) => {
-    await page.goto('/');
-    await expect(page).toHaveURL(/\/feitio\/atual$/);
-    await expect(page.getByText('Feitio de Abril/2026')).toBeVisible();
+  test.beforeEach(async ({ page }) => {
+    await limparDb(page);
   });
 
-  test('mostra as 4 panelas e 7 tonéis do mock', async ({ page }) => {
-    await page.goto('/feitio/atual');
+  test('/ redireciona para /feitio/novo quando não há feitio', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/feitio\/novo$/);
+  });
+
+  test('após criar feitio, dashboard mostra header e seções', async ({ page }) => {
+    await page.goto('/feitio/novo');
+    await page.getByLabel(/nome do feitio/i).fill('Feitio Dashboard');
+    await page.getByLabel(/feitor/i).fill('José');
+    await page.getByRole('button', { name: /Entrar no fogo/i }).click();
+    await expect(page).toHaveURL(/\/feitio\/atual$/);
+    await expect(page.getByRole('heading', { name: 'Feitio Dashboard' })).toBeVisible();
     await expect(page.getByText('Fornalha')).toBeVisible();
     await expect(page.getByText('Tonéis')).toBeVisible();
-    // Panelas numeradas 01..04
-    for (const n of ['01', '02', '03', '04']) {
-      await expect(page.getByText(n, { exact: true })).toBeVisible();
-    }
   });
 
   test('/config permite trocar a paleta e persiste a escolha', async ({ page }) => {
     await page.goto('/config');
     await expect(page.getByText('Paleta')).toBeVisible();
-    // Clica na Firmamento
     await page.getByRole('button', { name: /Firmamento/ }).click();
     await expect(
       page.getByRole('button', { name: /Firmamento/ }).locator('..').getByText('Ativa')
     ).toBeVisible();
-    // Após reload, a escolha é preservada
     await page.reload();
     await expect(
       page.getByRole('button', { name: /Firmamento/ }).locator('..').getByText('Ativa')
     ).toBeVisible();
-  });
-
-  test('clicar em panela abre modal de detalhe', async ({ page }) => {
-    await page.goto('/feitio/atual');
-    await page.getByText('03', { exact: true }).click();
-    // o modal tem role=dialog com aria-label específico
-    const modal = page.getByRole('dialog', { name: /Detalhe da panela/ });
-    await expect(modal).toBeVisible();
-    await expect(modal.getByText(/Panela 03/)).toBeVisible();
-    await expect(modal.getByText(/vai tirar/i)).toBeVisible();
   });
 });

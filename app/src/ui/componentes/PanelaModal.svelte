@@ -1,5 +1,7 @@
 <script lang="ts">
-  import type { PanelaMock } from '../mock-feitio';
+  import type { PanelaVisao } from '../visao';
+  import type { TipoConteudo, OrdemCozimento } from '../../domain/entities/panela';
+  import type { Tonel } from '../../domain/entities/tonel';
   import {
     conteudoLabel,
     fmtDuracao,
@@ -9,18 +11,95 @@
   } from '../labels';
   import { useRelogio } from '../relogio.svelte';
   import BtnPill from './primitivos/BtnPill.svelte';
+  import Pill from './primitivos/Pill.svelte';
+  import PillRow from './primitivos/PillRow.svelte';
+  import FieldGroup from './primitivos/FieldGroup.svelte';
+
+  export type PayloadTirar = { volumeL: number };
+  export type PayloadRepor = { conteudo: TipoConteudo; volumeL: number };
 
   type Props = {
-    panela: PanelaMock;
+    panela: PanelaVisao;
+    toneis: Array<Pick<Tonel, 'tipo' | 'ordem' | 'volumeL'>>;
     onClose: () => void;
+    onTirar: (p: PayloadTirar) => void;
+    onRepor: (p: PayloadRepor) => void;
+    onPausar: () => void;
+    onRetomar: () => void;
+    onDescartar: () => void;
   };
-  let { panela, onClose }: Props = $props();
+  let {
+    panela,
+    toneis,
+    onClose,
+    onTirar,
+    onRepor,
+    onPausar,
+    onRetomar,
+    onDescartar
+  }: Props = $props();
 
   const relogio = useRelogio();
   const tempoMs = $derived(
     panela.entradaFogoEm ? relogio.valor.getTime() - panela.entradaFogoEm.getTime() : 0
   );
   const cor = $derived(tiragemCor(panela.proxTiragem));
+
+  // Sub-formulários:
+  type Modo = 'principal' | 'tirar' | 'repor';
+  let modo = $state<Modo>('principal');
+
+  // Estado do sub-form de Tirar
+  const metaSugerida = $derived(Math.max(1, Math.floor((panela.volumeAtualL ?? 0) / 2)));
+  let volumeTirar = $state(0);
+  $effect(() => {
+    if (modo === 'tirar') {
+      volumeTirar = metaSugerida;
+    }
+  });
+
+  // Estado do sub-form de Repor
+  let volumeRepor = $state(60);
+  let conteudoReporKey = $state<string>('agua');
+
+  const opcoesConteudoRepor = $derived.by<Array<{ key: string; label: string; c: TipoConteudo }>>(() => {
+    const base: Array<{ key: string; label: string; c: TipoConteudo }> = [
+      { key: 'agua', label: 'Água', c: { tipo: 'agua' } }
+    ];
+    for (const t of toneis) {
+      if (t.tipo === 'cozimento' && t.ordem && t.volumeL > 0) {
+        base.push({
+          key: `coz${t.ordem}`,
+          label: `${t.ordem}º coz. · ${t.volumeL} L`,
+          c: { tipo: 'cozimento', ordem: t.ordem as OrdemCozimento }
+        });
+      }
+    }
+    return base;
+  });
+  const conteudoReporSelecionado = $derived(
+    opcoesConteudoRepor.find((o) => o.key === conteudoReporKey) ?? opcoesConteudoRepor[0]
+  );
+
+  const pausado = $derived(panela.estado === 'fora_do_fogo' || panela.tempoPausado === true);
+  const podeTirar = $derived(panela.estado === 'no_fogo');
+  const podeRepor = $derived(panela.estado === 'aguardando_reposicao');
+
+  function confirmarTirar() {
+    onTirar({ volumeL: volumeTirar });
+    modo = 'principal';
+  }
+
+  function confirmarRepor() {
+    if (!conteudoReporSelecionado) return;
+    onRepor({ conteudo: conteudoReporSelecionado.c, volumeL: volumeRepor });
+    modo = 'principal';
+  }
+
+  function descartar() {
+    if (typeof window !== 'undefined' && !window.confirm('Descartar esta panela?')) return;
+    onDescartar();
+  }
 </script>
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && onClose()} />
@@ -28,7 +107,6 @@
 <div class="overlay" role="presentation">
   <button class="close-area" aria-label="Fechar modal" onclick={onClose}></button>
   <div class="modal" role="dialog" aria-modal="true" aria-label="Detalhe da panela {panela.numero}">
-    <!-- Cabeçalho -->
     <div class="cabecalho">
       <div>
         <div class="mono eyebrow">Boca {panela.boca}</div>
@@ -44,7 +122,6 @@
       <button class="fechar" onclick={onClose} aria-label="Fechar">×</button>
     </div>
 
-    <!-- Próxima tiragem + volume -->
     <div class="linha-dupla">
       <div class="cell">
         <div class="mono eyebrow">vai tirar</div>
@@ -63,7 +140,6 @@
       </div>
     </div>
 
-    <!-- Tiragens anteriores -->
     <div class="tiragens">
       <div class="mono eyebrow">
         tiragens anteriores · {panela.tiragens.length}
@@ -87,16 +163,75 @@
       {/if}
     </div>
 
-    <!-- Ações -->
-    <div class="acoes">
-      <BtnPill variante="primary" accent={cor}>
-        Tirar — {tiragemLabel(panela.proxTiragem).toLowerCase()}
-      </BtnPill>
-      <BtnPill variante="ghost">Repor</BtnPill>
-      <BtnPill variante="ghost">Pausar</BtnPill>
-      <div class="espaco"></div>
-      <button class="link">histórico completo</button>
-    </div>
+    {#if modo === 'tirar'}
+      <div class="sub-form">
+        <FieldGroup label="volume da tiragem">
+          <div class="volume-grande">
+            <span class="serif num">{volumeTirar}</span>
+            <span class="mono u">L</span>
+          </div>
+          <PillRow>
+            {#each [metaSugerida, metaSugerida - 5, metaSugerida + 5, metaSugerida * 2].filter((v) => v > 0 && v <= (panela.volumeAtualL ?? 0)) as v (v)}
+              <Pill active={volumeTirar === v} onclick={() => (volumeTirar = v)}>{v} L</Pill>
+            {/each}
+          </PillRow>
+        </FieldGroup>
+        <div class="preview mono">
+          Tira em <span class="forte">{tiragemLabel(panela.proxTiragem).toLowerCase()}</span> — destino automático
+        </div>
+        <div class="acoes">
+          <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Cancelar</BtnPill>
+          <BtnPill variante="primary" accent={cor} onclick={confirmarTirar}>
+            Confirmar tiragem
+          </BtnPill>
+        </div>
+      </div>
+    {:else if modo === 'repor'}
+      <div class="sub-form">
+        <FieldGroup label="repor com">
+          <PillRow>
+            {#each opcoesConteudoRepor as o (o.key)}
+              <Pill active={conteudoReporKey === o.key} onclick={() => (conteudoReporKey = o.key)}>
+                {o.label}
+              </Pill>
+            {/each}
+          </PillRow>
+        </FieldGroup>
+        <FieldGroup label="volume">
+          <div class="volume-grande">
+            <span class="serif num">{volumeRepor}</span>
+            <span class="mono u">L</span>
+          </div>
+          <PillRow>
+            {#each [50, 55, 60, 65] as v (v)}
+              <Pill active={volumeRepor === v} onclick={() => (volumeRepor = v)}>{v} L</Pill>
+            {/each}
+          </PillRow>
+        </FieldGroup>
+        <div class="acoes">
+          <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Cancelar</BtnPill>
+          <BtnPill variante="primary" onclick={confirmarRepor}>Confirmar reposição</BtnPill>
+        </div>
+      </div>
+    {:else}
+      <div class="acoes">
+        {#if podeTirar}
+          <BtnPill variante="primary" accent={cor} onclick={() => (modo = 'tirar')}>
+            Tirar — {tiragemLabel(panela.proxTiragem).toLowerCase()}
+          </BtnPill>
+        {/if}
+        {#if podeRepor}
+          <BtnPill variante="primary" accent={cor} onclick={() => (modo = 'repor')}>Repor</BtnPill>
+        {/if}
+        {#if pausado}
+          <BtnPill variante="ghost" onclick={onRetomar}>Retomar</BtnPill>
+        {:else}
+          <BtnPill variante="ghost" onclick={onPausar}>Pausar</BtnPill>
+        {/if}
+        <div class="espaco"></div>
+        <button class="link" onclick={descartar}>descartar panela</button>
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -267,6 +402,34 @@
     color: var(--ink-faint);
   }
 
+  .sub-form {
+    padding: 20px 32px;
+    border-top: 1px solid var(--linha);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .volume-grande {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .num {
+    font-size: 48px;
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .preview {
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+  .preview .forte {
+    color: var(--ink);
+  }
+
   .acoes {
     padding: 20px 32px;
     border-top: 1px solid var(--linha);
@@ -274,6 +437,11 @@
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+  }
+  .sub-form .acoes {
+    padding: 0;
+    border-top: 0;
+    justify-content: flex-end;
   }
   .espaco {
     flex: 1;

@@ -1,23 +1,64 @@
 <script lang="ts">
+  import type { TipoConteudo, OrdemCozimento } from '../../domain/entities/panela';
+  import type { Tonel } from '../../domain/entities/tonel';
+  import { conteudoLabel } from '../labels';
   import BtnPill from './primitivos/BtnPill.svelte';
   import FieldGroup from './primitivos/FieldGroup.svelte';
   import Pill from './primitivos/Pill.svelte';
   import PillRow from './primitivos/PillRow.svelte';
 
+  export type PayloadNovaPanela = {
+    bocaNumero: number;
+    conteudo: TipoConteudo;
+    volumeL: number;
+  };
+
   type Props = {
     bocasVazias: number[];
+    toneis: Array<Pick<Tonel, 'tipo' | 'ordem' | 'volumeL'>>;
     onClose: () => void;
-    onConfirm?: () => void;
+    onConfirm: (p: PayloadNovaPanela) => void;
   };
-  let { bocasVazias, onClose, onConfirm }: Props = $props();
+  let { bocasVazias, toneis, onClose, onConfirm }: Props = $props();
 
-  let qtd = $state<1 | 2>(1);
-  let conteudo = $state<'agua' | 'coz1' | 'coz2'>('agua');
-  let volume = $state(60);
+  let bocaSelecionada = $state<number>(0);
+  let conteudoKey = $state<string>('agua');
+  let volume = $state<number>(60);
 
   $effect(() => {
-    qtd = bocasVazias.length >= 2 ? 2 : 1;
+    if (bocaSelecionada === 0 || !bocasVazias.includes(bocaSelecionada)) {
+      bocaSelecionada = bocasVazias[0] ?? 1;
+    }
   });
+
+  const opcoesConteudo = $derived.by<Array<{ key: string; label: string; c: TipoConteudo }>>(() => {
+    const base: Array<{ key: string; label: string; c: TipoConteudo }> = [
+      { key: 'agua', label: 'Água', c: { tipo: 'agua' } }
+    ];
+    for (const t of toneis) {
+      if (t.tipo === 'cozimento' && t.ordem && t.volumeL > 0) {
+        base.push({
+          key: `coz${t.ordem}`,
+          label: `${t.ordem}º coz. · ${t.volumeL} L`,
+          c: { tipo: 'cozimento', ordem: t.ordem as OrdemCozimento }
+        });
+      }
+    }
+    return base;
+  });
+
+  const conteudoSelecionado = $derived(
+    opcoesConteudo.find((o) => o.key === conteudoKey) ?? opcoesConteudo[0]
+  );
+
+  function confirmar() {
+    if (!conteudoSelecionado) return;
+    onConfirm({
+      bocaNumero: bocaSelecionada,
+      conteudo: conteudoSelecionado.c,
+      volumeL: volume
+    });
+  }
 </script>
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && onClose()} />
@@ -35,28 +76,29 @@
     </div>
 
     <div class="corpo">
-      <FieldGroup label="quantas">
-        <PillRow>
-          <Pill active={qtd === 1} onclick={() => (qtd = 1)}>1 panela</Pill>
-          {#if bocasVazias.length >= 2}
-            <Pill active={qtd === 2} onclick={() => (qtd = 2)}>Dupla (2)</Pill>
-          {/if}
-        </PillRow>
-      </FieldGroup>
+      {#if bocasVazias.length > 1}
+        <FieldGroup label="qual boca">
+          <PillRow>
+            {#each bocasVazias as b (b)}
+              <Pill active={bocaSelecionada === b} onclick={() => (bocaSelecionada = b)}>
+                Boca {b}
+              </Pill>
+            {/each}
+          </PillRow>
+        </FieldGroup>
+      {/if}
 
       <FieldGroup label="entra com">
         <PillRow>
-          <Pill active={conteudo === 'agua'} onclick={() => (conteudo = 'agua')}>Água</Pill>
-          <Pill active={conteudo === 'coz1'} onclick={() => (conteudo = 'coz1')}>
-            1º coz. · 52 L
-          </Pill>
-          <Pill active={conteudo === 'coz2'} onclick={() => (conteudo = 'coz2')}>
-            2º coz. · 40 L
-          </Pill>
+          {#each opcoesConteudo as o (o.key)}
+            <Pill active={conteudoKey === o.key} onclick={() => (conteudoKey = o.key)}>
+              {o.label}
+            </Pill>
+          {/each}
         </PillRow>
       </FieldGroup>
 
-      <FieldGroup label="volume cada">
+      <FieldGroup label="volume">
         <div class="volume-grande">
           <span class="serif num">{volume}</span>
           <span class="mono u">L</span>
@@ -67,13 +109,17 @@
           {/each}
         </PillRow>
       </FieldGroup>
+
+      <div class="preview mono">
+        Vai entrar <span class="forte">{conteudoLabel(conteudoSelecionado.c)}</span>
+        na <span class="forte">boca {bocaSelecionada}</span> com
+        <span class="forte">{volume} L</span>
+      </div>
     </div>
 
     <div class="rodape">
       <BtnPill variante="ghost" onclick={onClose}>Cancelar</BtnPill>
-      <BtnPill variante="primary" onclick={() => (onConfirm ?? onClose)()}>
-        Entrar no fogo
-      </BtnPill>
+      <BtnPill variante="primary" onclick={confirmar}>Entrar no fogo</BtnPill>
     </div>
   </div>
 </div>
@@ -154,6 +200,15 @@
   .u {
     font-size: 12px;
     color: var(--ink-faint);
+  }
+
+  .preview {
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+  .preview .forte {
+    color: var(--ink);
   }
 
   .rodape {
