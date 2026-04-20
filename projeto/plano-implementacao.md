@@ -116,13 +116,16 @@ Recriar os componentes do design em Svelte, **mantendo fidelidade visual**:
 | `ReporForm` | `ui/componentes/ReporForm.svelte` | — |
 | `NovaPanelaModal` | `ui/componentes/NovaPanelaModal.svelte` | — |
 | `ActionBar` | `ui/componentes/ActionBar.svelte` | — |
-| `TweaksPanel` (design only) | **não portar** | Dev-only; substituir por seletor de paleta simples em configurações |
+| `TweaksPanel` (design only) | `routes/config/+page.svelte` | Só seletor de paleta (layout/compacto/timeline descartados) |
 | `ActionBtn`, `QuickBtn`, `TonelRadio`, `ReporOption` | `ui/componentes/primitivos/*.svelte` | Componentes pequenos reutilizados |
 
-**Roteamento SvelteKit:**
-- `/` — lista de feitios + botão "Novo feitio"
-- `/feitio/[id]` — dashboard (rota principal)
-- Modais são `#if` em cima do dashboard, não rotas separadas (preserva estado do painel).
+**Roteamento SvelteKit (v1, feitio único):**
+- `/` — redireciona automaticamente:
+  - Se existe feitio com `status == 'em_andamento'` → `/feitio/atual`
+  - Senão → tela simples "Iniciar novo feitio" com formulário (RF-01)
+- `/feitio/atual` — dashboard (rota principal; sempre mostra o único feitio ativo)
+- `/config` — oculta; seletor de paleta entre as 5 opções do design
+- Modais são blocos `{#if}` em cima do dashboard, não rotas separadas (preserva estado do painel).
 
 **Animações:** portar keyframes `pulse` e `flicker` para `app.css`.
 
@@ -184,8 +187,11 @@ gestao-feitio/
 │   │   │   │   └── primitivos/{ActionBtn,QuickBtn,TonelRadio,ReporOption}.svelte
 │   │   └── routes/
 │   │       ├── +layout.svelte
-│   │       ├── +page.svelte               ← lista de feitios
-│   │       └── feitio/[id]/+page.svelte   ← dashboard
+│   │       ├── +page.svelte               ← redireciona p/ /feitio/atual ou /feitio/novo
+│   │       ├── feitio/
+│   │       │   ├── novo/+page.svelte      ← RF-01 cadastro de feitio
+│   │       │   └── atual/+page.svelte     ← dashboard (rota principal)
+│   │       └── config/+page.svelte        ← seletor de paleta
 │   ├── static/
 │   │   ├── manifest.webmanifest
 │   │   └── icons/
@@ -207,21 +213,21 @@ gestao-feitio/
 | Portar React → Svelte perde detalhes visuais | Colocar design original ao lado em iframe durante dev para comparar pixel a pixel |
 | `oklch` + `color-mix` em tablets antigos | Tablet alvo precisa suportar CSS Color Module 4 (Chromium 111+, Safari 15.4+); fallback hex é trivial |
 | Timers em vários componentes consomem bateria | Um único `setInterval` global num store, componentes assinam; reduz work |
-| Design é mobile/tablet-only; lista de feitios não está no design | Criar tela simples `/` com lista + CTA "Novo feitio"; evolui depois |
+| Design não cobre "novo feitio" | V1 com feitio único: rota `/feitio/novo` é formulário simples (RF-01); dashboard é o foco visual |
 | `Desfazer` é complexo com múltiplos tipos de evento | Começar com subset (tiragem, reposição, volume_ajustado); expandir |
 
 ---
 
-## 6. Decisões em aberto antes de começar
+## 6. Decisões tomadas (defaults confirmados)
 
-Pontos que afetam a implementação — recomendo responder antes da Fase 0:
-
-1. **Seguir com SvelteKit** (recomendação) ou manter React (atalho)?
-2. **Paleta padrão** — fica "Rainha da Floresta" (verde claro + branco) como no design, ou alternar?
-3. **Nome do app** na UI e manifest PWA — "Gestão de Feitio" ou algo mais curto/sagrado?
-4. **Tablet alvo** — modelo específico para calibrar tamanhos? O design usa 1280×800.
-5. **Multi-feitio** — aceito começar com 1 único feitio ativo (esconder rota `/`) e evoluir?
-6. **Remover Tweaks da UI final** — confirma que tweaks são dev-only (o design os usa apenas no Claude Design)?
+| # | Pergunta | Decisão |
+|---|---|---|
+| 1 | Stack | **SvelteKit + TypeScript + Dexie** (conforme `projeto.md`). React do protótipo serve apenas de referência visual. |
+| 2 | Paleta padrão | **Rainha da Floresta** (verde claro + branco). Demais 4 paletas ficam disponíveis num `/config` oculto (acessível por gesto ou URL direta). |
+| 3 | Nome do app | UI: **"Gestão de Feitio"**. Manifest PWA `short_name`: **"Feitio"** (cabe no ícone da home). |
+| 4 | Tablet alvo | **Genérico landscape 1280×800** (Android 10+ / iPad iOS 14+). Layout responde de 1024 px para cima sem regressão. |
+| 5 | Multi-feitio v1 | **Um feitio ativo por vez.** Rota raiz `/` redireciona para `/feitio/atual` se existir; senão mostra "Criar feitio". Lista histórica fica para v1.1. |
+| 6 | TweaksPanel | **Não portar.** Tweaks eram overlay do Claude Design. O único tweak relevante (paleta) vira uma tela `/config`. |
 
 ---
 
@@ -250,4 +256,14 @@ Pontos que afetam a implementação — recomendo responder antes da Fase 0:
 
 ## 9. Próximo passo imediato
 
-Aguardo resposta das 6 decisões abertas na §6. Com essas definições, começo a Fase 0 imediatamente.
+Com as 6 decisões fechadas em §6, o plano está executável. A Fase 0 começa com:
+
+1. `mkdir app && cd app && pnpm create svelte@latest .` (template skeleton + TS).
+2. Instalar dependências: `svelte@5`, `@sveltejs/kit`, `typescript`, `vite`, `tailwindcss`, `dexie`, `dexie-svelte` (ou wrapper custom), `vitest`, `@playwright/test`, `@vite-pwa/sveltekit`, `date-fns`, `lucide-svelte`.
+3. Copiar fontes Google no `app.html`: Instrument Serif, Inter, JetBrains Mono.
+4. Criar `app/src/app.css` com todas as variáveis CSS do design (`--bg`, `--fire`, `--ember`, `--agua`, etc.) e keyframes `pulse`, `flicker`.
+5. Criar `app/src/ui/paletas.ts` com as 5 paletas do design e função `aplicarPaleta(key)`.
+6. Inicializar `manifest.webmanifest` com `short_name: "Feitio"`, `name: "Gestão de Feitio"`, `theme_color` da paleta Rainha da Floresta, `display: "standalone"`, `orientation: "landscape"`.
+7. Smoke test: `pnpm dev`, abrir em `localhost`, conferir que o CSS variáveis já respondem.
+
+Depois disso, Fase 1 (domínio puro) começa — sem bloqueios externos.
