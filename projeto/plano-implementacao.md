@@ -1,8 +1,34 @@
 # Plano de Implementação — MVP do Aplicativo de Gestão de Feitio
 
-> Plano de execução para implementar o [Gestão de Feitio Dashboard](../design/project/Gestao%20de%20Feitio.html) — protótipo de alta fidelidade recebido via Claude Design.
+> Plano de execução **orientado a TDD** para implementar o [Gestão de Feitio Dashboard](../design/project/Gestao%20de%20Feitio.html) — protótipo de alta fidelidade recebido via Claude Design.
 >
 > Documentos base: [Tutorial](./tutorial-producao-daime.md) · [Requisitos](./requisitos.md) · [Projeto](./projeto.md)
+
+---
+
+## 0. Metodologia: TDD (Red · Green · Refactor)
+
+Todo código da camada **domain** e **app** é escrito via ciclo TDD clássico:
+
+1. **Red** — escrever um teste Vitest que falha, descrevendo o comportamento desejado com nomes do domínio (português).
+2. **Green** — escrever **o código mínimo** para o teste passar. Sem generalização prematura.
+3. **Refactor** — limpar duplicação, melhorar nomes, extrair funções. Testes continuam verdes.
+
+Camadas e nível de teste:
+
+| Camada | Tipo de teste | Ferramenta | TDD estrito? |
+|---|---|---|---|
+| `domain/*` (regras, nomenclatura, máquina de estados, projeções) | Unitário puro | Vitest | **Sim** — red first |
+| `infra/persistencia` | Integração com fake IndexedDB | Vitest + `fake-indexeddb` | Sim |
+| `app/comandos.ts` | Integração domínio + persistência | Vitest | Sim |
+| `ui/componentes/*.svelte` | Teste de componente | Vitest + `@testing-library/svelte` | Parcial — snapshot visual guia |
+| Fluxos end-to-end | E2E | Playwright | Acceptance test primeiro |
+
+**Disciplina:**
+- Nunca escrever código de produção sem um teste vermelho apontando para ele.
+- Commits pequenos, um por ciclo RGR quando fizer sentido agrupar.
+- Cobertura ≥ 90% no `domain/` é consequência, não meta.
+- Se um teste requer setup complexo, o problema é o desenho — refactor antes de continuar.
 
 ---
 
@@ -61,44 +87,84 @@ O design é React puro. A decisão original (documento de projeto) é SvelteKit 
 
 ## 3. Plano de entrega por fases
 
-### Fase 0 — Setup (~1 dia)
+### Fase 0 — Setup + guard-rails de teste (~1 dia)
 
-- Criar pasta `app/` em `gestao-feitio/` com SvelteKit + TypeScript + Tailwind.
-- Configurar `@vite-pwa/sveltekit`, Dexie, Vitest, Playwright.
-- Importar fontes Google (Instrument Serif, Inter, JetBrains Mono).
-- Criar variáveis CSS no `:root` espelhando o design (`--fire`, `--ember`, `--agua`, `--cozimento`, `--daime`, `--agua-forte`, softs via `color-mix`).
-- Implementar seletor de **paleta** (5 paletas do design) em `app/src/ui/paletas.ts`, aplicada via `document.documentElement.style.setProperty`.
+Ordem importa: **Vitest operante antes de qualquer linha de domínio**.
+
+1. `mkdir app && cd app && pnpm create svelte@latest .` (skeleton + TS).
+2. Instalar: `dexie`, `fake-indexeddb` (dev), `vitest`, `@testing-library/svelte`, `@playwright/test`, `@vite-pwa/sveltekit`, `tailwindcss`, `date-fns`, `lucide-svelte`.
+3. Configurar `vitest.config.ts` — `environment: 'jsdom'` para componentes, `environment: 'node'` para `domain/`.
+4. Configurar `playwright.config.ts` — projeto `chromium` em viewport 1280×800.
+5. Escrever **um teste canary** em cada nível (unitário, componente, E2E) que valida que o setup funciona. Todos falham com `not implemented`.
+6. Fontes Google + variáveis CSS (`app/src/app.css`) — espelho do design.
+7. `app/src/ui/paletas.ts` — 5 paletas + `aplicarPaleta(key)` com teste de roundtrip (aplica → lê `getPropertyValue` → confere).
+8. `manifest.webmanifest` com `short_name: "Feitio"`, `name: "Gestão de Feitio"`, `display: "standalone"`, `orientation: "landscape"`, `theme_color` da Rainha da Floresta.
+9. Smoke: `pnpm dev` abre; `pnpm test` roda canaries; `pnpm exec playwright test` abre chromium.
 
 **Arquivos novos:**
-- `app/package.json`, `app/svelte.config.js`, `app/vite.config.ts`
+- `app/package.json`, `app/svelte.config.js`, `app/vite.config.ts`, `app/vitest.config.ts`, `app/playwright.config.ts`
 - `app/src/app.css` (variáveis + keyframes `pulse`, `flicker`)
-- `app/src/ui/paletas.ts`
+- `app/src/ui/paletas.ts` + `app/src/ui/paletas.test.ts`
+- `app/tests/e2e/canary.spec.ts`
+- `app/static/manifest.webmanifest`
 
-### Fase 1 — Domínio puro + projeções (~2 dias)
+### Fase 1 — Domínio puro + projeções (~2-3 dias, TDD estrito)
 
-Implementar em TypeScript puro (sem Svelte):
+Ordem **red first**: cada arquivo `.ts` de domínio nasce de um `.test.ts` falhando.
 
-- `domain/entities/panela.ts` — tipos `Panela`, `EstadoPanela`, `TipoConteudo`, `TipoTiragem`, `Tiragem`.
-- `domain/entities/tonel.ts`, `feitio.ts`, `fornalha.ts`.
-- `domain/events/tipos.ts` — união discriminada completa.
-- `domain/regras/nomenclatura.ts` — `calcularTipoTiragem(panela)` com cobertura do ciclo de água forte (seguir `projeto.md` §4.3).
-- `domain/regras/maquina-estados.ts` — `transicao(estado, comando)`.
-- `domain/projecoes/fornalha.ts`, `panelas.ts`, `toneis.ts` — folds de eventos → estado.
-- `domain/regras/correcao-duplas.ts` — sugestão "mire X L" baseada em dupla.
+**Ciclo 1 — Nomenclatura automática (RF-08)**
+- Red: `nomenclatura.test.ts` — "panela com água nova, 1ª tiragem → cozimento ordem 1"
+- Green: tipos mínimos de `Panela`/`Tiragem`/`TipoTiragem` + função retornando cozimento 1
+- Repetir red→green para: 2º, 3º... 6º cozimento → água forte → múltiplas tiragens de água forte → panela com cozimento vira Daime 1º grau → 2º/3º/4º grau → panela pós-Daime volta à água → produz cozimento que vai ao tonel do 1º → limite 4º grau salta para água forte
+- Refactor final: `calcularTipoTiragem` pura em `domain/regras/nomenclatura.ts`
 
-**Testes Vitest** (Fase 1 termina com cobertura ≥ 90% do domínio):
-- Todos os cenários do tutorial (quinta-feira, sexta-feira, entrada em água forte, múltiplas tiragens de água forte).
-- Máquina de estados com tabela exaustiva.
-- Nomenclatura automática com fixtures do design (`initialState`).
+**Ciclo 2 — Máquina de estados da panela**
+- Red: `maquina-estados.test.ts` — tabela de transições permitidas/proibidas (um teste por célula)
+- Green: função `transicao(estado, comando) → estado | erro`
+- Cobertura exaustiva: `montada × comandos`, `no_fogo × comandos`, etc.
 
-### Fase 2 — Persistência + stores (~1 dia)
+**Ciclo 3 — Correção de duplas (RF-17)**
+- Red: "tirou 33 na primeira panela, meta do tonel 62 → sugere 29 na segunda"
+- Green: `sugerirCorrecaoDupla(tiragensAnteriores, metaTonel)` em `domain/regras/correcao-duplas.ts`
 
-- `infra/persistencia/dexie-db.ts` — schema IndexedDB (tabelas `eventos`, `feitios`, `pessoas`, `configuracoes`).
-- `infra/persistencia/repositorio-eventos.ts` — `append()`, `streamByFeitio()`.
-- `app/stores.ts` — stores Svelte derivados das projeções, reativos via `liveQuery`.
-- `app/comandos.ts` — command handlers que validam no domínio, apendam evento, atualizam store.
+**Ciclo 4 — Eventos (union discriminada)**
+- Red: teste de validação de payload por tipo de evento
+- Green: `domain/events/tipos.ts` + validadores
 
-### Fase 3 — UI: portar dashboard (~3-4 dias)
+**Ciclo 5 — Projeções (event sourcing)**
+- Red: "dados eventos [feitio_iniciado, panela_montada, panela_entra_fogo, tiragem_registrada] → panela com conteúdo e tiragens corretos"
+- Green: `domain/projecoes/panelas.ts`, `toneis.ts`, `fornalha.ts` — folds puros
+- Testes reproduzem os 3 cenários do tutorial (quinta, sexta-Daime, transição para água forte)
+
+**Critério para encerrar Fase 1:**
+- Todos os cenários do tutorial passam como testes.
+- `pnpm test:unit --coverage` reporta ≥ 90% em `src/domain/`.
+- Nenhum arquivo em `domain/` foi criado sem um teste prévio (conferir ordem dos commits).
+
+### Fase 2 — Persistência + stores (~1-2 dias, TDD com `fake-indexeddb`)
+
+**Ciclo 1 — Repositório de eventos (append-only)**
+- Red: "append de evento → `streamByFeitio` emite o evento" (usando `fake-indexeddb`)
+- Red: "dois eventos em ordem → stream preserva ordem por `momento`"
+- Green: `infra/persistencia/dexie-db.ts` + `repositorio-eventos.ts`
+
+**Ciclo 2 — Command handlers**
+- Red: "comando `RegistrarTiragem` em panela `no_fogo` com volume válido → persiste evento + panela vai para `aguardando_reposicao`"
+- Red: "comando inválido (tirar de panela `descartada`) → erro claro, nada persistido"
+- Green: `app/comandos.ts` — orquestra domínio (validação) + repositório (persistência)
+
+**Ciclo 3 — Stores reativos**
+- Red: "ao appendar evento, `fornalhaStore` re-projeta e notifica assinantes"
+- Green: `app/stores.ts` com `liveQuery` do Dexie
+
+**Critério:** commands do tutorial (quinta/sexta) rodam end-to-end em Vitest — sem UI ainda.
+
+### Fase 3 — UI: portar dashboard (~3-4 dias, ATDD leve)
+
+**Abordagem de teste:**
+- **E2E primeiro** (Playwright) — para cada fluxo principal, escrever o teste de aceitação antes da UI. Red: "navego para `/feitio/atual`, vejo 5 bocas, clico na Panela 3, vejo modal com timer e próxima tiragem Daime 1º grau".
+- **Teste de componente** com `@testing-library/svelte` para lógica não trivial (volume bar, timer, cálculo visual de meta).
+- **Visual** conferido side-by-side com o design original (iframe em dev).
 
 Recriar os componentes do design em Svelte, **mantendo fidelidade visual**:
 
@@ -129,10 +195,16 @@ Recriar os componentes do design em Svelte, **mantendo fidelidade visual**:
 
 **Animações:** portar keyframes `pulse` e `flicker` para `app.css`.
 
-### Fase 4 — Interatividade completa (~2 dias)
+### Fase 4 — Interatividade completa (~2 dias, driven pelo E2E)
 
-Ligar os botões aos commands:
-- `Tirar` → valida via domínio → `TiragemRegistrada` → atualiza panela e tonel destino → panela vai para `aguardando_reposicao`.
+Cada comando ganha um Playwright E2E "de fora pra dentro":
+
+1. Red E2E: usuário clica no botão → estado esperado (DOM + evento persistido).
+2. Green: wire up do handler Svelte → comando já testado da Fase 2.
+3. Refactor: extrair pequenos componentes, reduzir duplicação de modais.
+
+Comandos a ligar:
+- `Tirar` → `TiragemRegistrada` → atualiza panela e tonel destino → panela vai para `aguardando_reposicao`.
 - `Repor` → desconta do tonel origem → `ReposicaoRegistrada` → panela volta para `no_fogo`.
 - `Pausar` / `Retomar` → eventos `TempoPausado` / `TempoRetomado`.
 - `Trocar boca` → seleção dupla + `TrocaBocas`.
@@ -161,16 +233,16 @@ gestao-feitio/
 │   ├── src/
 │   │   ├── app.html
 │   │   ├── app.css
-│   │   ├── domain/                        ← Fase 1
+│   │   ├── domain/                        ← Fase 1 (TDD red-first)
 │   │   │   ├── entities/{panela,tonel,feitio,fornalha}.ts
-│   │   │   ├── events/tipos.ts
-│   │   │   ├── regras/{nomenclatura,maquina-estados,correcao-duplas}.ts
-│   │   │   └── projecoes/{fornalha,panelas,toneis}.ts
+│   │   │   ├── events/tipos.ts + tipos.test.ts
+│   │   │   ├── regras/{nomenclatura,maquina-estados,correcao-duplas}.ts + .test.ts
+│   │   │   └── projecoes/{fornalha,panelas,toneis}.ts + .test.ts
 │   │   ├── infra/                         ← Fase 2
-│   │   │   └── persistencia/{dexie-db,repositorio-eventos}.ts
+│   │   │   └── persistencia/{dexie-db,repositorio-eventos}.ts + .test.ts
 │   │   ├── app/                           ← Fase 2
 │   │   │   ├── stores.ts
-│   │   │   └── comandos.ts
+│   │   │   └── comandos.ts + comandos.test.ts
 │   │   ├── ui/                            ← Fase 3
 │   │   │   ├── paletas.ts
 │   │   │   ├── componentes/
@@ -243,14 +315,16 @@ gestao-feitio/
 
 ## 8. Estimativa total
 
-- Fase 0: 1 dia
-- Fase 1: 2 dias
-- Fase 2: 1 dia
-- Fase 3: 3-4 dias
+Ajustada para TDD (tempo de escrever o teste antes é pequeno, mas real):
+
+- Fase 0: 1 dia (inclui canaries e config Vitest/Playwright)
+- Fase 1: 2-3 dias (TDD estrito)
+- Fase 2: 1-2 dias
+- Fase 3: 3-4 dias (frontend-design skill acelera aqui)
 - Fase 4: 2 dias
 - Fase 5: 1 dia
 
-**Total: ~10-11 dias de trabalho focado.** Pode ser entregue incrementalmente — após Fase 3 já é demonstrável visualmente.
+**Total: ~10-13 dias.** Entrega incremental — após Fase 3 já é demonstrável visualmente; Fase 4 torna interativo.
 
 ---
 
