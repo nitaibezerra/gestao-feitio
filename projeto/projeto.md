@@ -415,13 +415,16 @@ export function calcularTipoTiragem(panela: Panela): TipoTiragem {
   }
 
   if (conteudo.tipo === 'cozimento') {
-    const qtdDaime = anteriores.filter(t => t.tipo === 'daime').length
-    const proximoGrau = qtdDaime + 1
-    if (proximoGrau > 4) {
-      // Após 4º grau, panela transita para ciclo de água forte.
+    // Regra explícita do tutorial: "a segunda panela nova, que entrou com o
+    // segundo cozimento, chamamos isso de segundo grau". Ou seja:
+    // grau do Daime = ordem do cozimento que a panela está consumindo,
+    // independente do histórico de Daimes anteriores da panela.
+    const grau = conteudo.ordem
+    if (grau > 4) {
+      // Cozimentos de ordem 5+ não viram Daime — transita para água forte.
       return { tipo: 'agua_forte' }
     }
-    return { tipo: 'daime', grau: proximoGrau as 1|2|3|4 }
+    return { tipo: 'daime', grau: grau as 1|2|3|4 }
   }
 
   // conteudo.tipo === 'agua_forte' (reposição explícita, raro)

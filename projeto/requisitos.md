@@ -365,10 +365,13 @@ SE conteudo_atual == "agua" E panela NUNCA tirou daime:
 
 SENÃO SE conteudo_atual começa com "cozimento_":
     # panela alimentada com cozimento → produz Daime
+    # REGRA: grau = ordem do cozimento que entrou na panela
+    # (tutorial: "a segunda panela nova, que entrou com o segundo cozimento,
+    #  chamamos isso de segundo grau" — não depende de histórico)
     tipo = "daime"
-    grau = numero_de_daimes_ja_tirados_desta_panela + 1
+    grau = ordem_do_cozimento_atual
     SE grau > 4:
-        tipo = "agua_forte"   # após 4º grau panela pode ir direto a água forte
+        tipo = "agua_forte"   # cozimentos ordem 5+ não viram Daime
 
 SENÃO SE conteudo_atual == "agua" E panela JÁ tirou daime:
     # voltou a ser alimentada com água após ciclo de Daime
