@@ -1,0 +1,37 @@
+<script lang="ts">
+  import type { PanelaMock } from '../mock-feitio';
+  import Panela from './Panela.svelte';
+  import SectionHead from './SectionHead.svelte';
+
+  type Props = {
+    panelas: PanelaMock[];
+    bocas: number;
+    onPanelaClick: (p: PanelaMock) => void;
+    onEmptyClick: (boca: number) => void;
+  };
+  let { panelas, bocas, onPanelaClick, onEmptyClick }: Props = $props();
+
+  const bocasArr = $derived(Array.from({ length: bocas }, (_, i) => i + 1));
+</script>
+
+<section>
+  <SectionHead title="Fornalha" subtitle="panelas no fogo" />
+  <div class="grid" style:grid-template-columns="repeat({bocas}, 1fr)">
+    {#each bocasArr as b (b)}
+      {@const panela = panelas.find((p) => p.boca === b)}
+      <Panela
+        boca={b}
+        {panela}
+        onclick={() => panela && onPanelaClick(panela)}
+        onclickEmpty={() => onEmptyClick(b)}
+      />
+    {/each}
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 14px;
+  }
+</style>

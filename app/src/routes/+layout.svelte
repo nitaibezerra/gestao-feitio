@@ -1,12 +1,12 @@
 <script lang="ts">
   import '../app.css';
   import { onMount } from 'svelte';
-  import { aplicarPaleta } from '../ui/paletas';
+  import { paletaStore } from '../ui/paleta-store.svelte';
 
   let { children } = $props();
 
   onMount(() => {
-    aplicarPaleta('luz-rainha');
+    paletaStore.hidratar();
   });
 </script>
 
