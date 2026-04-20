@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { PanelaMock } from '../mock-feitio';
+  import type { PanelaVisao } from '../visao';
   import { fmtDuracao, tiragemCor, tiragemLabel } from '../labels';
   import { useRelogio } from '../relogio.svelte';
   import VolRing from './VolRing.svelte';
 
   type Props = {
     boca: number;
-    panela?: PanelaMock;
+    panela?: PanelaVisao;
     onclick?: () => void;
     onclickEmpty?: () => void;
   };

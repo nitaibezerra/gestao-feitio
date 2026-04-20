@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { TonelMock } from '../mock-feitio';
+  import type { TonelVisao } from '../visao';
   import { tonelCor, tonelLabel } from '../labels';
 
-  type Props = { tonel: TonelMock };
+  type Props = { tonel: TonelVisao };
   let { tonel }: Props = $props();
 
   const pct = $derived((tonel.volumeL / tonel.capacidadeL) * 100);

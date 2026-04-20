@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { PanelaMock } from '../mock-feitio';
+  import type { PanelaVisao } from '../visao';
   import Panela from './Panela.svelte';
   import SectionHead from './SectionHead.svelte';
 
   type Props = {
-    panelas: PanelaMock[];
+    panelas: PanelaVisao[];
     bocas: number;
-    onPanelaClick: (p: PanelaMock) => void;
+    onPanelaClick: (p: PanelaVisao) => void;
     onEmptyClick: (boca: number) => void;
   };
   let { panelas, bocas, onPanelaClick, onEmptyClick }: Props = $props();

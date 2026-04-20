@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { EventoLog } from '../mock-feitio';
   import { fmtHora } from '../labels';
   import BtnPill from './primitivos/BtnPill.svelte';
 
+  type UltimoEvento = { texto: string; momento: Date };
+
   type Props = {
-    ultimoEvento?: EventoLog;
+    ultimoEvento?: UltimoEvento;
     onNova?: () => void;
     onUndo?: () => void;
   };
