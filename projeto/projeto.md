@@ -348,8 +348,14 @@ export type Panela = {
   entradaFogoEm: string | null
   acumuladoFogoS: number
   tempoPausado: boolean
+  emCicloAguaForte: boolean  // flag derivada: uma vez true, toda tiragem será agua_forte
   tiragens: Tiragem[]
 }
+
+export type TipoTiragem =
+  | { tipo: 'cozimento'; ordem: 1 | 2 | 3 | 4 | 5 | 6 }
+  | { tipo: 'daime'; grau: 1 | 2 | 3 | 4 }
+  | { tipo: 'agua_forte' }  // sem ordem — todas iguais, mesmo tonel
 ```
 
 ### 4.2. Eventos como união discriminada
@@ -384,30 +390,48 @@ export function calcularTipoTiragem(panela: Panela): TipoTiragem {
   const conteudo = panela.conteudo
   if (!conteudo) throw new Error('panela sem conteúdo')
 
-  const tiragensAnteriores = panela.tiragens
-
-  if (conteudo.tipo === 'agua') {
-    const jaDeuDaime = tiragensAnteriores.some(t => t.tipo === 'daime')
-    const ordemCoz = tiragensAnteriores.filter(t => t.tipo === 'cozimento').length + 1
-    if (jaDeuDaime) return { tipo: 'cozimento', ordem: 1 }  // reentrou em ciclo de água
-    if (ordemCoz > 6) return { tipo: 'agua_forte' }
-    return { tipo: 'cozimento', ordem: ordemCoz as 1|2|3|4|5|6 }
-  }
-
-  if (conteudo.tipo === 'cozimento') {
-    const grauDaime = tiragensAnteriores.filter(t => t.tipo === 'daime').length + 1
-    return { tipo: 'daime', grau: grauDaime }
-  }
-
-  if (conteudo.tipo === 'agua_forte') {
+  // Uma vez em ciclo de água forte, toda tiragem é água forte — independente do conteúdo.
+  // A panela volta ao fogo com água várias vezes, e cada tiragem vai para o mesmo tonel.
+  if (panela.emCicloAguaForte) {
     return { tipo: 'agua_forte' }
   }
 
-  throw new Error('estado inesperado')
+  const anteriores = panela.tiragens
+
+  if (conteudo.tipo === 'agua') {
+    const jaDeuDaime = anteriores.some(t => t.tipo === 'daime')
+    const qtdCoz = anteriores.filter(t => t.tipo === 'cozimento').length
+    if (jaDeuDaime) {
+      // Reentrou em ciclo de água após ter dado Daime.
+      // Os cozimentos produzidos aqui alimentam o tonel do 1º cozimento (misturados).
+      return { tipo: 'cozimento', ordem: 1 }
+    }
+    const proxima = qtdCoz + 1
+    if (proxima > 6) {
+      // Passou dos cozimentos numerados — transiciona para ciclo de água forte.
+      return { tipo: 'agua_forte' }
+    }
+    return { tipo: 'cozimento', ordem: proxima as 1|2|3|4|5|6 }
+  }
+
+  if (conteudo.tipo === 'cozimento') {
+    const qtdDaime = anteriores.filter(t => t.tipo === 'daime').length
+    const proximoGrau = qtdDaime + 1
+    if (proximoGrau > 4) {
+      // Após 4º grau, panela transita para ciclo de água forte.
+      return { tipo: 'agua_forte' }
+    }
+    return { tipo: 'daime', grau: proximoGrau as 1|2|3|4 }
+  }
+
+  // conteudo.tipo === 'agua_forte' (reposição explícita, raro)
+  return { tipo: 'agua_forte' }
 }
 ```
 
-Testada com casos do tutorial.
+**Efeito colateral implícito:** quando a função retorna `agua_forte`, o *command handler* deve marcar `panela.emCicloAguaForte = true` ao registrar a tiragem. A partir daí todas as tiragens seguintes são `agua_forte` automaticamente.
+
+Testada com casos do tutorial — incluindo o cenário crítico de **múltiplas tiragens de água forte consecutivas** da mesma panela.
 
 ---
 

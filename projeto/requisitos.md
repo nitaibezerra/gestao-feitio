@@ -45,13 +45,19 @@ Usar os termos exatamente como o feitor usa. Referência no [tutorial](./tutoria
 | Boca | `boca` |
 | Panela | `panela` |
 | Feitor | `feitor` |
-| Jagube / Cipó / Mestre | `jagube` |
-| Chacrona / Folha / Rainha | `folha` |
-| Batenção | `batencao` |
+| Foguista | `foguista` |
+| Paneleiro | `paneleiro` |
+| Baldeiro | `baldeiro` |
+| Jagube / Cipó / **Rei** | `jagube` |
+| Chacrona / Folha / **Rainha** | `folha` |
+| Fibra (de jagube) | `fibra` |
+| Pó (de jagube) | `po` |
+| Batenção (separa fibra e pó) | `batencao` |
 | Tiragem | `tiragem` |
 | Cozimento (1º…6º) | `cozimento` com `ordem` |
-| Água forte | `agua_forte` |
+| Água forte (múltiplas tiragens) | `agua_forte` |
 | Daime (1º…4º grau) | `daime` com `grau` |
+| Daime do Mestre (= Daime de 1º grau) | `daime` com `grau=1` |
 | Mel d'água | `mel_dagua` |
 | Apuração (2x1, 3x1) | `apuracao` com `razao` |
 | Tonel | `tonel` |
@@ -152,9 +158,14 @@ Campos:
 - `nome`
 - `inicio` (datetime)
 - `fim` (datetime, nullable)
-- `feitor_id` (pessoa)
+- `feitor_id` (pessoa — papel principal)
+- `foguista_id` (pessoa, nullable — opcional)
+- `paneleiros_ids` (lista de pessoas, nullable — opcional)
+- `baldeiros_ids` (lista de pessoas, nullable — opcional)
 - `casinha_id`
 - `status` — enum: `em_preparo` | `em_andamento` | `encerrado`
+
+> **Sobre papéis:** o feitor é obrigatório; os demais são informativos e servem para registro histórico. A UI v1 pode exibir apenas campo livre de texto para "equipe do feitio", evoluindo depois para cadastro estruturado.
 
 #### `Fornalha` e `Boca`
 
@@ -177,6 +188,7 @@ Campos:
 - `boca_atual_id` (nullable)
 - `estado` — enum (ver seção 4): `montada` | `no_fogo` | `fora_do_fogo` | `tirada` | `aguardando_reposicao` | `descartada`
 - `tipo_conteudo` — enum: `agua` | `cozimento_1` | `cozimento_2` | ... | `cozimento_6` | `agua_forte`. Define o que está na panela AGORA.
+- `em_ciclo_agua_forte` (bool) — quando `true`, todas as tiragens seguintes serão registradas como `agua_forte`, mesmo que a panela seja realimentada com água. Flag derivada/cacheada do histórico.
 - `volume_atual_l` (float, litros no momento)
 - `entrada_fogo` (datetime, último momento em que entrou)
 - `saida_fogo` (datetime, nullable)
@@ -192,7 +204,7 @@ Campos:
 - `panela_id`
 - `sequencia` (1ª, 2ª, 3ª tiragem daquela panela)
 - `tipo` — enum: `cozimento` | `daime` | `agua_forte`
-- `grau_ou_ordem` — int (1º, 2º, 3º...). Para cozimento é a ordem; para Daime é o grau.
+- `grau_ou_ordem` — int (1º, 2º, 3º...). Para cozimento é a ordem; para Daime é o grau. **Para água forte é sempre `null`** — água forte não tem numeração, todas as tiragens vão juntas ao mesmo tonel.
 - `volume_l` — float (volume tirado)
 - `momento` — datetime
 - `tonel_destino_id` — destino do líquido
@@ -260,6 +272,8 @@ stateDiagram-v2
 | `aguardando_reposicao` | `no_fogo` | Repor e dar play | tipo_conteudo novo, volume_l reposto |
 | `aguardando_reposicao` | `descartada` | Descartar | motivo opcional |
 
+> **Nota sobre água forte:** "água forte" não é um estado da panela, é uma característica do **conteúdo** (`tipo_conteudo`) e do **ciclo** em que ela está (flag `em_ciclo_agua_forte`). Uma panela em ciclo de água forte continua passando pelos mesmos estados (`no_fogo` → `tirada` → `aguardando_reposicao` → `no_fogo`...) — a diferença é que toda tiragem é registrada como `agua_forte` e toda reposição é com água. O ciclo se repete quantas vezes o feitor quiser até a transição final para `descartada`.
+
 ---
 
 ## 5. Requisitos funcionais
@@ -271,7 +285,9 @@ stateDiagram-v2
 **então** o sistema deve solicitar:
 - Nome do feitio (opcional, com sugestão automática `Feitio de {mês}/{ano}`)
 - Quantidade de bocas da fornalha (com valor padrão da casinha)
-- Nome do feitor (pode ser selecionado de pessoas já cadastradas ou criado)
+- Nome do **feitor** (pode ser selecionado de pessoas já cadastradas ou criado) — obrigatório
+- Nome do **foguista** (opcional)
+- Lista de **paneleiros** e **baldeiros** (opcional — pode ser campo livre em v1)
 - Data/hora de início (pré-preenchida com agora)
 
 ### RF-02 — Painel da fornalha (dashboard principal)
@@ -337,26 +353,41 @@ Em uma panela no fogo, deve ser possível **acrescentar volume** (ex: +5 L, +10 
 
 ### RF-08 — Regra de nomenclatura automática
 
-O sistema deve **calcular sozinho** o tipo da tiragem baseado em:
+O sistema deve **calcular sozinho** o tipo da tiragem baseado no conteúdo atual da panela e no histórico de tiragens dela:
 
 ```
-SE conteudo_atual == "agua":
+SE conteudo_atual == "agua" E panela NUNCA tirou daime:
+    # ciclo inicial de cozimentos
     tipo = "cozimento"
-    ordem = numero_de_tiragens_anteriores_dessa_panela + 1
+    ordem = numero_de_cozimentos_ja_tirados_desta_panela + 1
     SE ordem > limite_cozimentos (default 6):
-        tipo = "agua_forte"
+        tipo = "agua_forte"   # entra no ciclo de água forte (múltiplas tiragens)
 
 SENÃO SE conteudo_atual começa com "cozimento_":
+    # panela alimentada com cozimento → produz Daime
     tipo = "daime"
-    grau = numero_de_tiragens_de_daime_desta_panela + 1
+    grau = numero_de_daimes_ja_tirados_desta_panela + 1
     SE grau > 4:
-        -> painel sugere transição (ver RF-13)
+        tipo = "agua_forte"   # após 4º grau panela pode ir direto a água forte
 
-SENÃO SE conteudo_atual == "agua" E panela já tirou Daime antes:
-    -> voltou a ser alimentada com água após dar Daime
-    tipo = "cozimento" (alimenta tonel do 1º coz, misturado)
+SENÃO SE conteudo_atual == "agua" E panela JÁ tirou daime:
+    # voltou a ser alimentada com água após ciclo de Daime
+    # agora produz cozimento novamente (vai ao tonel do 1º coz, misturado)
+    tipo = "cozimento"
     ordem = 1
+
+SENÃO SE conteudo_atual == "agua_forte" OU panela já está em ciclo de água forte:
+    # IMPORTANTE: água forte NÃO é tiragem única
+    # a panela continua voltando ao fogo com água quantas vezes render
+    # cada tiragem dessas é registrada como agua_forte (sem ordem numérica)
+    tipo = "agua_forte"
 ```
+
+**Ponto crítico sobre água forte:**
+- Uma vez que a panela entra em "água forte", **todas as tiragens seguintes são água forte** até a panela ser descartada.
+- Não há numeração (`agua_forte_1`, `agua_forte_2`…). Todas as tiragens vão para o **mesmo tonel de água forte**.
+- A panela volta ao fogo **sempre com água** (nunca com cozimento) durante o ciclo de água forte.
+- Só o feitor decide quando descartar — o sistema não força.
 
 O feitor pode **sobrescrever** a sugestão manualmente caso o sistema se engane.
 
@@ -365,12 +396,13 @@ O feitor pode **sobrescrever** a sugestão manualmente caso o sistema se engane.
 Após tiragem confirmada, panela entra em `aguardando_reposicao`. Sistema pergunta:
 
 - **Com o que repor?** Sugestões inteligentes baseadas no próximo passo lógico:
-  - Se panela acabou de dar 1º cozimento → sugere "água" (continuar cozinhando) OU "vazio/descartar".
+  - Se panela acabou de dar 1º cozimento → sugere "água" (continuar cozinhando) OU "descartar".
   - Se panela acabou de dar Daime 1º grau → sugere "3º cozimento" (para virar 2º grau na próxima).
-  - Sempre permite escolher livremente.
+  - Se panela está no **ciclo de água forte** → **sugere apenas "água"** (não oferece cozimento como opção principal, pois no ciclo de água forte só se repõe água).
+  - Sempre permite escolher livremente, inclusive sobrescrever a sugestão.
 - **Volume a repor** (com botões de 60, 55, 50, 45, ou valor livre).
 
-O sistema **desconta do tonel** escolhido.
+O sistema **desconta do tonel** escolhido (quando aplicável — água pura não sai de tonel).
 
 ### RF-10 — Trocar panelas de lugar (swap entre bocas)
 

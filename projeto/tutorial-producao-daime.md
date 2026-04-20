@@ -9,12 +9,14 @@
 
 O **feitio** é o trabalho de fazer o **Santo Daime** — a bebida sagrada que se consagra na religião do Santo Daime.
 
-Fazer Daime é parecido com cozinhar um caldo muito especial. A gente pega duas plantas, coloca na panela com água, e deixa no fogo por muitas horas. Depois, o líquido que sai dessa panela ainda volta ao fogo com outras plantas novas, e assim se faz um Daime cada vez mais forte.
+Fazer Daime é parecido com cozinhar um caldo muito especial. A gente pega duas plantas, coloca na panela com água, e deixa no fogo por muitas horas. O líquido que sai dessa panela pode voltar ao fogo — às vezes sobre plantas novas, às vezes sendo apurado (reduzido por evaporação) — até se chegar ao Daime pronto.
+
+> **Importante:** a força do Daime **não depende de repetir o processo muitas vezes**. Ela depende principalmente de **que tipo de receita** foi feita (1º grau, 2º grau, Daime apurado, mel d'água) e da **concentração** da apuração (ex.: um Daime 3x1 é mais concentrado — e mais forte — que um Daime 2x1). Não existe "mais forte a cada volta ao fogo".
 
 **Duas plantas principais:**
 
-- **Jagube** (o cipó) — também chamado de "mestre". É um cipó grosso que vem da floresta.
-- **Chacrona** (a folha) — também chamada de "rainha". É um arbusto, e se usa as folhas.
+- **Jagube** (o cipó) — também chamado de **Rei**. É um cipó grosso que vem da floresta.
+- **Chacrona** (a folha) — também chamada de **Rainha**. É um arbusto, e se usa as folhas.
 
 **Dois elementos que completam:**
 
@@ -23,7 +25,7 @@ Fazer Daime é parecido com cozinhar um caldo muito especial. A gente pega duas 
 
 ```mermaid
 flowchart LR
-    J[Jagube / Cipó / Mestre]:::planta
+    J[Jagube / Cipó / Rei]:::planta
     C[Chacrona / Folha / Rainha]:::planta
     A[Água]:::elem
     F[Fogo]:::elem
@@ -82,9 +84,11 @@ Fazer Daime é trabalho de muita gente, cada um com um papel:
 | Personagem | O que faz |
 |---|---|
 | **Feitor** | O maestro de tudo. Cuida das panelas, dos tempos, dos pontos, das trocas. É quem decide. |
-| **Batedores** | Homens que macerram (batem) o jagube na batenção. |
+| **Foguista** | Responsável por alimentar a fornalha com lenha. É ele que controla a **temperatura de cada boca** — mais lenha aqui, menos ali. Trabalha lado a lado com o feitor: quando uma panela está atrasada, o foguista reforça o fogo daquela boca. |
+| **Batedores** | Homens que batem o jagube na batenção, separando fibra e pó (ver 4.2). |
 | **Mulheres da colheita** | Colhem e lavam as folhas da chacrona e entregam prontas na cozinha. |
-| **Apoio da cozinha** | Ajudam a montar, tirar, servir, encher as panelas. |
+| **Paneleiro** | Quem **carrega as panelas** — tira e põe no fogo. É trabalho pesado, porque panela cheia é pesada e quente. |
+| **Baldeiro** | Quem **realimenta as panelas** com líquido — seja água, seja cozimento vindo dos tonéis. É ele que despeja o conteúdo certo na panela certa, conforme o feitor indica. |
 
 > **Metáfora:** pense numa orquestra. O **feitor é o maestro** — ele não toca todos os instrumentos, mas sem ele o som vira bagunça.
 
@@ -98,7 +102,7 @@ Antes de entrar nos detalhes, olha o caminho inteiro do feitio:
 flowchart TD
     A[1. Colheita do cipó e da folha] --> B[2. Lavagem e raspagem do jagube]
     B --> C[3. Pesagem do jagube]
-    C --> D[4. Batenção: o cipó vira massa]
+    C --> D[4. Batenção: separa fibra e pó do cipó]
     D --> E[5. Montagem da panela em camadas]
     E --> F[6. Panela vai para o fogo na fornalha]
     F --> G[7. Cozimento — tira o líquido, repõe, repete]
@@ -125,7 +129,14 @@ Agora vamos uma por uma.
 
 ### 4.2. Batenção
 
-Os batedores pegam o jagube limpo e **batem com maço**, até virar uma massa esfiapada. Isso quebra as fibras do cipó e libera o que ele tem de bom.
+Os batedores pegam o jagube limpo e **batem com maço**. A batenção **não transforma o jagube em uma massa só** — ela **separa o cipó em duas partes**:
+
+- **Fibra** — a parte longa e esfiapada (as fibras do cipó).
+- **Pó** — a parte interna, mais macia, que se solta em forma de pó.
+
+Esses **dois materiais — fibra e pó — são usados separadamente na montagem da panela** (ver 4.4). Cada um tem um papel diferente nas camadas.
+
+> Pensa numa vassoura de palha: a palha que sai é a fibra; o restinho fino que cai no chão é o pó. A batenção produz os dois, e nenhum é jogado fora.
 
 **Quantidade típica:** mais ou menos **50 kg de jagube** dá para encher **2 panelas**.
 
@@ -139,24 +150,32 @@ Em paralelo, as mulheres:
 
 ### 4.4. Montagem da panela
 
-Na cozinha, a panela é montada em **camadas** — como uma lasanha:
+Na cozinha, a panela é montada em **5 camadas** — como uma lasanha. A ordem é sempre a mesma, **de baixo para cima**:
+
+1. **Fibra de jagube** (no fundo da panela — serve de "cama")
+2. **Folha de chacrona**
+3. **Pó de jagube** (a camada do meio)
+4. **Folha de chacrona**
+5. **Fibra de jagube** (cobre por cima)
+
+Ou seja: **fibra → folha → pó → folha → fibra**. A fibra entra no fundo e no topo (protegendo); o pó fica no meio; as folhas ficam intercaladas entre eles.
 
 ```mermaid
 flowchart TB
-    subgraph PANELA["Panela montada"]
-        L5[Camada de folha]
-        L4[Camada de jagube]
-        L3[Camada de folha]
-        L2[Camada de jagube]
-        L1[Camada de folha no fundo]
+    subgraph PANELA["Panela montada (de cima para baixo)"]
+        L5[5 - Fibra de jagube]
+        L4[4 - Folha de chacrona]
+        L3[3 - Pó de jagube]
+        L2[2 - Folha de chacrona]
+        L1[1 - Fibra de jagube no fundo]
     end
     L5 -.-> L4 -.-> L3 -.-> L2 -.-> L1
 
-    style L1 fill:#4a7c3a,color:#fff
-    style L3 fill:#4a7c3a,color:#fff
-    style L5 fill:#4a7c3a,color:#fff
-    style L2 fill:#8b5a2b,color:#fff
-    style L4 fill:#8b5a2b,color:#fff
+    style L1 fill:#a0714a,color:#fff
+    style L5 fill:#a0714a,color:#fff
+    style L2 fill:#4a7c3a,color:#fff
+    style L4 fill:#4a7c3a,color:#fff
+    style L3 fill:#6b4423,color:#fff
 ```
 
 Depois de montada, coloca **água** (ou outro líquido — já vamos ver) e leva para a **boca da fornalha**.
@@ -229,7 +248,9 @@ Se a panela é **nova** e entrou com **água**, o que sai dela se chama **cozime
 - A panela volta com água, vai ao fogo, tira de novo = **2º cozimento**
 - Repete... **3º, 4º, 5º, 6º cozimento**
 
-A partir da **5ª ou 6ª tiragem**, o material já está fraco. O que sai dali para frente não é mais chamado de cozimento, passa a se chamar **água forte**.
+A partir da **5ª ou 6ª tiragem** (pode variar), o material já está fraco. A gente **para de contar "cozimento 1, 2, 3..."** e passa a chamar tudo o que sai dali em diante de **água forte**.
+
+**Importante:** água forte **não é uma única tiragem**. A panela continua voltando ao fogo **com água**, repetidas vezes, e cada tiragem dali para frente é água forte. Quantas vezes? Depende do feitio e das necessidades — em algum momento o feitor decide que a panela já não rende mais e ela é descartada. Pode ser mais cedo, pode ser mais tarde.
 
 ```mermaid
 flowchart LR
@@ -239,8 +260,9 @@ flowchart LR
     C3 --> C4[4º Cozimento]
     C4 --> C5[5º Cozimento]
     C5 --> C6[6º Cozimento]
-    C6 --> AF[Água Forte]
-    AF --> FIM[Panela morre / descarta]
+    C6 --> AF[Água Forte<br/>múltiplas tiragens]
+    AF -->|volta com água<br/>quantas vezes render| AF
+    AF --> FIM[Panela descartada<br/>quando feitor decide]
 
     style P fill:#a8d5e2
     style C1 fill:#8b5a2b,color:#fff
@@ -253,13 +275,13 @@ flowchart LR
     style FIM fill:#333,color:#fff
 ```
 
-> Cada tonel de cozimento fica **marcado** com o número: Tonel do 1º cozimento, do 2º, etc. **Água forte** pode ir tudo no mesmo tonel.
+> Cada tonel de cozimento fica **marcado** com o número: Tonel do 1º cozimento, do 2º, etc. **Água forte** de todas as tiragens vai junta no **mesmo tonel** (não se numera).
 
 ### 6.2. Quando a panela entra com COZIMENTO (não com água)
 
 Agora vem o pulo do gato. Se a gente colocar uma **panela nova** (cheia de jagube e folha frescos) e em vez de água colocar **um cozimento que já foi tirado antes** — o que sai dela **não é mais cozimento**, é **Daime**.
 
-- **1ª tiragem** dessa panela nova, alimentada com **1º cozimento** = **Daime de 1º grau** (o mais forte — também chamado **"Daime do Mestre"**)
+- **1ª tiragem** dessa panela nova, alimentada com **1º cozimento** = **Daime de 1º grau** (também chamado **"Daime do Mestre"** — o mais concentrado direto da panela)
 - Volta com **2º cozimento**, tira de novo = **Daime de 2º grau**
 - Volta com **3º cozimento**, tira = **Daime de 3º grau**
 - Volta com **4º cozimento**, tira = **Daime de 4º grau**
@@ -273,8 +295,9 @@ flowchart LR
     D2 --> D3[+ 3º Cozimento = Daime 3º grau]
     D3 --> D4[+ 4º Cozimento = Daime 4º grau]
     D4 --> CV[Agora volta com água<br/>e produz cozimento]
-    CV --> AF2[Depois vira água forte]
-    AF2 --> FIM2[Morre / descarta]
+    CV --> AF2[Vira água forte<br/>múltiplas tiragens]
+    AF2 -->|volta com água<br/>quantas vezes render| AF2
+    AF2 --> FIM2[Descartada quando<br/>feitor decide]
 
     style PN fill:#e0c097
     style D1 fill:#6b2a2a,color:#fff
@@ -358,7 +381,7 @@ flowchart TD
     style LITRO fill:#2b0a0a,color:#fff
 ```
 
-No nosso exemplo real: a panela 3 tirou **18 litros** de Daime de 1º grau. Esse é o **"Daime do Mestre"** — o mais forte.
+No nosso exemplo real: a panela 3 tirou **18 litros** de Daime de 1º grau — o **"Daime do Mestre"**, mais concentrado direto da panela (vai engarrafado sem apurar).
 
 ### 7.2. O ciclo continua
 
@@ -366,7 +389,7 @@ Depois que a panela 3 tirou o 1º grau, ela volta ao fogo com o **3º cozimento*
 
 A panela 4, que começou com **2º cozimento**, começa dando **2º grau** direto.
 
-> **Metáfora do chá forte:** é como se a gente pegasse um chá já pronto e usasse ele (no lugar de água) para fazer um chá novo em cima de folhas frescas. O chá sai muito mais forte.
+> **Metáfora:** é como se a gente pegasse um chá já pronto e usasse ele (no lugar de água) para fazer um chá novo em cima de folhas frescas. O chá sai muito mais concentrado — já é Daime, não mais cozimento.
 
 ---
 
@@ -378,7 +401,7 @@ No fim do feitio, a gente tem **três tipos de Daime**:
 
 - Vem direto da panela nova com 1º cozimento
 - É **engarrafado direto**, sem apurar
-- É o mais concentrado, o mais forte
+- É o mais concentrado **direto da panela** (sem passar por apuração)
 
 ### 8.2. Daime apurado (2x1 ou 3x1)
 
@@ -474,15 +497,15 @@ Todo esse percurso pode ser resumido assim:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Montada: jagube + folha em camadas
+    [*] --> Montada: camadas de fibra, folha, pó, folha, fibra
     Montada --> NoFogo: entra com líquido (água OU cozimento)
     NoFogo --> ForaDoFogo: atinge o ponto
     ForaDoFogo --> Tirada: feitor retira o líquido
     Tirada --> Registrada: volume registrado no tonel
     Registrada --> NoFogo: reposição para nova tiragem
-    Registrada --> AguaForte: material já enfraqueceu
-    AguaForte --> NoFogo: ainda tira água forte
-    AguaForte --> Descartada: material esgotado
+    Registrada --> AguaForte: cozimentos esgotados, agora tira água forte
+    AguaForte --> NoFogo: volta com água e tira de novo (quantas vezes render)
+    AguaForte --> Descartada: feitor decide que não rende mais
     Descartada --> [*]
 ```
 
@@ -494,7 +517,7 @@ stateDiagram-v2
 | **No fogo** | Contando tempo de cozimento |
 | **Fora do fogo** | Saiu para tirar, pode estar pausada |
 | **Tirada** | Líquido retirado, esperando reposição |
-| **Água forte** | Já passou do estágio de cozimento/Daime |
+| **Água forte** | Passou dos cozimentos numerados — agora volta ao fogo com água, e cada tiragem vai para o tonel de água forte. Pode ser **repetido várias vezes**, até o feitor decidir descartar |
 | **Descartada** | Fim do ciclo — material vai fora, panela é lavada |
 
 ---
@@ -539,21 +562,27 @@ Tudo isso **sem precisar escrever à mão na panela com caneta**, como é feito 
 
 | Palavra | Significado |
 |---|---|
-| **Jagube** | Cipó usado como matéria-prima (também: mestre) |
-| **Chacrona** | Folha usada como matéria-prima (também: rainha) |
+| **Jagube** | Cipó usado como matéria-prima (também: **Rei**) |
+| **Chacrona** | Folha usada como matéria-prima (também: **Rainha**) |
+| **Fibra** | Parte longa e esfiapada do jagube, produzida na batenção. Usada nas camadas do fundo e do topo da panela |
+| **Pó** | Parte interna do jagube, mais macia, em forma de pó. Produzida na batenção e usada na camada do meio |
 | **Fornalha** | Fogão grande com várias bocas |
 | **Boca** | Cada lugar da fornalha onde cabe uma panela |
 | **Feitor** | Quem comanda o feitio |
-| **Batenção** | Ato de bater o jagube até virar massa |
+| **Foguista** | Quem alimenta a fornalha com lenha e controla a temperatura de cada boca |
+| **Paneleiro** | Quem carrega as panelas — tira e põe no fogo |
+| **Baldeiro** | Quem realimenta as panelas com líquido (água ou cozimento) |
+| **Batenção** | Ato de bater o jagube para **separar fibra e pó** |
 | **Tiragem** | Ato de retirar o líquido da panela |
 | **Tirar o ponto** | Decidir a hora certa de tirar, olhando o volume |
-| **Cozimento** | Líquido que sai de panela alimentada com água |
+| **Cozimento** | Líquido que sai de panela alimentada com água (1º, 2º, ... até ~6º) |
 | **Daime** | Líquido que sai de panela alimentada com cozimento |
-| **Grau do Daime** | 1º, 2º, 3º, 4º — ordem de força, do mais forte ao mais fraco |
-| **Água forte** | Últimos líquidos da panela, antes do descarte |
+| **Daime do Mestre** | Nome do Daime de 1º grau — o mais concentrado direto da panela |
+| **Grau do Daime** | 1º, 2º, 3º, 4º — ordem em que são tirados. 1º grau vai direto engarrafado; 2º, 3º, 4º vão para apuração |
+| **Água forte** | Líquido que sai da panela depois dos cozimentos numerados. **Múltiplas tiragens** — a panela continua voltando ao fogo com água até o feitor decidir descartar |
 | **Apuração** | Levar ao fogo para concentrar por evaporação |
-| **2x1 / 3x1** | Reduzir para metade / para um terço |
-| **Mel d'água** | Daime feito da apuração final de sobras |
+| **2x1 / 3x1** | Reduzir para metade / para um terço. **Quanto maior a razão (3x1 > 2x1), mais concentrado** |
+| **Mel d'água** | Daime feito da apuração final de sobras (cozimentos e águas fortes restantes) |
 | **Dupla** | Duas panelas que andam juntas, alimentando uma nova |
 | **Tonel** | Balde grande onde se guarda o líquido tirado |
 
@@ -574,7 +603,8 @@ flowchart TD
     TC1 --> TC2[2º cozimento]
     TC2 --> TC3[3º cozimento]
     TC3 --> TCN[...até 6º]
-    TCN --> AF[Água forte]
+    TCN --> AF[Água forte<br/>múltiplas tiragens]
+    AF -->|repete| AF
 
     TC1 --> PN1[Panela nova<br/>com 1º coz]
     TC2 --> PN2[Panela nova<br/>com 2º coz]
@@ -609,10 +639,12 @@ flowchart TD
 
 1. **Duas panelas alimentam uma.** É a regra de ouro do volume.
 2. **Panela com água → sai cozimento.** Panela nova com cozimento → sai Daime.
-3. **1º grau é o mais forte** (Daime do Mestre). Vai direto para o engarrafamento.
-4. **Sobrar nunca é problema, faltar é problema.** Mire sempre um pouquinho a mais.
-5. **A panela tem ciclo de vida.** Nasce, dá Daime, vira cozimento, vira água forte, morre.
-6. **O feitor é o maestro.** O aplicativo é a agenda dele — tira peso da memória e do giz escrito na panela.
+3. **1º grau é o Daime do Mestre** — o mais concentrado direto da panela. Vai direto para o engarrafamento, sem apurar.
+4. **Força do Daime não é "cada vez mais forte".** Depende da receita (1º grau, apurado, mel d'água) e da concentração (3x1 é mais concentrado que 2x1).
+5. **Sobrar nunca é problema, faltar é problema.** Mire sempre um pouquinho a mais.
+6. **A panela tem ciclo de vida.** Dá cozimentos, depois Daime (se alimentada com cozimento), depois volta a dar cozimento e, por fim, água forte — **em várias tiragens** até o feitor descartar.
+7. **Jagube = Rei, Chacrona = Rainha.** Os dois são indispensáveis.
+8. **O feitor é o maestro; o foguista cuida do fogo; paneleiro carrega, baldeiro alimenta.** O aplicativo é a agenda do feitor — tira peso da memória e do giz escrito na panela.
 
 ---
 
