@@ -2,82 +2,66 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Gestão de Feitio — Dashboard</title>
+<title>Gestão de Feitio — Luz Branca</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,200;0,300;0,400;0,500;1,300&family=Inter:wght@200;300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <style>
   :root {
-    --bg: #1a1410;
-    --bg-2: #221a14;
-    --bg-3: #2d2219;
-    --surface: #2a2017;
-    --surface-raised: #352820;
-    --border: #4a3a2e;
-    --border-soft: #3a2d22;
-    --text: #f3ead9;
-    --text-dim: #c4b49a;
-    --text-faint: #8a7c66;
-    --fire: #d9541e;
-    --fire-glow: #f2864a;
-    --ember: #f5a623;
-    /* Softs — atualizados pelo tweak de matiz junto com os principais */
-    --fire-soft-04: rgba(217, 84, 30, 0.04);
-    --fire-soft-08: rgba(217, 84, 30, 0.08);
-    --fire-soft-25: rgba(217, 84, 30, 0.25);
-    --fire-soft-30: rgba(217, 84, 30, 0.30);
-    --fire-glow-soft-35: rgba(242, 134, 74, 0.35);
-    --ember-soft-08: rgba(245, 166, 35, 0.08);
-    --ember-soft-12: rgba(245, 166, 35, 0.12);
-    --ember-soft-15: rgba(245, 166, 35, 0.15);
-    --ember-soft-25: rgba(245, 166, 35, 0.25);
-    --agua: #4a7c8f;
-    --agua-2: #6fa3b5;
-    --cozimento: #8b5a2b;
-    --cozimento-2: #a8703a;
-    --daime: #7a2a2a;
-    --daime-2: #a03a3a;
-    --agua-forte: #5a5247;
-    --folha: #4a7c3a;
-    --success: #6b8e4e;
-    --warn: #d4a017;
+    --bg: #fafaf8;
+    --bg-2: #f2f2ef;
+    --surface: #ffffff;
+    --ink: #1c2024;
+    --ink-soft: #5a6672;
+    --ink-faint: #9aa3ab;
+    --linha: #e8e8e3;
+    --linha-strong: #d8d8d2;
+
+    /* Azul firmamento — ação */
+    --azul: #6b8cb8;
+    --azul-claro: #b8cce0;
+    --azul-profundo: #3a5a82;
+
+    /* Domínio */
+    --verde: #7ba88c;
+    --daime: #b87a7a;
+    --cozimento: #b08a5a;
+    --agua-forte: #8a8376;
   }
   * { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
-    background: #0c0906;
-    color: var(--text);
+    background: var(--bg);
+    color: var(--ink);
     font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 300;
     min-height: 100vh;
-    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
-  .serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -0.01em; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-  button:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+  .serif { font-family: 'Fraunces', 'Instrument Serif', serif; font-weight: 300; letter-spacing: -0.02em; }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-weight: 400; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  button:focus-visible { outline: 1px solid var(--azul); outline-offset: 2px; }
 
-  /* Tablet frame: keep full-bleed responsive */
   .app-shell {
     width: 100%;
     min-height: 100vh;
     background:
-      radial-gradient(ellipse at top left, var(--bg-aura-1, var(--fire-soft-08)), transparent 50%),
-      radial-gradient(ellipse at bottom right, var(--bg-aura-2, rgba(74,124,143,0.05)), transparent 50%),
+      radial-gradient(ellipse at 50% -20%, var(--aura-top, rgba(184,204,224,0.28)), transparent 60%),
+      radial-gradient(ellipse at bottom right, var(--aura-bottom, rgba(184,204,224,0.08)), transparent 55%),
       var(--bg);
+    padding: 40px 56px 32px;
     display: flex;
     flex-direction: column;
+    gap: 40px;
   }
 
-  /* Compact fornalha — tighten BocaCard visuals */
-  .fornalha-compact button[style] {
-    min-height: 180px !important;
-  }
-  .fornalha-compact .serif[style*="font-size: 40px"],
-  .fornalha-compact .serif[style*="font-size:40px"] {
-    font-size: 30px !important;
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 </style>
 </head>
@@ -85,74 +69,25 @@
 <div id="root"></div>
 
 <script type="text/babel" data-presets="react">
-
-const { useState, useEffect, useMemo, useRef } = React;
+const { useState, useEffect, useMemo } = React;
 
 const TWEAKS = /*EDITMODE-BEGIN*/{
-  "layout": "grade-simples",
-  "showTimeline": true,
-  "compactMode": false,
-  "palette": "daime-rainha"
+  "palette": "luz-rainha",
+  "showCreditos": true,
+  "showFooter": true,
+  "density": "confortavel"
 }/*EDITMODE-END*/;
 
-// ----------------------------------------------------------------
-// PALETAS — cores de destaque (acento) do app
-// Base (fundo, cinzas) não muda. Muda o "fogo/brasa/ember" e glows.
-// ----------------------------------------------------------------
+// ---- PALETAS ----
 const PALETAS = {
-  "fogo": {
-    nome: "Fogo & Brasa",
-    subtitulo: "o feitio no fogo",
-    bgTop: "oklch(0.62 0.17 40 / 0.08)",
-    bgBottom: "oklch(0.55 0.08 230 / 0.05)",
-    fire: "oklch(0.62 0.17 40)",
-    fireGlow: "oklch(0.72 0.16 45)",
-    ember: "oklch(0.78 0.15 75)",
-  },
-  "daime-mata": {
-    nome: "Mata verde",
-    subtitulo: "verde da mata + azul firmamento",
-    bgTop: "oklch(0.55 0.14 155 / 0.09)",
-    bgBottom: "oklch(0.55 0.12 230 / 0.07)",
-    fire: "oklch(0.52 0.13 155)",     // verde mata
-    fireGlow: "oklch(0.68 0.15 155)", // verde mais vivo
-    ember: "oklch(0.82 0.09 210)",    // azul clareza
-  },
-  "daime-firmamento": {
-    nome: "Firmamento",
-    subtitulo: "azul profundo + branco",
-    bgTop: "oklch(0.50 0.13 245 / 0.10)",
-    bgBottom: "oklch(0.60 0.08 180 / 0.05)",
-    fire: "oklch(0.48 0.14 245)",     // azul firmamento
-    fireGlow: "oklch(0.65 0.15 235)", // azul médio
-    ember: "oklch(0.92 0.02 230)",    // branco suave azulado
-  },
-  "daime-cruzeiro": {
-    nome: "Cruzeiro",
-    subtitulo: "verde, azul e branco juntos",
-    bgTop: "oklch(0.55 0.13 160 / 0.08)",
-    bgBottom: "oklch(0.50 0.13 245 / 0.08)",
-    fire: "oklch(0.50 0.14 160)",     // verde
-    fireGlow: "oklch(0.55 0.15 235)", // azul
-    ember: "oklch(0.94 0.02 200)",    // branco
-  },
-  "daime-rainha": {
-    nome: "Rainha da Floresta",
-    subtitulo: "verde claro + branco luz",
-    bgTop: "oklch(0.62 0.14 145 / 0.10)",
-    bgBottom: "oklch(0.82 0.04 180 / 0.04)",
-    fire: "oklch(0.58 0.15 145)",     // verde folha
-    fireGlow: "oklch(0.75 0.17 140)", // verde luz
-    ember: "oklch(0.95 0.03 160)",    // branco esverdeado
-  },
+  "luz-branca":     { nome: "Luz Branca",  sub: "azul sobre papel",       azul: "#6b8cb8", azulClaro: "#b8cce0", azulProfundo: "#3a5a82", auraTop: "rgba(184,204,224,0.28)", auraBottom: "rgba(184,204,224,0.08)" },
+  "luz-mata":       { nome: "Luz & Mata",  sub: "verde folha + papel",    azul: "#7ba88c", azulClaro: "#c6dcc8", azulProfundo: "#4a7a5a", auraTop: "rgba(123,168,140,0.22)", auraBottom: "rgba(184,204,224,0.08)" },
+  "luz-firmamento": { nome: "Firmamento",  sub: "azul profundo, firmeza", azul: "#4a7ab0", azulClaro: "#a8c0de", azulProfundo: "#2d4a70", auraTop: "rgba(107,140,184,0.28)", auraBottom: "rgba(184,204,224,0.10)" },
+  "luz-rainha":     { nome: "Rainha",      sub: "verde luz, branco puro", azul: "#8bb062", azulClaro: "#c8d8b2", azulProfundo: "#5a7a3e", auraTop: "rgba(168,200,150,0.20)", auraBottom: "rgba(223,232,210,0.14)" },
 };
 
-// ----------------------------------------------------------------
-// DOMAIN DATA — estado simulado de um feitio em andamento
-// Cenário: Feitio de Abril/2026, Sexta-feira, 14:32
-// 5 bocas, panelas 1-4 ativas, ton éis com cozimentos + Daime
-// ----------------------------------------------------------------
-const NOW = new Date(2026, 3, 17, 14, 32, 0); // sexta 17/abr 14:32
+// ---- DADOS ----
+const NOW = new Date(2026, 3, 17, 14, 32, 0);
 
 const initialState = {
   feitio: {
@@ -161,102 +96,83 @@ const initialState = {
     feitor: "José",
     foguista: "Cícero",
     casinha: "Casinha da Sede",
-    status: "em_andamento",
   },
   fornalha: { bocas: 5 },
   panelas: [
-    {
-      id: "p1", numero: 1, boca: 1,
-      estado: "no_fogo",
-      conteudo: { tipo: "agua" },
-      volumeAtualL: 58,
-      entradaFogoEm: new Date(2026, 3, 17, 13, 45),
-      metaTiragem: 30,
-      tempoPausado: false,
-      emCicloAguaForte: false,
-      tiragens: [
-        { ordem: 1, tipo: "cozimento", grau: 1, volume: 31, momento: new Date(2026, 3, 16, 10, 15) },
-        { ordem: 2, tipo: "cozimento", grau: 2, volume: 30, momento: new Date(2026, 3, 16, 14, 40) },
-        { ordem: 3, tipo: "cozimento", grau: 3, volume: 31, momento: new Date(2026, 3, 16, 19, 10) },
-      ],
-      proxTiragem: { tipo: "cozimento", grau: 4 },
+    { id:"p1", numero:1, boca:1, conteudo:{tipo:"agua"},
+      volumeAtualL:58, metaTiragem:40,
+      entradaFogoEm: new Date(2026,3,17,12,40),
+      proxTiragem:{tipo:"cozimento",grau:1},
+      tiragens:[
+        {ordem:1,tipo:"cozimento",grau:1,volume:31,momento:new Date(2026,3,16,10,15)},
+        {ordem:2,tipo:"cozimento",grau:2,volume:30,momento:new Date(2026,3,16,14,40)},
+      ]
     },
-    {
-      id: "p2", numero: 2, boca: 2,
-      estado: "no_fogo",
-      conteudo: { tipo: "agua" },
-      volumeAtualL: 60,
-      entradaFogoEm: new Date(2026, 3, 17, 13, 47),
-      metaTiragem: 29,
-      tempoPausado: false,
-      emCicloAguaForte: false,
-      tiragens: [
-        { ordem: 1, tipo: "cozimento", grau: 1, volume: 30, momento: new Date(2026, 3, 16, 10, 20) },
-        { ordem: 2, tipo: "cozimento", grau: 2, volume: 30, momento: new Date(2026, 3, 16, 14, 45) },
-        { ordem: 3, tipo: "cozimento", grau: 3, volume: 30, momento: new Date(2026, 3, 16, 19, 12) },
-      ],
-      proxTiragem: { tipo: "cozimento", grau: 4 },
+    { id:"p2", numero:2, boca:2, conteudo:{tipo:"cozimento",ordem:2},
+      volumeAtualL:72, metaTiragem:45,
+      entradaFogoEm: new Date(2026,3,17,10,15),
+      proxTiragem:{tipo:"cozimento",grau:3},
+      tiragens:[
+        {ordem:1,tipo:"cozimento",grau:1,volume:30,momento:new Date(2026,3,16,10,20)},
+        {ordem:2,tipo:"cozimento",grau:2,volume:30,momento:new Date(2026,3,16,14,45)},
+      ]
     },
-    {
-      id: "p3", numero: 3, boca: 3,
-      estado: "no_fogo",
-      conteudo: { tipo: "cozimento", ordem: 1 },
-      volumeAtualL: 54,
-      entradaFogoEm: new Date(2026, 3, 17, 13, 20),
-      metaTiragem: 18,
-      tempoPausado: false,
-      emCicloAguaForte: false,
-      tiragens: [],
-      proxTiragem: { tipo: "daime", grau: 1 },
+    { id:"p3", numero:3, boca:3, conteudo:{tipo:"cozimento",ordem:3},
+      volumeAtualL:48, metaTiragem:30,
+      entradaFogoEm: new Date(2026,3,17,8,45),
+      proxTiragem:{tipo:"daime",grau:1},
+      tiragens:[]
     },
-    {
-      id: "p4", numero: 4, boca: 5,
-      estado: "no_fogo",
-      conteudo: { tipo: "cozimento", ordem: 2 },
-      volumeAtualL: 55,
-      entradaFogoEm: new Date(2026, 3, 17, 14, 2),
-      metaTiragem: 22,
-      tempoPausado: false,
-      emCicloAguaForte: false,
-      tiragens: [],
-      proxTiragem: { tipo: "daime", grau: 2 },
+    { id:"p4", numero:4, boca:4, conteudo:{tipo:"cozimento",ordem:4},
+      volumeAtualL:36, metaTiragem:20,
+      entradaFogoEm: new Date(2026,3,17,11,20),
+      proxTiragem:{tipo:"daime",grau:2},
+      tiragens:[]
     },
   ],
   toneis: [
-    { id: "t1", tipo: "cozimento", ordem: 1, volume: 62, capacidade: 200 },
-    { id: "t2", tipo: "cozimento", ordem: 2, volume: 60, capacidade: 200 },
-    { id: "t3", tipo: "cozimento", ordem: 3, volume: 61, capacidade: 200 },
-    { id: "t4", tipo: "daime", grau: 1, volume: 18, capacidade: 100 },
-    { id: "t5", tipo: "agua_forte", volume: 0, capacidade: 200 },
+    { numero:1, tipo:"cozimento", ordem:1, volumeL:52, capacidadeL:120 },
+    { numero:2, tipo:"cozimento", ordem:2, volumeL:40, capacidadeL:120 },
+    { numero:3, tipo:"cozimento", ordem:3, volumeL:30, capacidadeL:80  },
+    { numero:4, tipo:"cozimento", ordem:4, volumeL:18, capacidadeL:80  },
+    { numero:5, tipo:"daime",     grau:1,  volumeL:24, capacidadeL:60  },
+    { numero:6, tipo:"daime",     grau:2,  volumeL:12, capacidadeL:60  },
+    { numero:7, tipo:"agua_forte",         volumeL:8,  capacidadeL:40  },
   ],
   eventos: [
-    { id: "e1", tipo: "tiragem_registrada", momento: new Date(2026, 3, 17, 13, 40), texto: "Panela 3 — Repôs 1º cozimento, 54 L" },
-    { id: "e2", tipo: "volume_ajustado", momento: new Date(2026, 3, 17, 13, 30), texto: "Panela 1 — Acrescentou 3 L" },
-    { id: "e3", tipo: "tiragem_registrada", momento: new Date(2026, 3, 17, 11, 20), texto: "Panela 2 — Tirou 30 L (3º cozimento) → Tonel 3" },
+    { id:"e1", momento:new Date(2026,3,17,14,10), texto:"Panela 3 — Tirou 18 L (3º cozimento) → Tonel 3" },
+    { id:"e2", momento:new Date(2026,3,17,13,30), texto:"Panela 1 — Acrescentou 3 L" },
+    { id:"e3", momento:new Date(2026,3,17,11,20), texto:"Panela 2 — Tirou 30 L (3º cozimento) → Tonel 3" },
   ],
 };
 
-// Hooks
-function useTick(ms = 1000) {
-  const [, setT] = useState(0);
+// ---- HOOKS ----
+function useLiveNow() {
+  const [now, setNow] = useState(new Date(NOW));
   useEffect(() => {
-    const id = setInterval(() => setT(x => x + 1), ms);
+    const id = setInterval(() => setNow(d => new Date(d.getTime() + 1000)), 1000);
     return () => clearInterval(id);
-  }, [ms]);
+  }, []);
+  return now;
 }
+
+// ---- FMT ----
 function fmtDuration(ms) {
   if (ms < 0) ms = 0;
   const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  return `${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
 }
 function fmtHora(d) {
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
-
-// Domain labels
+function tiragemLabel(t) {
+  if (t.tipo === "cozimento") return `${t.grau}º cozimento`;
+  if (t.tipo === "daime")     return `${t.grau}º grau`;
+  if (t.tipo === "agua_forte")return "Água forte";
+  return "—";
+}
 function conteudoLabel(c) {
   if (!c) return "—";
   if (c.tipo === "agua") return "Água";
@@ -264,1143 +180,728 @@ function conteudoLabel(c) {
   if (c.tipo === "agua_forte") return "Água forte";
   return "—";
 }
-function tiragemLabel(t) {
-  if (t.tipo === "cozimento") return `${t.grau}º cozimento`;
-  if (t.tipo === "daime") return `${t.grau}º grau`;
-  if (t.tipo === "agua_forte") return "Água forte";
-  return "—";
-}
-function tiragemShort(t) {
-  if (t.tipo === "cozimento") return `${t.grau}ºC`;
-  if (t.tipo === "daime") return `${t.grau}ºG`;
-  if (t.tipo === "agua_forte") return "AF";
-  return "—";
-}
 function tonelLabel(t) {
   if (t.tipo === "cozimento") return `${t.ordem}º Cozimento`;
-  if (t.tipo === "daime") return `Daime ${t.grau}º grau`;
-  if (t.tipo === "agua_forte") return "Água Forte";
-  if (t.tipo === "apuracao") return "Apuração";
-  if (t.tipo === "mel_dagua") return "Mel d'Água";
+  if (t.tipo === "daime")     return `Daime ${t.grau}º grau`;
+  if (t.tipo === "agua_forte")return "Água Forte";
   return "—";
 }
-function tonelColor(t) {
-  if (t.tipo === "cozimento") return "var(--cozimento)";
-  if (t.tipo === "daime") return "var(--daime)";
-  if (t.tipo === "agua_forte") return "var(--agua-forte)";
-  return "var(--border)";
+function tiragemCor(t) {
+  if (!t) return "var(--ink-soft)";
+  if (t.tipo === "daime")     return "var(--daime)";
+  if (t.tipo === "cozimento") return "var(--azul-profundo)";
+  if (t.tipo === "agua_forte")return "var(--agua-forte)";
+  return "var(--ink-soft)";
 }
-function conteudoColor(c) {
-  if (!c) return "var(--border)";
-  if (c.tipo === "agua") return "var(--agua)";
-  if (c.tipo === "cozimento") return "var(--cozimento)";
-  if (c.tipo === "agua_forte") return "var(--agua-forte)";
-  return "var(--border)";
-}
-function proxTiragemColor(p) {
-  if (!p) return "var(--text-dim)";
-  if (p.tipo === "cozimento") return "var(--cozimento-2)";
-  if (p.tipo === "daime") return "var(--daime-2)";
-  if (p.tipo === "agua_forte") return "var(--agua-forte)";
-  return "var(--text-dim)";
+function tonelCor(t) {
+  if (t.tipo === "daime")     return "var(--daime)";
+  if (t.tipo === "agua_forte")return "var(--agua-forte)";
+  return "var(--azul)";
 }
 
-// ==== TOP BAR ==========================================
-function TopBar({ feitio }) {
-  useTick(1000);
-  const [now, setNow] = useState(NOW);
-  useEffect(() => {
-    const id = setInterval(() => setNow(d => new Date(d.getTime() + 1000)), 1000);
-    return () => clearInterval(id);
-  }, []);
-
+// =========================================================
+// HEADER — grid 3-col, muito respiro
+// =========================================================
+function Header({ feitio }) {
+  const now = useLiveNow();
   const duracaoMs = now - feitio.inicio;
-  const h = Math.floor(duracaoMs / 3600000);
 
   return (
     <header style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '18px 32px',
-      borderBottom: '1px solid var(--border-soft)',
-      background: 'linear-gradient(180deg, var(--fire-soft-04), transparent)',
+      display: 'grid', gridTemplateColumns: 'auto 1fr auto',
+      alignItems: 'center', gap: 40,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: '50%',
-          background: 'radial-gradient(circle at 40% 40%, var(--fire-glow), var(--fire) 55%, #6b2a0f)',
-          boxShadow: '0 0 24px var(--fire-glow-soft-35), inset 0 -4px 8px rgba(0,0,0,0.3)',
-          position: 'relative',
+      <div style={{
+        width: 44, height: 44, borderRadius: '50%',
+        border: '1px solid var(--azul-claro)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--azul)', fontSize: 18, fontWeight: 300,
+        background: 'rgba(255,255,255,0.6)',
+      }}>✦</div>
+      <div>
+        <div className="mono" style={{
+          fontSize: 10, letterSpacing: '0.35em',
+          textTransform: 'uppercase', color: 'var(--ink-faint)',
         }}>
-          <div style={{
-            position: 'absolute', inset: 10, borderRadius: '50%',
-            background: 'radial-gradient(circle, var(--ember), transparent 70%)',
-            filter: 'blur(2px)',
-          }} />
+          Feitio · {feitio.casinha}
         </div>
-        <div>
-          <div className="serif" style={{ fontSize: 28, lineHeight: 1, color: 'var(--text)' }}>
-            {feitio.nome}
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--text-faint)', marginTop: 4, display: 'flex', gap: 14 }}>
-            <span>Feitor: <span style={{ color: 'var(--text-dim)' }}>{feitio.feitor}</span></span>
-            <span style={{ opacity: 0.4 }}>·</span>
-            <span>Foguista: <span style={{ color: 'var(--text-dim)' }}>{feitio.foguista}</span></span>
-            <span style={{ opacity: 0.4 }}>·</span>
-            <span>{feitio.casinha}</span>
-          </div>
-        </div>
+        <h1 className="serif" style={{
+          margin: '4px 0 0', fontSize: 30, fontWeight: 300,
+          color: 'var(--ink)',
+        }}>
+          {feitio.nome}
+        </h1>
       </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-        <StatusPill status={feitio.status} dayLabel={`Dia 2 · ${h}h em andamento`} />
-        <div style={{ textAlign: 'right' }}>
-          <div className="serif" style={{ fontSize: 36, lineHeight: 1, letterSpacing: '-0.02em' }}>
-            {String(now.getHours()).padStart(2,'0')}:{String(now.getMinutes()).padStart(2,'0')}
-          </div>
-          <div className="mono" style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            sex · 17 abr
-          </div>
+      <div style={{ textAlign: 'right' }}>
+        <div className="serif" style={{
+          fontSize: 42, fontWeight: 200, letterSpacing: '-0.02em',
+          color: 'var(--ink)', lineHeight: 1,
+        }}>
+          {fmtHora(now)}
+        </div>
+        <div className="mono" style={{
+          fontSize: 11, color: 'var(--ink-faint)',
+          letterSpacing: '0.15em', marginTop: 4,
+          textTransform: 'uppercase',
+        }}>
+          Dia 2 · {fmtDuration(duracaoMs)}
         </div>
       </div>
     </header>
   );
 }
-function StatusPill({ status, dayLabel }) {
+
+// =========================================================
+// CRÉDITOS — linha horizontal com borda inferior
+// =========================================================
+function Creditos({ feitio, panelas, bocas, toneis }) {
+  const noTonel = toneis.reduce((a,t) => a + t.volumeL, 0);
   return (
     <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 10,
-      padding: '8px 16px', borderRadius: 999,
-      background: 'rgba(107,142,78,0.12)',
-      border: '1px solid rgba(107,142,78,0.35)',
-      fontSize: 12, color: 'var(--text-dim)',
-      textTransform: 'uppercase', letterSpacing: '0.08em',
+      display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40,
+      paddingBottom: 24, borderBottom: '1px solid var(--linha)',
     }}>
-      <span style={{
-        width: 8, height: 8, borderRadius: '50%',
-        background: 'var(--success)',
-        boxShadow: '0 0 8px var(--success)',
-        animation: 'pulse 2s ease-in-out infinite',
-      }} />
-      <span>Em andamento</span>
-      <span style={{ opacity: 0.4 }}>·</span>
-      <span style={{ textTransform: 'none', letterSpacing: 0 }}>{dayLabel}</span>
+      <Field label="Feitor" value={feitio.feitor} />
+      <Field label="Foguista" value={feitio.foguista} />
+      <Field label="Bocas ao fogo" value={`${panelas.length} / ${bocas}`} />
+      <Field label="No tonel" value={`${noTonel} L`} highlight />
     </div>
   );
 }
 
-
-// ---- next section ----
-
-
-
-
-// ==== BOCA / PANELA CARD ===============================
-function BocaCard({ boca, panela, onClick, onClickEmpty, selected, onLongSelect }) {
-  const hasPanela = !!panela;
-  if (!hasPanela) {
-    return (
-      <button
-        onClick={onClickEmpty}
-        style={{
-          position: 'relative',
-          minHeight: 240,
-          padding: 20,
-          background: 'var(--surface)',
-          border: '1.5px dashed var(--border)',
-          borderRadius: 16,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          gap: 14,
-          transition: 'all 0.2s',
-          color: 'var(--text-faint)',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--fire)'; e.currentTarget.style.background = 'var(--bg-3)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface)'; }}
-      >
-        <div className="mono" style={{ fontSize: 11, letterSpacing: '0.15em', opacity: 0.6 }}>BOCA {boca}</div>
-        <div style={{
-          width: 56, height: 56, borderRadius: '50%',
-          border: '1.5px dashed var(--border)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 24, color: 'var(--text-faint)',
-        }}>+</div>
-        <div style={{ fontSize: 13, color: 'var(--text-dim)' }}>Nova panela</div>
-      </button>
-    );
-  }
-  return <PanelaCard boca={boca} panela={panela} onClick={onClick} selected={selected} />;
-}
-
-function PanelaCard({ boca, panela, onClick, selected }) {
-  useTick(1000);
-  const [now, setNow] = useState(new Date(NOW));
-  useEffect(() => {
-    const id = setInterval(() => setNow(d => new Date(d.getTime() + 1000)), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const tempoMs = now - panela.entradaFogoEm;
-  const volPct = Math.min(100, Math.max(0, (panela.volumeAtualL / 120) * 100));
-  const metaPct = (panela.metaTiragem / panela.volumeAtualL) * 100;
-  const rumoMeta = panela.volumeAtualL - panela.metaTiragem; // quanto precisa evaporar
-
-  const accent = conteudoColor(panela.conteudo);
-  const proxAccent = proxTiragemColor(panela.proxTiragem);
-
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        position: 'relative',
-        minHeight: 240,
-        padding: 0,
-        background: 'var(--surface)',
-        border: selected ? '2px solid var(--ember)' : '1px solid var(--border-soft)',
-        borderRadius: 16,
-        textAlign: 'left',
-        overflow: 'hidden',
-        transition: 'all 0.2s',
-        boxShadow: selected ? '0 0 0 4px var(--ember-soft-15)' : '0 1px 2px rgba(0,0,0,0.3)',
-      }}
-      onMouseEnter={(e) => { if (!selected) e.currentTarget.style.borderColor = 'var(--border)'; }}
-      onMouseLeave={(e) => { if (!selected) e.currentTarget.style.borderColor = 'var(--border-soft)'; }}
-    >
-      {/* Fire glow behind */}
-      <div style={{
-        position: 'absolute', bottom: -40, left: '50%', transform: 'translateX(-50%)',
-        width: '80%', height: 80,
-        background: 'radial-gradient(ellipse, var(--fire-soft-25), transparent 70%)',
-        filter: 'blur(8px)',
-        pointerEvents: 'none',
-      }} />
-
-      {/* Top bar: boca + timer */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 16px',
-        borderBottom: '1px solid var(--border-soft)',
-        background: `linear-gradient(90deg, ${proxAccent}22, transparent)`,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 8, height: 8, borderRadius: '50%',
-            background: 'var(--fire)', boxShadow: '0 0 8px var(--fire-glow)',
-            animation: 'flicker 2.5s ease-in-out infinite',
-          }} />
-          <span className="mono" style={{ fontSize: 10, letterSpacing: '0.15em', color: 'var(--text-faint)' }}>
-            BOCA {boca} · PANELA {panela.numero}
-          </span>
-        </div>
-        <span className="mono" style={{ fontSize: 15, fontWeight: 500, color: 'var(--ember)', letterSpacing: '-0.02em' }}>
-          {fmtDuration(tempoMs)}
-        </span>
-      </div>
-
-      {/* Main body — name of pan = next yield */}
-      <div style={{ padding: '16px 18px 14px' }}>
-        <div style={{ marginBottom: 14 }}>
-          <div className="mono" style={{ fontSize: 9, color: 'var(--text-faint)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-            vai tirar
-          </div>
-          <div className="serif" style={{
-            fontSize: 40, lineHeight: 1.02, letterSpacing: '-0.02em',
-            color: proxAccent, marginTop: 2,
-          }}>
-            {tiragemLabel(panela.proxTiragem)}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 2, background: accent, display: 'inline-block' }} />
-            <span>cozinhando com <span style={{ color: 'var(--text-dim)' }}>{conteudoLabel(panela.conteudo).toLowerCase()}</span></span>
-          </div>
-        </div>
-
-        {/* Volume bar */}
-        <div style={{ marginBottom: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Volume atual</span>
-            <span>
-              <span className="serif" style={{ fontSize: 22, color: 'var(--text)' }}>{panela.volumeAtualL}</span>
-              <span className="mono" style={{ fontSize: 11, color: 'var(--text-faint)', marginLeft: 3 }}>L</span>
-            </span>
-          </div>
-          <VolumeBar volumeL={panela.volumeAtualL} metaL={panela.metaTiragem} accent={accent} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11 }}>
-            <span className="mono" style={{ color: 'var(--text-faint)' }}>
-              meta tirar em <span style={{ color: 'var(--ember)' }}>{panela.metaTiragem}L</span>
-            </span>
-            <span className="mono" style={{ color: 'var(--text-faint)' }}>
-              −{rumoMeta}L p/ ponto
-            </span>
-          </div>
-        </div>
-
-        {/* Filler removed — proxima tiragem agora é o nome */}
-      </div>
-    </button>
-  );
-}
-
-function VolumeBar({ volumeL, metaL, accent }) {
-  const capacidade = 120;
-  const pctAtual = (volumeL / capacidade) * 100;
-  const pctMeta = (metaL / capacidade) * 100;
-  return (
-    <div style={{
-      position: 'relative', height: 10,
-      background: 'rgba(0,0,0,0.35)',
-      borderRadius: 5,
-      overflow: 'hidden',
-      border: '1px solid var(--border-soft)',
-    }}>
-      <div style={{
-        position: 'absolute', left: 0, top: 0, bottom: 0,
-        width: `${pctAtual}%`,
-        background: `linear-gradient(90deg, ${accent}, ${accent}dd)`,
-        transition: 'width 0.4s',
-      }} />
-      {/* Meta marker */}
-      <div style={{
-        position: 'absolute', left: `${pctMeta}%`, top: -2, bottom: -2,
-        width: 2, background: 'var(--ember)',
-        boxShadow: '0 0 4px var(--ember)',
-      }} />
-    </div>
-  );
-}
-
-// ---- next section ----
-
-
-
-
-// ==== FORNALHA GRID ====================================
-function Fornalha({ panelas, bocas, onBocaClick, onEmptyClick, selectedIds, tweaks }) {
-  const bocasArr = Array.from({ length: bocas }, (_, i) => i + 1);
-  const panelaByBoca = (b) => panelas.find(p => p.boca === b);
-  const isSimples = tweaks?.layout === 'grade-simples';
-  const compact = !!tweaks?.compactMode;
-  return (
-    <div style={{
-      position: 'relative',
-      padding: compact ? '16px 20px' : '24px 28px',
-    }}>
-      {/* Fornalha label */}
-      <div style={{
-        display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
-        marginBottom: compact ? 10 : 16,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
-          <h2 className="serif" style={{ margin: 0, fontSize: compact ? 20 : 24, letterSpacing: '-0.01em' }}>Fornalha</h2>
-          <span className="mono" style={{ fontSize: 11, color: 'var(--text-faint)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            {panelas.length} de {bocas} bocas ocupadas
-          </span>
-        </div>
-        <FornalhaLegenda />
-      </div>
-
-      {isSimples ? (
-        <div className={compact ? 'fornalha-compact' : ''} style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${Math.min(bocas, 3)}, 1fr)`,
-          gap: compact ? 10 : 16,
-        }}>
-          {bocasArr.map(b => (
-            <BocaCard
-              key={b} boca={b}
-              panela={panelaByBoca(b)}
-              onClick={() => onBocaClick(panelaByBoca(b))}
-              onClickEmpty={() => onEmptyClick(b)}
-              selected={selectedIds.includes(panelaByBoca(b)?.id)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className={compact ? 'fornalha-compact' : ''}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: compact ? 10 : 16,
-            position: 'relative',
-          }}>
-            {bocasArr.slice(0, 3).map(b => (
-              <BocaCard
-                key={b} boca={b}
-                panela={panelaByBoca(b)}
-                onClick={() => onBocaClick(panelaByBoca(b))}
-                onClickEmpty={() => onEmptyClick(b)}
-                selected={selectedIds.includes(panelaByBoca(b)?.id)}
-                compact={compact}
-              />
-            ))}
-          </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(6, 1fr)',
-            gap: compact ? 10 : 16,
-            marginTop: compact ? 10 : 16,
-          }}>
-            {bocasArr.slice(3).map((b, i) => (
-              <div key={b} style={{ gridColumn: i === 0 ? '2 / span 2' : '4 / span 2' }}>
-                <BocaCard
-                  boca={b}
-                  panela={panelaByBoca(b)}
-                  onClick={() => onBocaClick(panelaByBoca(b))}
-                  onClickEmpty={() => onEmptyClick(b)}
-                  selected={selectedIds.includes(panelaByBoca(b)?.id)}
-                  compact={compact}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FornalhaLegenda() {
-  const items = [
-    { label: "Água", color: "var(--agua)" },
-    { label: "Cozimento", color: "var(--cozimento)" },
-    { label: "Daime", color: "var(--daime)" },
-    { label: "Água forte", color: "var(--agua-forte)" },
-  ];
-  return (
-    <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-      {items.map(i => (
-        <div key={i.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 3, background: i.color, boxShadow: `0 0 6px ${i.color}60` }} />
-          <span className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            {i.label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ==== TONEIS SIDEBAR ==================================
-function ToneisPanel({ toneis }) {
-  const totalDaime = toneis.filter(t => t.tipo === 'daime').reduce((s, t) => s + t.volume, 0);
-  const totalCoz = toneis.filter(t => t.tipo === 'cozimento').reduce((s, t) => s + t.volume, 0);
-  return (
-    <aside style={{
-      padding: '24px 24px',
-      borderLeft: '1px solid var(--border-soft)',
-      background: 'linear-gradient(180deg, rgba(107,42,42,0.04), transparent)',
-      display: 'flex', flexDirection: 'column', gap: 20,
-      minHeight: 0,
-    }}>
-      <div>
-        <h2 className="serif" style={{ margin: 0, fontSize: 24 }}>Tonéis</h2>
-        <div className="mono" style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          armazenamento do feitio
-        </div>
-      </div>
-
-      {/* Summary numbers */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
-      }}>
-        <SummaryStat label="Cozimentos" value={totalCoz} unit="L" color="var(--cozimento)" />
-        <SummaryStat label="Daime" value={totalDaime} unit="L" color="var(--daime)" />
-      </div>
-
-      {/* Toneis list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {toneis.map(t => <TonelRow key={t.id} tonel={t} />)}
-      </div>
-
-      <button style={{
-        padding: '10px 14px',
-        border: '1px solid var(--border)',
-        borderRadius: 8,
-        color: 'var(--text-dim)',
-        fontSize: 13,
-        background: 'var(--surface)',
-      }}>
-        + Novo tonel
-      </button>
-    </aside>
-  );
-}
-
-function SummaryStat({ label, value, unit, color }) {
-  return (
-    <div style={{
-      padding: '12px 14px',
-      background: 'var(--surface)',
-      border: '1px solid var(--border-soft)',
-      borderRadius: 10,
-      borderLeft: `3px solid ${color}`,
-    }}>
-      <div style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-        {label}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 4 }}>
-        <span className="serif" style={{ fontSize: 28, letterSpacing: '-0.02em' }}>{value}</span>
-        <span className="mono" style={{ fontSize: 12, color: 'var(--text-faint)' }}>{unit}</span>
-      </div>
-    </div>
-  );
-}
-
-function TonelRow({ tonel }) {
-  const pct = (tonel.volume / tonel.capacidade) * 100;
-  const color = tonelColor(tonel);
-  return (
-    <div style={{
-      padding: '12px 14px',
-      background: 'var(--surface)',
-      border: '1px solid var(--border-soft)',
-      borderRadius: 10,
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* fill bg */}
-      <div style={{
-        position: 'absolute', left: 0, bottom: 0, top: 0,
-        width: `${pct}%`,
-        background: `linear-gradient(90deg, ${color}22, ${color}08)`,
-        transition: 'width 0.3s',
-      }} />
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 28, height: 36,
-            borderRadius: '4px 4px 8px 8px',
-            background: `linear-gradient(180deg, ${color}40, ${color})`,
-            border: `1px solid ${color}`,
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', left: 2, right: 2, bottom: 2,
-              height: `${Math.max(6, pct * 0.3)}%`,
-              background: color,
-              borderRadius: '1px 1px 6px 6px',
-            }} />
-          </div>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{tonelLabel(tonel)}</div>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.06em', marginTop: 2 }}>
-              {tonel.capacidade}L max
-            </div>
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <span className="serif" style={{ fontSize: 22, color: 'var(--text)' }}>{tonel.volume}</span>
-          <span className="mono" style={{ fontSize: 11, color: 'var(--text-faint)', marginLeft: 2 }}>L</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---- next section ----
-
-
-
-
-// ==== PANELA DETAIL MODAL ==============================
-function PanelaDetailModal({ panela, onClose, onTirar, onRepor }) {
-  if (!panela) return null;
-  const [view, setView] = useState("detail"); // detail | tirar | repor
-  useTick(1000);
-  const [now, setNow] = useState(new Date(NOW));
-  useEffect(() => {
-    const id = setInterval(() => setNow(d => new Date(d.getTime() + 1000)), 1000);
-    return () => clearInterval(id);
-  }, []);
-  const tempoMs = now - panela.entradaFogoEm;
-  const accent = conteudoColor(panela.conteudo);
-  const proxAccent = proxTiragemColor(panela.proxTiragem);
-
-  return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(12,9,6,0.75)', backdropFilter: 'blur(6px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 50, padding: 20,
-    }} onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: '100%', maxWidth: 720,
-          background: 'var(--bg-2)',
-          border: '1px solid var(--border)',
-          borderRadius: 16,
-          overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-        }}
-      >
-        {view === "detail" && <PanelaDetailBody panela={panela} accent={accent} proxAccent={proxAccent} tempoMs={tempoMs}
-          onClose={onClose} onTirar={() => setView("tirar")} onRepor={() => setView("repor")} />}
-        {view === "tirar" && <TirarForm panela={panela} onCancel={() => setView("detail")} onConfirm={() => { onTirar(); onClose(); }} />}
-        {view === "repor" && <ReporForm panela={panela} onCancel={() => setView("detail")} onConfirm={() => { onRepor(); onClose(); }} />}
-      </div>
-    </div>
-  );
-}
-
-function PanelaDetailBody({ panela, accent, proxAccent, tempoMs, onClose, onTirar, onRepor }) {
+function Field({ label, value, highlight }) {
   return (
     <div>
-      <div style={{
-        padding: '20px 24px',
-        background: `linear-gradient(90deg, ${accent}22, transparent)`,
-        borderBottom: '1px solid var(--border-soft)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div className="serif" style={{ fontSize: 44, lineHeight: 1, color: 'var(--text)' }}>
-            Panela {panela.numero}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              na boca {panela.boca}
-            </span>
-            <span style={{
-              display: 'inline-flex', padding: '3px 10px', borderRadius: 999,
-              background: `${accent}20`, border: `1px solid ${accent}50`,
-              fontSize: 11, color: accent, textTransform: 'uppercase', letterSpacing: '0.08em',
-              alignSelf: 'flex-start',
-            }}>
-              {conteudoLabel(panela.conteudo)}
-            </span>
-          </div>
-        </div>
-        <button onClick={onClose} style={{
-          width: 36, height: 36, borderRadius: 8,
-          border: '1px solid var(--border-soft)',
-          color: 'var(--text-dim)', fontSize: 18,
-        }}>×</button>
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, borderBottom: '1px solid var(--border-soft)' }}>
-        <StatCell label="Tempo no fogo" value={fmtDuration(tempoMs)} color="var(--ember)" mono />
-        <StatCell label="Volume atual" value={`${panela.volumeAtualL}L`} color="var(--text)" serif sep />
-        <StatCell label="Meta p/ tirar" value={`${panela.metaTiragem}L`} color="var(--ember)" serif sep />
-      </div>
-
-      {/* Próxima tiragem banner */}
-      <div style={{
-        margin: 20, padding: 18,
-        background: `linear-gradient(90deg, ${proxAccent}15, ${proxAccent}05)`,
-        border: `1px solid ${proxAccent}40`,
-        borderRadius: 12,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <div>
-          <div style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-            Próxima tiragem será
-          </div>
-          <div className="serif" style={{ fontSize: 30, marginTop: 4, color: 'var(--text)', letterSpacing: '-0.02em' }}>
-            {tiragemLabel(panela.proxTiragem)}
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>calculado pelo conteúdo</div>
-          <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>+ histórico da panela</div>
-        </div>
-      </div>
-
-      {/* Historico */}
-      <div style={{ padding: '0 20px 16px' }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
-          Tiragens anteriores · {panela.tiragens.length}
-        </div>
-        {panela.tiragens.length === 0 ? (
-          <div style={{ padding: '12px 14px', border: '1px dashed var(--border-soft)', borderRadius: 8, fontSize: 12, color: 'var(--text-faint)', fontStyle: 'italic' }}>
-            Primeira tiragem ainda não foi feita.
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {panela.tiragens.map((t, i) => (
-              <div key={i} style={{
-                display: 'grid', gridTemplateColumns: '28px 1fr auto auto', gap: 10,
-                alignItems: 'center',
-                padding: '10px 12px', background: 'var(--surface)',
-                borderRadius: 8, border: '1px solid var(--border-soft)',
-                fontSize: 13,
-              }}>
-                <span className="mono" style={{ fontSize: 11, color: 'var(--text-faint)' }}>{t.ordem}ª</span>
-                <span style={{ color: 'var(--text)' }}>{tiragemLabel(t)}</span>
-                <span><span className="serif" style={{ fontSize: 16 }}>{t.volume}</span><span className="mono" style={{ fontSize: 10, color: 'var(--text-faint)' }}>L</span></span>
-                <span className="mono" style={{ fontSize: 11, color: 'var(--text-faint)' }}>{fmtHora(t.momento)}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div style={{
-        padding: '14px 20px 20px',
-        borderTop: '1px solid var(--border-soft)',
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10,
-      }}>
-        <ActionBtn primary accent="var(--daime)" label="Tirar" sub="registrar volume" icon="↓" onClick={onTirar} />
-        <ActionBtn label="Repor" sub="+ água ou coz." icon="+" onClick={onRepor} />
-        <ActionBtn label="Pausar" sub="parar timer" icon="‖" />
-        <ActionBtn label="Trocar boca" sub="swap" icon="⇄" />
-      </div>
-      <div style={{
-        padding: '0 20px 16px',
-        display: 'flex', justifyContent: 'space-between',
-        fontSize: 12, color: 'var(--text-faint)',
-      }}>
-        <button style={{ color: 'var(--text-faint)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Ver histórico completo</button>
-        <button style={{ color: '#a04040', textDecoration: 'underline', textUnderlineOffset: 3 }}>Descartar panela</button>
-      </div>
-    </div>
-  );
-}
-
-function StatCell({ label, value, color, serif, mono, sep }) {
-  return (
-    <div style={{ padding: '16px 18px', borderLeft: sep ? '1px solid var(--border-soft)' : 'none' }}>
-      <div className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-        {label}
-      </div>
-      <div className={serif ? 'serif' : (mono ? 'mono' : '')} style={{
-        fontSize: serif ? 32 : 24, color, marginTop: 4, letterSpacing: '-0.01em',
+      <div className="mono" style={{
+        fontSize: 10, letterSpacing: '0.25em',
+        textTransform: 'uppercase', color: 'var(--ink-faint)',
+        marginBottom: 4,
+      }}>{label}</div>
+      <div className={highlight ? 'serif' : ''} style={{
+        fontSize: highlight ? 26 : 18,
+        fontWeight: highlight ? 300 : 400,
+        color: highlight ? 'var(--azul-profundo)' : 'var(--ink)',
+        letterSpacing: '-0.01em',
       }}>{value}</div>
     </div>
   );
 }
 
-function ActionBtn({ label, sub, icon, primary, accent, onClick }) {
+// =========================================================
+// FORNALHA — panelas em grid
+// =========================================================
+function Fornalha({ panelas, bocas, onPanelaClick, onEmptyClick }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: '14px 12px',
-        borderRadius: 10,
-        background: primary ? (accent || 'var(--fire)') : 'var(--surface)',
-        border: primary ? 'none' : '1px solid var(--border)',
-        color: primary ? '#fff' : 'var(--text)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', gap: 4,
-        transition: 'all 0.15s',
+    <section>
+      <SectionHead title="Fornalha" subtitle="panelas no fogo" />
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${bocas}, 1fr)`, gap: 14 }}>
+        {Array.from({length: bocas}, (_, i) => i+1).map(b => {
+          const p = panelas.find(x => x.boca === b);
+          return (
+            <Panela key={b} boca={b} panela={p}
+              onClick={() => p && onPanelaClick(p)}
+              onClickEmpty={() => onEmptyClick(b)} />
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function SectionHead({ title, subtitle }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 24, marginBottom: 24 }}>
+      <h2 className="serif" style={{
+        margin: 0, fontSize: 18, fontWeight: 400,
+        letterSpacing: '0.01em', color: 'var(--ink)',
+      }}>{title}</h2>
+      <span className="mono" style={{
+        fontSize: 11, color: 'var(--ink-faint)',
+        letterSpacing: '0.15em', textTransform: 'uppercase',
+      }}>{subtitle}</span>
+    </div>
+  );
+}
+
+function Panela({ boca, panela, onClick, onClickEmpty }) {
+  if (!panela) {
+    return (
+      <button onClick={onClickEmpty} style={{
+        minHeight: 200, borderRadius: 16,
+        border: '1px dashed var(--linha)',
+        background: 'var(--surface)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexDirection: 'column', gap: 8,
+        color: 'var(--ink-faint)',
+        transition: 'border-color 0.2s',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
-    >
-      <span style={{ fontSize: 22, opacity: primary ? 1 : 0.8 }}>{icon}</span>
-      <span style={{ fontSize: 14, fontWeight: 600 }}>{label}</span>
-      <span style={{ fontSize: 10, opacity: 0.7 }}>{sub}</span>
-    </button>
-  );
-}
-
-function TirarForm({ panela, onCancel, onConfirm }) {
-  const [volume, setVolume] = useState(panela.metaTiragem);
-  const [tonel, setTonel] = useState(null);
-  const tipoTiragem = panela.proxTiragem;
-  const accent = proxTiragemColor(tipoTiragem);
-  return (
-    <div>
-      <div style={{ padding: '20px 24px 14px', borderBottom: '1px solid var(--border-soft)', background: `linear-gradient(90deg, ${accent}15, transparent)` }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Panela {panela.numero} · registrar tiragem</div>
-        <div className="serif" style={{ fontSize: 32, marginTop: 4 }}>Tirar — {tiragemLabel(tipoTiragem)}</div>
-      </div>
-      <div style={{ padding: 24 }}>
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Volume tirado</label>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
-            <span className="serif" style={{ fontSize: 72, color: 'var(--text)', lineHeight: 1 }}>{volume}</span>
-            <span className="mono" style={{ fontSize: 16, color: 'var(--text-faint)' }}>L</span>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-            {[25, 28, 30, 31, 33, 35].map(v => (
-              <QuickBtn key={v} active={volume === v} onClick={() => setVolume(v)}>{v} L</QuickBtn>
-            ))}
-            <QuickBtn onClick={() => setVolume(v => Math.max(0, v - 1))}>−1</QuickBtn>
-            <QuickBtn onClick={() => setVolume(v => v + 1)}>+1</QuickBtn>
-          </div>
-
-          <div style={{
-            marginTop: 12, padding: 10, borderRadius: 8,
-            background: 'var(--ember-soft-08)', border: '1px solid var(--ember-soft-25)',
-            fontSize: 12, color: 'var(--text-dim)',
-          }}>
-            <span className="mono" style={{ color: 'var(--ember)', marginRight: 6 }}>◐</span>
-            Dupla: Panela 1 deu <b>31 L</b>. Para chegar a 62 L no tonel, mire <b>31 L</b>.
-          </div>
+      onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--azul-claro)'}
+      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--linha)'}>
+        <div className="mono" style={{ fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase' }}>
+          Boca {boca}
         </div>
+        <div style={{
+          width: 32, height: 32, borderRadius: '50%',
+          border: '1px solid var(--linha)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 18, fontWeight: 200,
+        }}>+</div>
+      </button>
+    );
+  }
 
-        <div>
-          <label style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tonel destino</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-            <TonelRadio label="3º Cozimento" hint="atual: 61L · após: 61+" volume={61} selected={tonel === 'sugerido'} onClick={() => setTonel('sugerido')} sugerido accent="var(--cozimento)" />
-            <TonelRadio label="Outro tonel..." volume={0} onClick={() => setTonel('outro')} selected={tonel === 'outro'} accent="var(--border)" />
-          </div>
-        </div>
-      </div>
-      <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border-soft)', display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-        <button onClick={onCancel} style={{
-          padding: '12px 22px', borderRadius: 10, border: '1px solid var(--border)',
-          color: 'var(--text-dim)', fontSize: 14,
-        }}>Cancelar</button>
-        <button onClick={onConfirm} style={{
-          padding: '12px 28px', borderRadius: 10,
-          background: accent, color: '#fff', fontSize: 14, fontWeight: 600,
-        }}>Confirmar tiragem</button>
-      </div>
-    </div>
-  );
-}
+  const now = useLiveNow();
+  const tempoMs = now - panela.entradaFogoEm;
+  const volPct = Math.min(100, (panela.volumeAtualL / 120) * 100);
+  const metaPct = Math.min(100, (panela.metaTiragem / 120) * 100);
+  const cor = tiragemCor(panela.proxTiragem);
 
-function ReporForm({ panela, onCancel, onConfirm }) {
-  const [tipo, setTipo] = useState('agua');
-  const [volume, setVolume] = useState(55);
-  return (
-    <div>
-      <div style={{ padding: '20px 24px 14px', borderBottom: '1px solid var(--border-soft)', background: `linear-gradient(90deg, rgba(74,124,143,0.18), transparent)` }}>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Panela {panela.numero} · reposição</div>
-        <div className="serif" style={{ fontSize: 32, marginTop: 4 }}>Repor líquido</div>
-      </div>
-      <div style={{ padding: 24 }}>
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Com o que repor</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 8 }}>
-            <ReporOption active={tipo === 'agua'} onClick={() => setTipo('agua')} label="Água" color="var(--agua)" sugerido />
-            <ReporOption active={tipo === 'cozimento'} onClick={() => setTipo('cozimento')} label="3º Cozimento" sub="61 L no tonel" color="var(--cozimento)" />
-            <ReporOption active={tipo === 'outro'} onClick={() => setTipo('outro')} label="Outro..." color="var(--border)" />
-          </div>
-        </div>
-        <div>
-          <label style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Volume</label>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
-            <span className="serif" style={{ fontSize: 72, color: 'var(--text)', lineHeight: 1 }}>{volume}</span>
-            <span className="mono" style={{ fontSize: 16, color: 'var(--text-faint)' }}>L</span>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-            {[45, 50, 55, 60].map(v => (
-              <QuickBtn key={v} active={volume === v} onClick={() => setVolume(v)}>{v} L</QuickBtn>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border-soft)', display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-        <button onClick={onCancel} style={{
-          padding: '12px 22px', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: 14,
-        }}>Cancelar</button>
-        <button onClick={onConfirm} style={{
-          padding: '12px 28px', borderRadius: 10,
-          background: 'var(--agua)', color: '#fff', fontSize: 14, fontWeight: 600,
-        }}>Repor e dar play</button>
-      </div>
-    </div>
-  );
-}
-
-function QuickBtn({ children, active, onClick }) {
   return (
     <button onClick={onClick} style={{
-      padding: '10px 14px', minWidth: 58,
-      borderRadius: 8,
-      border: active ? '1.5px solid var(--ember)' : '1px solid var(--border)',
-      background: active ? 'var(--ember-soft-12)' : 'var(--surface)',
-      color: active ? 'var(--ember)' : 'var(--text-dim)',
-      fontSize: 14, fontWeight: 500,
-    }}>{children}</button>
-  );
-}
-
-function TonelRadio({ label, hint, selected, onClick, sugerido, accent, volume }) {
-  return (
-    <button onClick={onClick} style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '12px 14px', borderRadius: 10,
-      border: selected ? `1.5px solid ${accent}` : '1px solid var(--border)',
-      background: selected ? `${accent}15` : 'var(--surface)',
+      minHeight: 200,
+      background: 'var(--surface)',
+      border: '1px solid var(--linha)',
+      borderRadius: 16,
+      padding: '16px 14px 14px',
+      display: 'flex', flexDirection: 'column',
       textAlign: 'left',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${selected ? accent : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {selected && <span style={{ width: 8, height: 8, borderRadius: '50%', background: accent }} />}
-        </span>
-        <div>
-          <div style={{ fontSize: 14, color: 'var(--text)' }}>{label}</div>
-          {hint && <div className="mono" style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{hint}</div>}
+      boxShadow: '0 1px 2px rgba(40,60,90,0.04), 0 8px 24px rgba(40,60,90,0.03)',
+      transition: 'border-color 0.2s, transform 0.2s',
+    }}
+    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--linha-strong)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--linha)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+      {/* topo */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
+        <span className="mono" style={{
+          fontSize: 9, letterSpacing: '0.28em',
+          textTransform: 'uppercase', color: 'var(--ink-faint)',
+        }}>Boca {boca}</span>
+        <span className="mono" style={{
+          fontSize: 11, color: 'var(--ink-soft)',
+          fontVariantNumeric: 'tabular-nums',
+        }}>{fmtDuration(tempoMs)}</span>
+      </div>
+
+      {/* número gigante */}
+      <div className="serif" style={{
+        fontSize: 64, lineHeight: 0.85, fontWeight: 200,
+        color: 'var(--ink)', letterSpacing: '-0.04em',
+        marginBottom: 10,
+      }}>
+        {String(panela.numero).padStart(2, '0')}
+      </div>
+
+      {/* próxima tiragem */}
+      <div style={{ marginBottom: 14 }}>
+        <div className="mono" style={{
+          fontSize: 9, letterSpacing: '0.28em',
+          textTransform: 'uppercase', color: 'var(--ink-faint)',
+          marginBottom: 2,
+        }}>vai tirar</div>
+        <div style={{
+          fontSize: 16, fontWeight: 500, color: cor,
+          letterSpacing: '-0.01em', lineHeight: 1.15,
+        }}>
+          {tiragemLabel(panela.proxTiragem)}
         </div>
       </div>
-      {sugerido && <span className="mono" style={{ fontSize: 10, color: 'var(--ember)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>sugerido</span>}
+
+      {/* volume — ring + número */}
+      <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <VolRing volPct={volPct} metaPct={metaPct} cor={cor} />
+        <div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+            <span style={{ fontSize: 20, fontWeight: 400, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
+              {panela.volumeAtualL}
+            </span>
+            <span className="mono" style={{ fontSize: 10, color: 'var(--ink-faint)' }}>L</span>
+          </div>
+          <div className="mono" style={{
+            fontSize: 9, color: 'var(--ink-faint)',
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+          }}>meta {panela.metaTiragem}</div>
+        </div>
+      </div>
     </button>
   );
 }
 
-function ReporOption({ active, onClick, label, sub, color, sugerido }) {
+function VolRing({ volPct, metaPct, cor }) {
+  const r = 16;
+  const c = 2 * Math.PI * r;
+  const metaAngle = (metaPct / 100) * 360 - 90;
+  const mx = 20 + r * Math.cos(metaAngle * Math.PI / 180);
+  const my = 20 + r * Math.sin(metaAngle * Math.PI / 180);
   return (
-    <button onClick={onClick} style={{
-      padding: '14px 10px', borderRadius: 10,
-      border: active ? `1.5px solid ${color}` : '1px solid var(--border)',
-      background: active ? `${color}15` : 'var(--surface)',
-      display: 'flex', flexDirection: 'column', gap: 4,
-      position: 'relative',
-    }}>
-      {sugerido && <span style={{ position: 'absolute', top: 6, right: 6, fontSize: 9, color: 'var(--ember)', textTransform: 'uppercase', letterSpacing: '0.1em' }} className="mono">sug.</span>}
-      <span style={{ width: 24, height: 24, borderRadius: 6, background: color, marginBottom: 4 }} />
-      <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{label}</span>
-      {sub && <span className="mono" style={{ fontSize: 10, color: 'var(--text-faint)' }}>{sub}</span>}
-    </button>
+    <svg width="40" height="40" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
+      <circle cx="20" cy="20" r={r} fill="none" stroke="var(--linha)" strokeWidth="2" />
+      <circle cx="20" cy="20" r={r} fill="none" stroke={cor} strokeWidth="2" strokeLinecap="round"
+        strokeDasharray={`${(volPct/100) * c} ${c}`}
+        transform="rotate(-90 20 20)" />
+      <circle cx={mx} cy={my} r="2" fill="var(--ink)" />
+    </svg>
   );
 }
 
-// ---- next section ----
+// =========================================================
+// TONÉIS — grid horizontal, barra fina
+// =========================================================
+function Toneis({ toneis }) {
+  return (
+    <section>
+      <SectionHead title="Tonéis" subtitle="colheita guardada" />
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${toneis.length}, 1fr)`, gap: 14 }}>
+        {toneis.map(t => <Tonel key={t.numero} tonel={t} />)}
+      </div>
+    </section>
+  );
+}
 
-
-
-
-// ==== ACTION BAR (footer) ==============================
-function ActionBar({ onNovaPanela, onToneis, onApurar, onUndo, lastEvent }) {
+function Tonel({ tonel }) {
+  const pct = (tonel.volumeL / tonel.capacidadeL) * 100;
+  const cor = tonelCor(tonel);
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '14px 28px',
-      background: 'var(--bg-2)',
-      borderTop: '1px solid var(--border-soft)',
+      padding: 14, borderRadius: 14,
+      background: 'var(--surface)',
+      border: '1px solid var(--linha)',
+      display: 'flex', flexDirection: 'column', gap: 10,
+      minHeight: 130,
     }}>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <PrimaryBtn onClick={onNovaPanela}>+ Nova panela</PrimaryBtn>
-        <GhostBtn onClick={onApurar}>Apurar</GhostBtn>
-        <GhostBtn>Litragem</GhostBtn>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <span className="mono" style={{
+          fontSize: 9, letterSpacing: '0.25em',
+          textTransform: 'uppercase', color: 'var(--ink-faint)',
+        }}>T{tonel.numero}</span>
+        <span className="serif" style={{
+          fontSize: 20, fontWeight: 300, color: 'var(--ink)',
+          letterSpacing: '-0.02em',
+        }}>{tonel.volumeL}</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        {lastEvent && (
-          <div style={{ fontSize: 12, color: 'var(--text-faint)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="mono">{fmtHora(lastEvent.momento)}</span>
-            <span>·</span>
-            <span style={{ color: 'var(--text-dim)' }}>{lastEvent.texto}</span>
-          </div>
-        )}
-        <button onClick={onUndo} style={{
-          padding: '10px 18px', borderRadius: 8,
-          border: '1px solid var(--border)',
-          color: 'var(--text-dim)', fontSize: 13,
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: 'var(--surface)',
+      <div style={{
+        fontSize: 12, fontWeight: 500, color: 'var(--ink)',
+        letterSpacing: '-0.01em', lineHeight: 1.2,
+      }}>
+        {tonelLabel(tonel)}
+      </div>
+      <div style={{ marginTop: 'auto' }}>
+        <div style={{ height: 3, background: 'var(--linha)', borderRadius: 2 }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: cor, borderRadius: 2 }} />
+        </div>
+        <div className="mono" style={{
+          fontSize: 9, color: 'var(--ink-faint)',
+          marginTop: 4, letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>
-          <span style={{ fontSize: 16 }}>⎌</span>
-          Desfazer última
-        </button>
+          {Math.round(pct)}% · {tonel.capacidadeL} L
+        </div>
       </div>
     </div>
   );
 }
 
-function PrimaryBtn({ children, onClick }) {
+// =========================================================
+// FOOTER — último evento + ações
+// =========================================================
+function Footer({ ultimoEvento, onNova, onUndo }) {
   return (
-    <button onClick={onClick} style={{
-      padding: '12px 20px', borderRadius: 10,
-      background: 'var(--fire)', color: '#fff',
-      fontSize: 14, fontWeight: 600,
-      boxShadow: '0 2px 10px var(--fire-soft-30)',
+    <footer style={{
+      marginTop: 'auto', paddingTop: 24,
+      borderTop: '1px solid var(--linha)',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    }}>
+      <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
+        <span className="mono" style={{
+          color: 'var(--ink-faint)', marginRight: 12,
+          letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: 10,
+        }}>último</span>
+        {ultimoEvento.texto}
+        <span className="mono" style={{
+          color: 'var(--ink-faint)', marginLeft: 12,
+        }}>{fmtHora(ultimoEvento.momento)}</span>
+      </div>
+      <div style={{ display: 'flex', gap: 12 }}>
+        <button onClick={onUndo} style={{
+          padding: '10px 20px', background: 'transparent',
+          color: 'var(--ink-soft)',
+          border: '1px solid var(--linha)', borderRadius: 999,
+          fontSize: 13, fontWeight: 400,
+        }}>Desfazer</button>
+        <button onClick={onNova} style={{
+          padding: '10px 24px',
+          background: 'var(--azul-profundo)', color: '#fff',
+          borderRadius: 999,
+          fontSize: 13, fontWeight: 500, letterSpacing: '0.02em',
+        }}>Nova panela</button>
+      </div>
+    </footer>
+  );
+}
+
+// =========================================================
+// MODAL DE DETALHE DA PANELA
+// =========================================================
+function PanelaModal({ panela, onClose }) {
+  if (!panela) return null;
+  const now = useLiveNow();
+  const tempoMs = now - panela.entradaFogoEm;
+  const cor = tiragemCor(panela.proxTiragem);
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(28,32,36,0.22)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 50, padding: 24,
+    }}>
+      <div onClick={(e) => e.stopPropagation()} style={{
+        width: '100%', maxWidth: 640,
+        background: 'var(--surface)',
+        border: '1px solid var(--linha)',
+        borderRadius: 18,
+        boxShadow: '0 24px 60px rgba(40,60,90,0.18)',
+        overflow: 'hidden',
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '28px 32px 24px',
+          borderBottom: '1px solid var(--linha)',
+          display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+        }}>
+          <div>
+            <div className="mono" style={{
+              fontSize: 10, letterSpacing: '0.3em',
+              textTransform: 'uppercase', color: 'var(--ink-faint)',
+            }}>Boca {panela.boca}</div>
+            <div className="serif" style={{
+              fontSize: 56, lineHeight: 0.9, fontWeight: 200,
+              letterSpacing: '-0.04em', marginTop: 6,
+            }}>
+              Panela {String(panela.numero).padStart(2,'0')}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 13, color: 'var(--ink-soft)' }}>
+              com <span style={{ color: 'var(--ink)' }}>{conteudoLabel(panela.conteudo).toLowerCase()}</span>
+              <span style={{ color: 'var(--ink-faint)', margin: '0 8px' }}>·</span>
+              há <span className="mono" style={{ color: 'var(--ink)' }}>{fmtDuration(tempoMs)}</span> no fogo
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            width: 32, height: 32, borderRadius: '50%',
+            border: '1px solid var(--linha)',
+            color: 'var(--ink-soft)', fontSize: 16,
+          }}>×</button>
+        </div>
+
+        {/* Próxima tiragem + volume */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr',
+          borderBottom: '1px solid var(--linha)',
+        }}>
+          <div style={{ padding: '24px 32px' }}>
+            <div className="mono" style={{
+              fontSize: 10, letterSpacing: '0.28em',
+              textTransform: 'uppercase', color: 'var(--ink-faint)',
+              marginBottom: 6,
+            }}>vai tirar</div>
+            <div className="serif" style={{
+              fontSize: 26, fontWeight: 300, color: cor,
+              letterSpacing: '-0.02em',
+            }}>
+              {tiragemLabel(panela.proxTiragem)}
+            </div>
+          </div>
+          <div style={{ padding: '24px 32px', borderLeft: '1px solid var(--linha)' }}>
+            <div className="mono" style={{
+              fontSize: 10, letterSpacing: '0.28em',
+              textTransform: 'uppercase', color: 'var(--ink-faint)',
+              marginBottom: 6,
+            }}>volume · meta</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span className="serif" style={{ fontSize: 26, fontWeight: 300, color: 'var(--ink)' }}>
+                {panela.volumeAtualL}
+              </span>
+              <span className="mono" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>L</span>
+              <span style={{ color: 'var(--ink-faint)', margin: '0 6px' }}>/</span>
+              <span style={{ fontSize: 16, color: 'var(--ink-soft)' }}>{panela.metaTiragem} L</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tiragens anteriores */}
+        <div style={{ padding: '24px 32px' }}>
+          <div className="mono" style={{
+            fontSize: 10, letterSpacing: '0.28em',
+            textTransform: 'uppercase', color: 'var(--ink-faint)',
+            marginBottom: 14,
+          }}>tiragens anteriores · {panela.tiragens.length}</div>
+          {panela.tiragens.length === 0 ? (
+            <div style={{
+              fontSize: 13, color: 'var(--ink-faint)',
+              fontStyle: 'italic', padding: '12px 0',
+            }}>
+              Primeira tiragem ainda não foi feita.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {panela.tiragens.map((t, i) => (
+                <div key={i} style={{
+                  display: 'grid',
+                  gridTemplateColumns: '32px 1fr auto auto',
+                  gap: 16, alignItems: 'baseline',
+                  padding: '12px 0',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--linha)',
+                }}>
+                  <span className="mono" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>{t.ordem}ª</span>
+                  <span style={{ fontSize: 14, color: 'var(--ink)' }}>{tiragemLabel(t)}</span>
+                  <span>
+                    <span className="serif" style={{ fontSize: 18 }}>{t.volume}</span>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--ink-faint)', marginLeft: 2 }}>L</span>
+                  </span>
+                  <span className="mono" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>{fmtHora(t.momento)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Ações */}
+        <div style={{
+          padding: '20px 32px',
+          borderTop: '1px solid var(--linha)',
+          display: 'flex', gap: 12, alignItems: 'center',
+        }}>
+          <ModalPrimaryBtn accent={cor}>Tirar — {tiragemLabel(panela.proxTiragem).toLowerCase()}</ModalPrimaryBtn>
+          <ModalGhostBtn>Repor</ModalGhostBtn>
+          <ModalGhostBtn>Pausar</ModalGhostBtn>
+          <div style={{ flex: 1 }} />
+          <button style={{
+            fontSize: 12, color: 'var(--ink-faint)',
+            textDecoration: 'underline', textUnderlineOffset: 3,
+          }}>histórico completo</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModalPrimaryBtn({ children, accent }) {
+  return (
+    <button style={{
+      padding: '11px 22px', borderRadius: 999,
+      background: accent, color: '#fff',
+      fontSize: 13, fontWeight: 500, letterSpacing: '0.01em',
     }}>{children}</button>
   );
 }
-function GhostBtn({ children, onClick }) {
+function ModalGhostBtn({ children }) {
   return (
-    <button onClick={onClick} style={{
-      padding: '12px 18px', borderRadius: 10,
-      background: 'var(--surface)', color: 'var(--text-dim)',
-      fontSize: 14, fontWeight: 500,
-      border: '1px solid var(--border)',
+    <button style={{
+      padding: '11px 18px', borderRadius: 999,
+      background: 'transparent', color: 'var(--ink-soft)',
+      border: '1px solid var(--linha)',
+      fontSize: 13, fontWeight: 400,
     }}>{children}</button>
   );
 }
 
-// ==== NOVA PANELA MODAL (simple) =======================
-function NovaPanelaModal({ onClose, bocasVazias, toneis }) {
-  const [qtd, setQtd] = useState(2);
+// =========================================================
+// NOVA PANELA — modal mínimo
+// =========================================================
+function NovaPanelaModal({ onClose, bocasVazias }) {
+  const [qtd, setQtd] = useState(bocasVazias.length >= 2 ? 2 : 1);
   const [conteudo, setConteudo] = useState('agua');
   const [volume, setVolume] = useState(60);
   return (
-    <div style={{
+    <div onClick={onClose} style={{
       position: 'fixed', inset: 0,
-      background: 'rgba(12,9,6,0.75)', backdropFilter: 'blur(6px)',
+      background: 'rgba(28,32,36,0.22)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 50, padding: 20,
-    }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        width: '100%', maxWidth: 620, background: 'var(--bg-2)', borderRadius: 16,
-        border: '1px solid var(--border)', overflow: 'hidden',
-      }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-soft)' }}>
-          <div className="mono" style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>criar</div>
-          <div className="serif" style={{ fontSize: 32, marginTop: 4 }}>Nova panela na fornalha</div>
-        </div>
-        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div>
-            <label style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Quantas</label>
-            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-              <QuickBtn active={qtd === 1} onClick={() => setQtd(1)}>1 panela</QuickBtn>
-              <QuickBtn active={qtd === 2} onClick={() => setQtd(2)}>Dupla (2)</QuickBtn>
-            </div>
-          </div>
-          <div>
-            <label style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Entra com</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 8 }}>
-              <ReporOption active={conteudo === 'agua'} onClick={() => setConteudo('agua')} label="Água" color="var(--agua)" />
-              <ReporOption active={conteudo === 'coz1'} onClick={() => setConteudo('coz1')} label="1º Cozimento" sub="62 L no tonel" color="var(--cozimento)" />
-              <ReporOption active={conteudo === 'coz2'} onClick={() => setConteudo('coz2')} label="2º Cozimento" sub="60 L no tonel" color="var(--cozimento-2)" />
-            </div>
-          </div>
-          <div>
-            <label style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Volume inicial cada</label>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
-              <span className="serif" style={{ fontSize: 56 }}>{volume}</span>
-              <span className="mono" style={{ color: 'var(--text-faint)' }}>L</span>
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-              {[50, 55, 60].map(v => <QuickBtn key={v} active={volume === v} onClick={() => setVolume(v)}>{v} L</QuickBtn>)}
-            </div>
-          </div>
-        </div>
-        <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border-soft)', display: 'flex', justifyContent: 'space-between' }}>
-          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, border: '1px solid var(--border)', color: 'var(--text-dim)' }}>Cancelar</button>
-          <button onClick={onClose} style={{ padding: '12px 28px', borderRadius: 10, background: 'var(--fire)', color: '#fff', fontWeight: 600 }}>Montar e entrar no fogo</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---- next section ----
-
-
-
-
-// ==== TWEAKS PANEL ======================================
-function TweaksPanel({ tweaks, setTweaks, onClose }) {
-  const update = (k, v) => {
-    const next = { ...tweaks, [k]: v };
-    setTweaks(next);
-    try {
-      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*');
-    } catch {}
-  };
-  return (
-    <div style={{
-      position: 'fixed', right: 20, bottom: 20,
-      width: 300, zIndex: 100,
-      background: 'var(--bg-2)', border: '1px solid var(--border)',
-      borderRadius: 14, overflow: 'hidden',
-      boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+      zIndex: 50, padding: 24,
     }}>
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-soft)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="serif" style={{ fontSize: 18 }}>Tweaks</div>
-        <button onClick={onClose} style={{ color: 'var(--text-faint)', fontSize: 18 }}>×</button>
-      </div>
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, fontSize: 13, maxHeight: '80vh', overflowY: 'auto' }}>
-        <Tweak label="Layout das bocas">
-          <SegmentedCtrl value={tweaks.layout} onChange={(v) => update('layout', v)} options={[
-            { v: 'fornalha-visual', l: 'Visual' },
-            { v: 'grade-simples', l: 'Grade' },
-          ]} />
-        </Tweak>
-        <Tweak label="Modo compacto">
-          <Toggle checked={tweaks.compactMode} onChange={(v) => update('compactMode', v)} />
-        </Tweak>
-        <Tweak label="Mostrar timeline">
-          <Toggle checked={tweaks.showTimeline} onChange={(v) => update('showTimeline', v)} />
-        </Tweak>
-        <Tweak label="Paleta de cores">
-          <PaletaPicker value={tweaks.palette} onChange={(v) => update('palette', v)} />
-        </Tweak>
+      <div onClick={(e) => e.stopPropagation()} style={{
+        width: '100%', maxWidth: 560,
+        background: 'var(--surface)', borderRadius: 18,
+        border: '1px solid var(--linha)',
+        boxShadow: '0 24px 60px rgba(40,60,90,0.18)',
+        overflow: 'hidden',
+      }}>
+        <div style={{ padding: '28px 32px 20px', borderBottom: '1px solid var(--linha)' }}>
+          <div className="mono" style={{ fontSize: 10, color: 'var(--ink-faint)', letterSpacing: '0.3em', textTransform: 'uppercase' }}>criar</div>
+          <div className="serif" style={{ fontSize: 32, fontWeight: 200, letterSpacing: '-0.03em', marginTop: 6 }}>
+            Nova panela na fornalha
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ink-faint)', marginTop: 8 }}>
+            {bocasVazias.length} boca{bocasVazias.length !== 1 ? 's' : ''} livre{bocasVazias.length !== 1 ? 's' : ''}: {bocasVazias.join(', ')}
+          </div>
+        </div>
+        <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <FieldGroup label="quantas">
+            <PillRow>
+              <Pill active={qtd===1} onClick={() => setQtd(1)}>1 panela</Pill>
+              {bocasVazias.length >= 2 && <Pill active={qtd===2} onClick={() => setQtd(2)}>Dupla (2)</Pill>}
+            </PillRow>
+          </FieldGroup>
+          <FieldGroup label="entra com">
+            <PillRow>
+              <Pill active={conteudo==='agua'} onClick={() => setConteudo('agua')}>Água</Pill>
+              <Pill active={conteudo==='coz1'} onClick={() => setConteudo('coz1')}>1º coz. · 52 L</Pill>
+              <Pill active={conteudo==='coz2'} onClick={() => setConteudo('coz2')}>2º coz. · 40 L</Pill>
+            </PillRow>
+          </FieldGroup>
+          <FieldGroup label="volume cada">
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
+              <span className="serif" style={{ fontSize: 48, fontWeight: 200, letterSpacing: '-0.03em' }}>{volume}</span>
+              <span className="mono" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>L</span>
+            </div>
+            <PillRow>
+              {[50, 55, 60, 65].map(v => <Pill key={v} active={volume===v} onClick={() => setVolume(v)}>{v} L</Pill>)}
+            </PillRow>
+          </FieldGroup>
+        </div>
+        <div style={{
+          padding: '20px 32px', borderTop: '1px solid var(--linha)',
+          display: 'flex', justifyContent: 'space-between', gap: 12,
+        }}>
+          <ModalGhostBtn><span onClick={onClose} style={{ display: 'block', margin: '-11px -18px', padding: '11px 18px' }}>Cancelar</span></ModalGhostBtn>
+          <button onClick={onClose} style={{
+            padding: '11px 26px', borderRadius: 999,
+            background: 'var(--azul-profundo)', color: '#fff',
+            fontSize: 13, fontWeight: 500, letterSpacing: '0.01em',
+          }}>Entrar no fogo</button>
+        </div>
       </div>
     </div>
   );
 }
 
-function PaletaPicker({ value, onChange }) {
-  const keys = Object.keys(PALETAS);
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {keys.map(k => {
-        const p = PALETAS[k];
-        const active = value === k;
-        return (
-          <button key={k} onClick={() => onChange(k)} style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            padding: '10px 12px',
-            background: active ? 'var(--surface-2, var(--bg-3))' : 'var(--surface)',
-            border: active ? '1.5px solid ' + p.fire : '1px solid var(--border-soft)',
-            borderRadius: 10,
-            textAlign: 'left',
-            transition: 'all 0.15s',
-          }}>
-            {/* Color dots */}
-            <div style={{ display: 'flex', gap: 3 }}>
-              <span style={{ width: 14, height: 22, borderRadius: 3, background: p.fire, boxShadow: active ? `0 0 8px ${p.fire}` : 'none' }} />
-              <span style={{ width: 14, height: 22, borderRadius: 3, background: p.fireGlow }} />
-              <span style={{ width: 14, height: 22, borderRadius: 3, background: p.ember }} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="serif" style={{ fontSize: 15, lineHeight: 1.1, color: active ? p.fireGlow : 'var(--text)' }}>
-                {p.nome}
-              </div>
-              <div style={{ fontSize: 10.5, color: 'var(--text-faint)', marginTop: 2, letterSpacing: '0.02em' }}>
-                {p.subtitulo}
-              </div>
-            </div>
-            {active && <span className="mono" style={{ fontSize: 9, color: p.fireGlow, letterSpacing: '0.15em' }}>ATIVA</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-function Tweak({ label, children }) {
+function FieldGroup({ label, children }) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
+      <div className="mono" style={{
+        fontSize: 10, color: 'var(--ink-faint)',
+        letterSpacing: '0.28em', textTransform: 'uppercase',
+        marginBottom: 10,
+      }}>{label}</div>
       {children}
     </div>
   );
 }
-function SegmentedCtrl({ value, onChange, options }) {
+function PillRow({ children }) {
+  return <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{children}</div>;
+}
+function Pill({ active, onClick, children }) {
   return (
-    <div style={{ display: 'flex', background: 'var(--surface)', padding: 3, borderRadius: 8, border: '1px solid var(--border-soft)' }}>
-      {options.map(o => (
-        <button key={o.v} onClick={() => onChange(o.v)} style={{
-          flex: 1, padding: '6px 8px', borderRadius: 6,
-          background: value === o.v ? 'var(--fire)' : 'transparent',
-          color: value === o.v ? '#fff' : 'var(--text-dim)',
-          fontSize: 12, fontWeight: 500,
-        }}>{o.l}</button>
-      ))}
+    <button onClick={onClick} style={{
+      padding: '9px 16px', borderRadius: 999,
+      border: active ? '1px solid var(--azul)' : '1px solid var(--linha)',
+      background: active ? 'rgba(107,140,184,0.08)' : 'transparent',
+      color: active ? 'var(--azul-profundo)' : 'var(--ink-soft)',
+      fontSize: 13, fontWeight: 400,
+      transition: 'all 0.15s',
+    }}>{children}</button>
+  );
+}
+
+// =========================================================
+// TWEAKS
+// =========================================================
+function TweaksPanel({ tweaks, setTweaks, onClose }) {
+  const update = (k, v) => {
+    const next = { ...tweaks, [k]: v };
+    setTweaks(next);
+    try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*'); } catch {}
+  };
+  return (
+    <div style={{
+      position: 'fixed', right: 24, bottom: 24,
+      width: 300, zIndex: 100,
+      background: 'var(--surface)',
+      border: '1px solid var(--linha)',
+      borderRadius: 16,
+      boxShadow: '0 24px 60px rgba(40,60,90,0.18)',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        padding: '14px 18px', borderBottom: '1px solid var(--linha)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <div className="serif" style={{ fontSize: 18, fontWeight: 300 }}>Tweaks</div>
+        <button onClick={onClose} style={{ color: 'var(--ink-faint)', fontSize: 18 }}>×</button>
+      </div>
+      <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <TweakField label="Paleta">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {Object.entries(PALETAS).map(([k, p]) => {
+              const active = tweaks.palette === k;
+              return (
+                <button key={k} onClick={() => update('palette', k)} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 12px', borderRadius: 10,
+                  border: active ? '1px solid ' + p.azul : '1px solid var(--linha)',
+                  background: active ? 'rgba(107,140,184,0.05)' : 'transparent',
+                  textAlign: 'left',
+                }}>
+                  <div style={{ display: 'flex', gap: 3 }}>
+                    <span style={{ width: 12, height: 20, borderRadius: 2, background: p.azulProfundo }} />
+                    <span style={{ width: 12, height: 20, borderRadius: 2, background: p.azul }} />
+                    <span style={{ width: 12, height: 20, borderRadius: 2, background: p.azulClaro }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="serif" style={{ fontSize: 14, fontWeight: 400, color: 'var(--ink)' }}>{p.nome}</div>
+                    <div style={{ fontSize: 10.5, color: 'var(--ink-faint)', marginTop: 1 }}>{p.sub}</div>
+                  </div>
+                  {active && <span className="mono" style={{ fontSize: 9, color: p.azulProfundo, letterSpacing: '0.15em' }}>ATIVA</span>}
+                </button>
+              );
+            })}
+          </div>
+        </TweakField>
+        <TweakField label="Linha de créditos">
+          <Toggle checked={tweaks.showCreditos} onChange={(v) => update('showCreditos', v)} />
+        </TweakField>
+        <TweakField label="Rodapé">
+          <Toggle checked={tweaks.showFooter} onChange={(v) => update('showFooter', v)} />
+        </TweakField>
+      </div>
+    </div>
+  );
+}
+
+function TweakField({ label, children }) {
+  return (
+    <div>
+      <div className="mono" style={{
+        fontSize: 10, color: 'var(--ink-faint)',
+        letterSpacing: '0.25em', textTransform: 'uppercase',
+        marginBottom: 8,
+      }}>{label}</div>
+      {children}
     </div>
   );
 }
 function Toggle({ checked, onChange }) {
   return (
     <button onClick={() => onChange(!checked)} style={{
-      width: 44, height: 24, borderRadius: 12,
-      background: checked ? 'var(--fire)' : 'var(--border)',
+      width: 40, height: 22, borderRadius: 11,
+      background: checked ? 'var(--azul-profundo)' : 'var(--linha-strong)',
       position: 'relative', transition: 'all 0.2s',
     }}>
       <span style={{
-        position: 'absolute', top: 2, left: checked ? 22 : 2,
-        width: 20, height: 20, borderRadius: '50%', background: '#fff',
-        transition: 'left 0.2s',
+        position: 'absolute', top: 2, left: checked ? 20 : 2,
+        width: 18, height: 18, borderRadius: '50%',
+        background: '#fff', transition: 'left 0.2s',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
       }} />
     </button>
   );
 }
 
-// ---- next section ----
-
-
-
-
-// ==== MAIN APP =========================================
+// =========================================================
+// APP
+// =========================================================
 function App() {
   const [state, setState] = useState(initialState);
-  const [selectedPanela, setSelectedPanela] = useState(null);
+  const [selected, setSelected] = useState(null);
   const [novaOpen, setNovaOpen] = useState(false);
   const [tweaks, setTweaks] = useState(TWEAKS);
   const [tweaksOpen, setTweaksOpen] = useState(false);
@@ -1415,71 +916,44 @@ function App() {
     return () => window.removeEventListener('message', handler);
   }, []);
 
-  // Apply palette tweak
+  // aplicar paleta
   useEffect(() => {
-    const pal = PALETAS[tweaks.palette] || PALETAS["fogo"];
+    const p = PALETAS[tweaks.palette] || PALETAS["luz-branca"];
     const s = document.documentElement.style;
-    s.setProperty('--fire',      pal.fire);
-    s.setProperty('--fire-glow', pal.fireGlow);
-    s.setProperty('--ember',     pal.ember);
-    // Softs — mesma matiz, com alpha (via color-mix para funcionar com oklch)
-    const mix = (c, a) => `color-mix(in oklab, ${c} ${a}%, transparent)`;
-    s.setProperty('--fire-soft-04',       mix(pal.fire, 4));
-    s.setProperty('--fire-soft-08',       mix(pal.fire, 8));
-    s.setProperty('--fire-soft-25',       mix(pal.fire, 25));
-    s.setProperty('--fire-soft-30',       mix(pal.fire, 30));
-    s.setProperty('--fire-glow-soft-35',  mix(pal.fireGlow, 35));
-    s.setProperty('--ember-soft-08',      mix(pal.ember, 8));
-    s.setProperty('--ember-soft-12',      mix(pal.ember, 12));
-    s.setProperty('--ember-soft-15',      mix(pal.ember, 15));
-    s.setProperty('--ember-soft-25',      mix(pal.ember, 25));
-    // Fundo radial (duas "auroras")
-    s.setProperty('--bg-aura-1', pal.bgTop);
-    s.setProperty('--bg-aura-2', pal.bgBottom);
+    s.setProperty('--azul', p.azul);
+    s.setProperty('--azul-claro', p.azulClaro);
+    s.setProperty('--azul-profundo', p.azulProfundo);
+    s.setProperty('--aura-top', p.auraTop);
+    s.setProperty('--aura-bottom', p.auraBottom);
   }, [tweaks.palette]);
 
   const bocasOcupadas = state.panelas.map(p => p.boca);
-  const bocasVazias = Array.from({length: state.fornalha.bocas}, (_, i) => i+1).filter(b => !bocasOcupadas.includes(b));
+  const bocasVazias = Array.from({length: state.fornalha.bocas}, (_, i) => i+1)
+    .filter(b => !bocasOcupadas.includes(b));
 
   return (
     <div className="app-shell">
-      <TopBar feitio={state.feitio} />
+      <Header feitio={state.feitio} />
+      {tweaks.showCreditos && (
+        <Creditos feitio={state.feitio} panelas={state.panelas}
+          bocas={state.fornalha.bocas} toneis={state.toneis} />
+      )}
+      <Fornalha
+        panelas={state.panelas}
+        bocas={state.fornalha.bocas}
+        onPanelaClick={setSelected}
+        onEmptyClick={() => setNovaOpen(true)} />
+      <Toneis toneis={state.toneis} />
 
-      <main style={{
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 380px',
-        minHeight: 0,
-      }}>
-        <Fornalha
-          panelas={state.panelas}
-          bocas={state.fornalha.bocas}
-          onBocaClick={(p) => p && setSelectedPanela(p)}
-          onEmptyClick={() => setNovaOpen(true)}
-          selectedIds={selectedPanela ? [selectedPanela.id] : []}
-          tweaks={tweaks}
-        />
-        <ToneisPanel toneis={state.toneis} />
-      </main>
+      {tweaks.showFooter && (
+        <Footer
+          ultimoEvento={state.eventos[0]}
+          onNova={() => setNovaOpen(true)}
+          onUndo={() => {}} />
+      )}
 
-      <ActionBar
-        onNovaPanela={() => setNovaOpen(true)}
-        onUndo={() => {}}
-        lastEvent={tweaks.showTimeline ? state.eventos[0] : null}
-      />
-
-      {selectedPanela && <PanelaDetailModal
-        panela={selectedPanela}
-        onClose={() => setSelectedPanela(null)}
-        onTirar={() => {}}
-        onRepor={() => {}}
-      />}
-      {novaOpen && <NovaPanelaModal
-        onClose={() => setNovaOpen(false)}
-        bocasVazias={bocasVazias}
-        toneis={state.toneis}
-      />}
-
+      {selected && <PanelaModal panela={selected} onClose={() => setSelected(null)} />}
+      {novaOpen && <NovaPanelaModal onClose={() => setNovaOpen(false)} bocasVazias={bocasVazias} />}
       {tweaksOpen && <TweaksPanel tweaks={tweaks} setTweaks={setTweaks} onClose={() => setTweaksOpen(false)} />}
     </div>
   );
@@ -1487,30 +961,6 @@ function App() {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
-
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<style>
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.9); }
-}
-@keyframes flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-</style>
 </body>
 </html>

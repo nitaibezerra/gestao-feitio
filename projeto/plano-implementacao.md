@@ -1,8 +1,37 @@
 # Plano de Implementação — MVP do Aplicativo de Gestão de Feitio
 
-> Plano de execução **orientado a TDD** para implementar o [Gestão de Feitio Dashboard](../design/project/Gestao%20de%20Feitio.html) — protótipo de alta fidelidade recebido via Claude Design.
+> Plano de execução **orientado a TDD** para implementar o [Gestão de Feitio — Luz Branca](../design/project/Gestao%20de%20Feitio.html) — identidade visual oficial escolhida pelo dono do projeto após exploração de 6 identidades (`design/project/Identidades Visuais.html`).
 >
 > Documentos base: [Tutorial](./tutorial-producao-daime.md) · [Requisitos](./requisitos.md) · [Projeto](./projeto.md)
+
+---
+
+## Identidade visual (Luz Branca) — resumo canônico
+
+**Princípio:** minimalismo de papel. Tema claro com muito respiro, tipografia light, linhas finas, auroras sutis ao fundo. Fundo `#fafaf8` (papel quente), tinta `#1c2024`, linhas `#e8e8e3`.
+
+**Tipografia:**
+- **Fraunces** (weights 200/300/400/500 + italic 300) — números, títulos, grandes presenças (substitui Instrument Serif)
+- **Inter** (weights 200/300/400/500) — UI; corpo em 300
+- **IBM Plex Mono** (weights 300/400) — labels técnicas, timers, eyebrows (substitui JetBrains Mono)
+
+**Paletas disponíveis (todas claras, dentro da família Luz Branca):**
+
+| Key | Nome | Descrição | Azul |
+|---|---|---|---|
+| `luz-branca` | Luz Branca | azul sobre papel | `#6b8cb8` |
+| `luz-mata` | Luz & Mata | verde folha + papel | `#7ba88c` |
+| `luz-firmamento` | Firmamento | azul profundo, firmeza | `#4a7ab0` |
+| `luz-rainha` | Rainha | verde luz, branco puro | `#8bb062` ← **padrão** |
+
+**Layout:** single-column vertical com `padding: 40px 56px 32px` e `gap: 40px`. Sem sidebar. Header 3-col (orbe ✦ | título + eyebrow | relógio + duração). Créditos em linha horizontal. Fornalha em grid `repeat(bocas, 1fr)`. Tonéis em grid horizontal `repeat(n, 1fr)`. Footer com borda superior.
+
+**Linguagem visual:**
+- Cards: `background: var(--surface); border: 1px solid var(--linha); border-radius: 16px;`
+- Botões: pill (`border-radius: 999px`). Primário sólido azul-profundo, ghost com borda linha
+- Panela: número `Fraunces 64px weight 200` como elemento central; "vai tirar" abaixo; ring SVG + volume no rodapé
+- Tonel: eyebrow `T{n}` + número Fraunces + label + barra fina 3px com % e capacidade
+- Modais: overlay `rgba(28,32,36,0.22)` com `backdrop-filter: blur(8px)`, card `maxWidth: 640px`
 
 ---
 
@@ -170,20 +199,18 @@ Recriar os componentes do design em Svelte, **mantendo fidelidade visual**:
 
 | Componente React (design) | Componente Svelte (alvo) | Notas |
 |---|---|---|
-| `TopBar` | `ui/componentes/TopBar.svelte` | Relógio vivo via `onMount` + `setInterval` |
-| `StatusPill` | embutido em TopBar | — |
-| `Fornalha` | `ui/componentes/Fornalha.svelte` | Layout 3+2 com `grid-column` ou "simples" |
-| `BocaCard` / `PanelaCard` | `ui/componentes/PanelaCard.svelte` | Timer reativo, volume bar com marcador |
-| `VolumeBar` | `ui/componentes/VolumeBar.svelte` | — |
-| `FornalhaLegenda` | embutido | — |
-| `ToneisPanel` + `TonelRow` + `SummaryStat` | `ui/componentes/ToneisPanel.svelte` | — |
-| `PanelaDetailModal` | `ui/componentes/PanelaDetailModal.svelte` | Estado `view` local (detail/tirar/repor) |
-| `TirarForm` | `ui/componentes/TirarForm.svelte` | — |
-| `ReporForm` | `ui/componentes/ReporForm.svelte` | — |
-| `NovaPanelaModal` | `ui/componentes/NovaPanelaModal.svelte` | — |
-| `ActionBar` | `ui/componentes/ActionBar.svelte` | — |
-| `TweaksPanel` (design only) | `routes/config/+page.svelte` | Só seletor de paleta (layout/compacto/timeline descartados) |
-| `ActionBtn`, `QuickBtn`, `TonelRadio`, `ReporOption` | `ui/componentes/primitivos/*.svelte` | Componentes pequenos reutilizados |
+| `Header` | `ui/componentes/Header.svelte` | Grid 3-col; orbe ✦, título+eyebrow, relógio vivo Fraunces 42px weight 200 |
+| `Creditos` | `ui/componentes/Creditos.svelte` | Linha horizontal com "Feitor / Foguista / Bocas ao fogo / No tonel" + borda inferior |
+| `SectionHead` | `ui/componentes/SectionHead.svelte` | Título Fraunces 18 + eyebrow mono — usado em Fornalha e Tonéis |
+| `Fornalha` + `Panela` | `ui/componentes/Fornalha.svelte`, `Panela.svelte` | Grid `repeat(bocas, 1fr)` simples. Panela com número gigante 64px + ring SVG |
+| `VolRing` | `ui/componentes/VolRing.svelte` | SVG circle com stroke-dasharray e dot da meta |
+| `Toneis` + `Tonel` | `ui/componentes/Toneis.svelte`, `Tonel.svelte` | Grid horizontal; barra fina 3px |
+| `Footer` | `ui/componentes/Footer.svelte` | Último evento + botões pill (Desfazer ghost / Nova panela sólido) |
+| `PanelaModal` | `ui/componentes/PanelaModal.svelte` | Header com Panela NN serif 56, grid "vai tirar / volume·meta", histórico, ações pill |
+| `NovaPanelaModal` | `ui/componentes/NovaPanelaModal.svelte` | FieldGroup + PillRow + Pill para quantas/entra com/volume |
+| `TweaksPanel` (design only) | `routes/config/+page.svelte` | Só seletor de paleta |
+| `Field`, `FieldGroup`, `PillRow`, `Pill` | `ui/componentes/primitivos/*.svelte` | Primitivos reusados |
+| `ModalPrimaryBtn`, `ModalGhostBtn` | `ui/componentes/primitivos/BtnPill.svelte` | Botão pill com variante primary/ghost |
 
 **Roteamento SvelteKit (v1, feitio único):**
 - `/` — redireciona automaticamente:
@@ -243,20 +270,24 @@ gestao-feitio/
 │   │   ├── app/                           ← Fase 2
 │   │   │   ├── stores.ts
 │   │   │   └── comandos.ts + comandos.test.ts
-│   │   ├── ui/                            ← Fase 3
+│   │   ├── ui/                            ← Fase 3 (Luz Branca)
 │   │   │   ├── paletas.ts
+│   │   │   ├── labels.ts                  ← conteudoLabel, tiragemLabel, tonelLabel, cores
+│   │   │   ├── relogio.svelte.ts          ← rune reativa que retorna "agora"
+│   │   │   ├── mock-feitio.ts             ← estado simulado TEMPORÁRIO (Fase 4 remove)
 │   │   │   ├── componentes/
-│   │   │   │   ├── TopBar.svelte
+│   │   │   │   ├── Header.svelte
+│   │   │   │   ├── Creditos.svelte
+│   │   │   │   ├── SectionHead.svelte
 │   │   │   │   ├── Fornalha.svelte
-│   │   │   │   ├── PanelaCard.svelte
-│   │   │   │   ├── VolumeBar.svelte
-│   │   │   │   ├── ToneisPanel.svelte
-│   │   │   │   ├── PanelaDetailModal.svelte
-│   │   │   │   ├── TirarForm.svelte
-│   │   │   │   ├── ReporForm.svelte
+│   │   │   │   ├── Panela.svelte
+│   │   │   │   ├── VolRing.svelte
+│   │   │   │   ├── Toneis.svelte
+│   │   │   │   ├── Tonel.svelte
+│   │   │   │   ├── Footer.svelte
+│   │   │   │   ├── PanelaModal.svelte
 │   │   │   │   ├── NovaPanelaModal.svelte
-│   │   │   │   ├── ActionBar.svelte
-│   │   │   │   └── primitivos/{ActionBtn,QuickBtn,TonelRadio,ReporOption}.svelte
+│   │   │   │   └── primitivos/{Field,FieldGroup,PillRow,Pill,BtnPill}.svelte
 │   │   └── routes/
 │   │       ├── +layout.svelte
 │   │       ├── +page.svelte               ← redireciona p/ /feitio/atual ou /feitio/novo

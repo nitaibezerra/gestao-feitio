@@ -1,84 +1,87 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PALETAS, aplicarPaleta, type PaletaKey } from './paletas';
 
+/**
+ * Paletas da família "Luz Branca" — todas são variações claras do
+ * mesmo sistema: azul dominante + auroras sutis de fundo.
+ * (design/project/Gestao de Feitio.html linhas 82-87)
+ */
+
 describe('PALETAS', () => {
-  it('contém as 5 paletas do design', () => {
-    const keys = Object.keys(PALETAS);
-    expect(keys).toEqual([
-      'fogo',
-      'daime-mata',
-      'daime-firmamento',
-      'daime-cruzeiro',
-      'daime-rainha'
+  it('contém as 4 paletas da família Luz Branca', () => {
+    expect(Object.keys(PALETAS)).toEqual([
+      'luz-branca',
+      'luz-mata',
+      'luz-firmamento',
+      'luz-rainha'
     ]);
   });
 
-  it('cada paleta tem nome, subtitulo, fire, fireGlow, ember, bgTop, bgBottom', () => {
+  it('cada paleta tem nome, sub, azul, azulClaro, azulProfundo, auraTop, auraBottom', () => {
     for (const key of Object.keys(PALETAS) as PaletaKey[]) {
       const p = PALETAS[key];
       expect(p.nome).toBeTypeOf('string');
-      expect(p.subtitulo).toBeTypeOf('string');
-      expect(p.fire).toMatch(/^oklch/);
-      expect(p.fireGlow).toMatch(/^oklch/);
-      expect(p.ember).toMatch(/^oklch/);
-      expect(p.bgTop).toMatch(/^oklch/);
-      expect(p.bgBottom).toMatch(/^oklch/);
+      expect(p.sub).toBeTypeOf('string');
+      expect(p.azul).toMatch(/^#/);
+      expect(p.azulClaro).toMatch(/^#/);
+      expect(p.azulProfundo).toMatch(/^#/);
+      expect(p.auraTop).toMatch(/^rgba\(/);
+      expect(p.auraBottom).toMatch(/^rgba\(/);
     }
   });
 
-  it('paleta "daime-rainha" tem nome "Rainha da Floresta"', () => {
-    expect(PALETAS['daime-rainha'].nome).toBe('Rainha da Floresta');
+  it('"luz-rainha" tem nome "Rainha" (padrão do produto)', () => {
+    expect(PALETAS['luz-rainha'].nome).toBe('Rainha');
+  });
+
+  it('"luz-branca" tem azul firmamento #6b8cb8', () => {
+    expect(PALETAS['luz-branca'].azul).toBe('#6b8cb8');
+  });
+
+  it('"luz-mata" usa verde folha', () => {
+    expect(PALETAS['luz-mata'].azul).toBe('#7ba88c');
   });
 });
 
 describe('aplicarPaleta', () => {
+  const PROPRIEDADES = [
+    '--azul',
+    '--azul-claro',
+    '--azul-profundo',
+    '--aura-top',
+    '--aura-bottom'
+  ] as const;
+
   beforeEach(() => {
-    // limpar custom props
     const s = document.documentElement.style;
-    [
-      '--fire', '--fire-glow', '--ember',
-      '--fire-soft-04', '--fire-soft-08', '--fire-soft-25', '--fire-soft-30',
-      '--fire-glow-soft-35',
-      '--ember-soft-08', '--ember-soft-12', '--ember-soft-15', '--ember-soft-25',
-      '--bg-aura-1', '--bg-aura-2'
-    ].forEach(p => s.removeProperty(p));
+    PROPRIEDADES.forEach((p) => s.removeProperty(p));
   });
 
-  it('aplica --fire da paleta escolhida em document.documentElement', () => {
-    aplicarPaleta('daime-rainha');
-    expect(document.documentElement.style.getPropertyValue('--fire'))
-      .toBe(PALETAS['daime-rainha'].fire);
+  it('aplica --azul da paleta escolhida', () => {
+    aplicarPaleta('luz-rainha');
+    expect(document.documentElement.style.getPropertyValue('--azul')).toBe(
+      PALETAS['luz-rainha'].azul
+    );
   });
 
-  it('aplica --ember e --fire-glow', () => {
-    aplicarPaleta('daime-firmamento');
+  it('aplica --azul-claro e --azul-profundo', () => {
+    aplicarPaleta('luz-firmamento');
     const s = document.documentElement.style;
-    expect(s.getPropertyValue('--fire-glow')).toBe(PALETAS['daime-firmamento'].fireGlow);
-    expect(s.getPropertyValue('--ember')).toBe(PALETAS['daime-firmamento'].ember);
+    expect(s.getPropertyValue('--azul-claro')).toBe(PALETAS['luz-firmamento'].azulClaro);
+    expect(s.getPropertyValue('--azul-profundo')).toBe(PALETAS['luz-firmamento'].azulProfundo);
   });
 
-  it('aplica as 9 variantes soft (color-mix com alpha)', () => {
-    aplicarPaleta('fogo');
+  it('aplica auroras --aura-top e --aura-bottom', () => {
+    aplicarPaleta('luz-mata');
     const s = document.documentElement.style;
-    for (const prop of [
-      '--fire-soft-04', '--fire-soft-08', '--fire-soft-25', '--fire-soft-30',
-      '--fire-glow-soft-35',
-      '--ember-soft-08', '--ember-soft-12', '--ember-soft-15', '--ember-soft-25'
-    ]) {
-      expect(s.getPropertyValue(prop)).toMatch(/color-mix/);
-    }
+    expect(s.getPropertyValue('--aura-top')).toBe(PALETAS['luz-mata'].auraTop);
+    expect(s.getPropertyValue('--aura-bottom')).toBe(PALETAS['luz-mata'].auraBottom);
   });
 
-  it('aplica auroras de fundo (--bg-aura-1 e --bg-aura-2)', () => {
-    aplicarPaleta('daime-cruzeiro');
-    const s = document.documentElement.style;
-    expect(s.getPropertyValue('--bg-aura-1')).toBe(PALETAS['daime-cruzeiro'].bgTop);
-    expect(s.getPropertyValue('--bg-aura-2')).toBe(PALETAS['daime-cruzeiro'].bgBottom);
-  });
-
-  it('chamar com paleta inválida não explode — aplica fogo por fallback', () => {
+  it('paleta inválida cai em "luz-branca" (fallback)', () => {
     aplicarPaleta('inexistente' as PaletaKey);
-    const s = document.documentElement.style;
-    expect(s.getPropertyValue('--fire')).toBe(PALETAS['fogo'].fire);
+    expect(document.documentElement.style.getPropertyValue('--azul')).toBe(
+      PALETAS['luz-branca'].azul
+    );
   });
 });

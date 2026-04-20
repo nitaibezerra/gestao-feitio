@@ -6,7 +6,7 @@
   let { children } = $props();
 
   onMount(() => {
-    aplicarPaleta('daime-rainha');
+    aplicarPaleta('luz-rainha');
   });
 </script>
 

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Identidades Visuais — Gestão de Feitio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@200;300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0f1115; color: #e8eaef; font-family: 'Inter', sans-serif; min-height: 100vh; overflow: hidden; }
+
+  .app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    background: #0a0c10;
+    border-right: 1px solid #1c1f26;
+    padding: 24px 20px;
+    display: flex; flex-direction: column; gap: 20px;
+    overflow-y: auto;
+  }
+  .brand { padding-bottom: 16px; border-bottom: 1px solid #1c1f26; }
+  .brand-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; letter-spacing: -0.02em; color: #f0f2f8; }
+  .brand-sub { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6a7180; margin-top: 4px; }
+
+  .nav-title { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #6a7180; margin-bottom: 4px; }
+  .nav { display: flex; flex-direction: column; gap: 4px; }
+  .nav button {
+    text-align: left; background: transparent; color: #c2c7d1; border: 1px solid transparent;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.35;
+    transition: all 0.15s;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .nav button:hover { background: #12161d; color: #fff; }
+  .nav button.active { background: #1a1f28; border-color: #262c38; color: #fff; }
+  .nav .num {
+    font-family: 'Fraunces', serif; font-size: 18px; font-weight: 400; font-style: italic;
+    color: #6a7180; flex-shrink: 0; width: 22px; line-height: 1;
+  }
+  .nav button.active .num { color: #c4b49a; }
+  .nav .meta { display: block; font-size: 10.5px; color: #7a8090; margin-top: 3px; letter-spacing: 0.02em; }
+
+  .footer {
+    margin-top: auto; padding-top: 16px; border-top: 1px solid #1c1f26;
+    font-size: 10.5px; color: #6a7180; line-height: 1.5;
+  }
+
+  /* Stage */
+  .stage {
+    overflow: auto; background: #16181d;
+    display: flex; align-items: stretch; justify-content: stretch;
+    position: relative;
+  }
+  .stage-inner {
+    width: 100%; min-width: 1200px; min-height: 100%;
+    display: flex; align-items: stretch;
+  }
+
+  /* Mode badge (claro/escuro) */
+  .mode-badge {
+    position: absolute; top: 16px; right: 20px; z-index: 10;
+    background: rgba(20,22,28,0.88); backdrop-filter: blur(8px);
+    color: #c4b49a; padding: 6px 12px; border-radius: 999px;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    border: 1px solid #262c38;
+    pointer-events: none;
+  }
+</style>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Shared data & helpers -->
+<script type="text/babel" src="identidades/shared.jsx"></script>
+
+<!-- Identidades -->
+<script type="text/babel" src="identidades/id1-firmamento.jsx"></script>
+<script type="text/babel" src="identidades/id2-herbario.jsx"></script>
+<script type="text/babel" src="identidades/id3-luz-branca.jsx"></script>
+<script type="text/babel" src="identidades/id4-cruzeiro.jsx"></script>
+<script type="text/babel" src="identidades/id5-folha-viva.jsx"></script>
+<script type="text/babel" src="identidades/id6-opala.jsx"></script>
+
+<script type="text/babel">
+const IDENTIDADES = [
+  {
+    key: 'firmamento',
+    nome: 'Firmamento Claro',
+    desc: 'Papel, azul firmamento, serifa clássica. Diário do feitor à luz do dia.',
+    modo: 'claro',
+    Component: () => <Id1_Firmamento />,
+  },
+  {
+    key: 'herbario',
+    nome: 'Herbário Escuro',
+    desc: 'Verde mata profundo, aquarela, botânico. Caderno de campo na floresta.',
+    modo: 'escuro',
+    Component: () => <Id2_Herbario />,
+  },
+  {
+    key: 'luz-branca',
+    nome: 'Luz Branca',
+    desc: 'Minimalismo sagrado. Branco, azul muito claro, tipografia geométrica, muito ar.',
+    modo: 'claro',
+    Component: () => <Id3_LuzBranca />,
+  },
+  {
+    key: 'cruzeiro',
+    nome: 'Cruzeiro Noturno',
+    desc: 'Azul noite profundo, constelações sutis, dourado de lamparina.',
+    modo: 'escuro',
+    Component: () => <Id4_Cruzeiro />,
+  },
+  {
+    key: 'folha-viva',
+    nome: 'Folha Viva',
+    desc: 'Verde folha claro, ilustrações orgânicas, caderno manuscrito vivo.',
+    modo: 'claro',
+    Component: () => <Id5_FolhaViva />,
+  },
+  {
+    key: 'opala-dia',
+    nome: 'Opala · Dia',
+    desc: 'Iridescente refinado. Nácar sob luz clara do dia.',
+    modo: 'claro',
+    Component: () => <Id6_Opala variante="dia" />,
+  },
+  {
+    key: 'opala-noite',
+    nome: 'Opala · Noite',
+    desc: 'Vidro azul profundo, iridescência luminescente no escuro.',
+    modo: 'escuro',
+    Component: () => <Id6_Opala variante="noite" />,
+  },
+  {
+    key: 'opala-saturada',
+    nome: 'Opala · Saturada',
+    desc: 'Azul e verde dominantes, nácar com mais presença e peso.',
+    modo: 'claro',
+    Component: () => <Id6_Opala variante="saturada" />,
+  },
+];
+
+function App() {
+  const [active, setActive] = React.useState(() => {
+    return localStorage.getItem('identidade_active') || 'opala-dia';
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('identidade_active', active);
+  }, [active]);
+
+  const current = IDENTIDADES.find(i => i.key === active) || IDENTIDADES[0];
+
+  return (
+    <div className="app">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-title">Identidades Visuais</div>
+          <div className="brand-sub">Gestão de Feitio</div>
+        </div>
+
+        <div>
+          <div className="nav-title">Direções</div>
+          <div className="nav">
+            {IDENTIDADES.map((id, i) => (
+              <button key={id.key}
+                className={active === id.key ? 'active' : ''}
+                onClick={() => setActive(id.key)}>
+                <span className="num">{String(i + 1).padStart(2, '0')}</span>
+                <span>
+                  <strong style={{ fontWeight: 500 }}>{id.nome}</strong>
+                  <span className="meta">{id.desc}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="footer">
+          6 propostas distintas para o mesmo dashboard.<br/>
+          Cada uma é um sistema visual completo — paleta, tipografia e ornamentação.
+        </div>
+      </aside>
+
+      <main className="stage" key={current.key} data-screen-label={`${IDENTIDADES.findIndex(i=>i.key===current.key)+1} — ${current.nome}`}>
+        <div className="mode-badge">{current.modo === 'claro' ? '☀ claro' : '☾ escuro'}</div>
+        <div className="stage-inner">
+          <current.Component />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>

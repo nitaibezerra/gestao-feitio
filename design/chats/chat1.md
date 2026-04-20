@@ -348,3 +348,415 @@ Troquei o slider de matiz por um **seletor de paleta** com 5 opções do univers
 
 Cada paleta muda o fogo, a brasa, os glows e as auroras de fundo. Clica numa e o dashboard inteiro responde. Se quiser ajustar tons específicos, é só falar qual.
 
+## User
+
+gostei do wireframe. Proponha novas opções de identidade visual
+
+## Assistant
+
+Vou propor **5 identidades visuais distintas** — não só paletas, mas sistemas completos: tipografia, textura de fundo, tratamento dos cartões, e a "personalidade" do app. Cada uma com uma voz diferente para o Daime.
+
+Antes de montar, deixa eu alinhar algumas perguntas rápidas para focar na direção que você quer:
+
+_[tool: questions_v2]_
+
+## User
+
+Questions answered:
+- tom_geral: Luz e clareza (branco, azul firmamento, etéreo)
+- modo_luz: Ambos — ofereça variações em claro e escuro
+- tipografia: Decide for me
+- textura: Orgânico (folhas, ramos, aquarela)
+- quantas_opcoes: 6
+- escopo: Só a tela atual (dashboard da fornalha)
+- referencias: Nada específico — seja livre
+
+## Assistant
+
+Perfeito. Vou criar **6 identidades visuais** independentes — cada uma um ensaio completo do mesmo dashboard. Direção: luz e clareza, orgânico, com variações claro/escuro.
+
+_[tool: update_todos]_
+
+Vou primeiro entender o estado atual e decidir como organizar. A melhor apresentação para 6 identidades distintas é o **design_canvas** — com cada identidade como um cartão em grid. Mas cada identidade é um dashboard inteiro (grande). Vou montar um arquivo novo onde cada identidade é uma "tela" navegável por tabs laterais.
+
+Estratégia:
+- Novo arquivo `Identidades Visuais.html` com 6 cenas alternáveis
+- Cada cena usa os mesmos dados (panelas, tonéis) mas com visual completamente diferente
+- Sidebar de navegação fixa à esquerda para pular entre as 6
+- Para não virar um arquivo gigante, reuso o estado mas reescrevo o layout/visual de cada uma
+
+Vou começar construindo a estrutura e a primeira identidade. Extrai o estado do domínio do arquivo original primeiro:
+
+_[tool: run_script]_
+
+Vou extrair também os helpers de formato/labels. Deixa eu criar o arquivo base com shell + navegação:
+
+_[tool: run_script]_
+
+Vou extrair helpers (240-~320) e estado inicial, depois escrever o arquivo novo estruturado:
+
+_[tool: read_file]_
+
+Deixa eu consolidar e criar um arquivo `Identidades/data.js` com o estado+helpers compartilhados, e depois o `Identidades Visuais.html` que importa tudo.
+
+Mas economizar o custo — vou fazer tudo em **um único arquivo** mas separando identidades como componentes React em arquivos JSX separados. Cada identidade ~200 linhas.
+
+_[tool: write_file]_
+
+Agora crio cada identidade. Começo pela 1 — **Firmamento Claro**: papel, azul firmamento, tipografia clássica.
+
+_[tool: write_file]_
+
+Agora Identidade 2 — **Herbário escuro** (verde mata, aquarela, fundo escuro orgânico):
+
+_[tool: write_file]_
+
+_[tool: snip]_
+
+Agora Identidade 3 — **Luz branca ambiente**: minimalista extremo, tipografia geométrica, muito ar:
+
+_[tool: write_file]_
+
+Identidade 4 — **Cruzeiro Noturno**: escuro profundo azul com estrelas, tipografia serifa com ar etéreo.
+
+_[tool: write_file]_
+
+Identidade 5 — **Folha Viva**: verde claro, orgânico, como caderno manuscrito com ilustrações de folhas.
+
+_[tool: write_file]_
+
+_[tool: snip]_
+
+Identidade 6 — **Opala**: etéreo claro, iridescente, como pedra opala com reflexos azuis/verdes/rosas suaves.
+
+_[tool: write_file]_
+
+_[tool: snip]_
+
+Agora o shell HTML principal com sidebar de navegação entre as 6 identidades:
+
+_[tool: write_file]_
+
+_[tool: snip]_
+
+_[tool: done]_
+
+Entreguei em `Identidades Visuais.html`. Seis direções independentes, cada uma um sistema visual completo aplicado ao mesmo dashboard — use a sidebar à esquerda para navegar.
+
+**As 6 propostas:**
+
+1. **Firmamento Claro** ☀ — papel bege, azul firmamento, serifa EB Garamond. Voz de "livro do feitio" manuscrito.
+2. **Herbário Escuro** ☾ — verde mata profundo com galhos ilustrados ao fundo e aquarela nos cards.
+3. **Luz Branca** ☀ — minimalismo extremo. Branco, muito ar, Inter light, números gigantes, anéis de progresso circulares. A única sem serifa.
+4. **Cruzeiro Noturno** ☾ — azul noite com estrelas semeadas e o Cruzeiro do Sul no canto, dourado de lamparina.
+5. **Folha Viva** ☀ — verde folha claro, ilustração botânica no canto, layout de caderno vivo.
+6. **Opala** ☀ — iridescente. Gradientes azul→verde→rosa como reflexo de nácar; a mais "contemporânea" das claras.
+
+**Sistema comum em todas:** mesmo layout (header com nome/relógio, fornalha à esquerda com 5 bocas, tonéis à direita, rodapé com última anotação + ações). Assim dá para comparar de verdade o efeito só da identidade.
+
+Diz qual(is) te fala(m) mais e eu aprofundo — adapto a tela de detalhe da panela ou combino elementos entre duas.
+
+_[tool: fork_verifier_agent]_
+
+Human: <pasted_text name="fork_verifier_agent result">
+
+## User
+
+A background task has completed. Here are the results:
+
+## Assistant
+
+Boa catch. Vou fixar uma largura mínima no stage para as identidades renderizarem na proporção pra que foram desenhadas:
+
+_[tool: str_replace_edit]_
+
+Também vou colapsar a sidebar em viewports estreitos e garantir que o `<stage-inner>` vire flex column para o filho preencher altura. Na verdade o filho é um `<div>` das identidades com `width: 100%, minHeight: 100%` — já funciona. Deixa eu conferir:
+
+_[tool: done]_
+
+Stage agora tem `min-width: 1200px` com scroll horizontal — cada identidade renderiza na proporção pra qual foi desenhada, e em janelas estreitas você pode rolar horizontalmente pra ver tudo sem sobreposição.
+
+_[tool: fork_verifier_agent]_
+
+Human: <pasted_text name="fork_verifier_agent result">
+<async_tool_result tool="fork_verifier_agent">
+<verifier-result verdict="done">
+Todas as 6 identidades renderizam corretamente com min-width 1200px aplicado. Testei navegando entre Firmamento, Herbário, Luz Branca, Cruzeiro, Folha Viva e Opala: em cada uma o header fica separado dos créditos (borda de 1-1.5px entre eles), a grade de bocas (fornalha à esquerda) e o painel de tonéis (à direita) ficam lado-a-lado na grid `minmax(0, 1fr) 340px` sem sobrepor, e o rodapé com "última anotação" + botões Desfazer/Nova panela está visível ao final. Scroll horizontal aparece quando o viewport é estreito (esperado), e vertical quando a identidade excede a altura disponível — ambos funcionam bem. Nenhum erro de console.
+</verifier-result>
+</async_tool_result>
+</pasted_text>
+
+
+A background task has completed. Here are the results:
+[id:m0094]
+
+## User
+
+A background task has completed. Here are the results:
+
+## Assistant
+
+Pronto — 6 identidades renderizando limpas. Me diga qual(is) te chamaram atenção e eu aprofundo a direção escolhida (estende pra tela de detalhe da panela, combina elementos de duas, ou refina a escolhida).
+
+## User
+
+gostei do Opala
+
+## Assistant
+
+Ótima escolha — é a mais singular das 6. Antes de aprofundar, deixa eu confirmar algumas direções pra focar bem:
+
+_[tool: questions_v2]_
+
+## User
+
+Questions answered:
+- o_que_manter: Tudo — mantenha como está
+- intensidade: Mais intenso — quero que a opção respire mais presença
+- proximos_passos: Criar variantes de Opala (ex: Opala Dia, Opala Noite, Opala Saturada), Refinar só o Opala atual (ajustes finos, densidade, hierarquia)
+- variante_escura: Sim — mostre uma versão escura de Opala (noite)
+
+## Assistant
+
+Perfeito. Vou (a) refinar a Opala atual com mais presença, e (b) criar **3 variantes**: **Opala Dia** (atual refinada), **Opala Noite** (versão escura) e **Opala Saturada** (mais intensa, verde+azul dominantes).
+
+Plano:
+1. Refatorar `id6-opala.jsx` para receber uma paleta por prop
+2. Definir 3 paletas Opala
+3. Adicionar as 3 variantes na sidebar
+
+_[tool: read_file]_
+
+_[tool: snip]_
+
+_[tool: update_todos]_
+
+Agora vou refatorar o arquivo Opala para aceitar uma paleta via prop, refinar com mais presença, e criar 3 variantes:
+
+_[tool: write_file]_
+
+Agora atualizo o shell principal pra adicionar as 3 variantes na sidebar:
+
+_[tool: snip]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+_[tool: update_todos]_
+
+_[tool: done]_
+
+_[tool: snip]_
+
+_[tool: fork_verifier_agent]_
+
+A Opala agora vive em três variantes na sidebar:
+
+- **Opala · Dia** — refinada, mais presença que a versão original (gradientes mais definidos no título, total guardado em número grande iridescente, fio colorido no topo dos cards, auroras do fundo mais densas).
+- **Opala · Noite** — versão escura. Fundo vidro azul-meia-noite com luminescência; iridescência brilha no escuro sem cansar.
+- **Opala · Saturada** — mesma estrutura clara, mas azul e verde dominantes, paleta mais encorpada — para quem quiser a opção com mais peso.
+
+Todas usam a mesma estrutura — só muda a paleta. O orbe iridescente (círculo conic-gradient) aparece como selo em headers e títulos de seção.
+
+Me diz qual das três ficou mais perto do que você imaginou — ou se quer combinar (ex: densidade da Saturada + fundo da Noite).
+
+## User
+
+No final das contas gostei mais do Luz Branca. Aplique essa identidade a todas as telas e componentes do Protótipo
+
+## Assistant
+
+Entendido — Luz Branca como identidade oficial do produto. Deixa eu primeiro olhar o sketch que você anexou e ver o estado atual do protótipo para saber tudo que precisa ser convertido.
+
+_[tool: view_image]_
+
+_[tool: list_files]_
+
+_[tool: list_files]_
+
+_[tool: list_files]_
+
+_[tool: list_files]_
+
+_[tool: read_file]_
+
+Vou ler o protótipo atual para ver tudo que precisa ser convertido:
+
+_[tool: snip]_
+
+_[tool: read_file]_
+
+_[tool: read_file]_
+
+_[tool: snip]_
+
+Vou preservar o arquivo original como backup e aplicar a identidade Luz Branca sobre tudo. Primeiro backup:
+
+_[tool: copy_files]_
+
+A identidade **Luz Branca** é minimalista: fundo `#fafaf8`, azul `#6b8cb8` + azul profundo `#3a5a82`, tipografia **Inter light**, muito respiro, linhas finas `#e8e8e3`, anéis SVG nos volumes, números gigantes em `fontWeight: 200–300`.
+
+Vou reescrever o `Gestao de Feitio.html` substituindo toda a paleta e mantendo a arquitetura (TopBar, Fornalha, ToneisPanel, PanelaDetailModal, TirarForm, ReporForm, NovaPanelaModal, ActionBar, TweaksPanel). Como é um arquivo grande (1500 linhas), vou fazer edição cirúrgica do CSS + componentes-chave.
+
+_[tool: str_replace_edit]_
+
+Agora vou substituir paletas internas, TopBar (brasa→símbolo sutil), TonelRow (tonéis com linha fina de volume), remover flicker/glow escuro e ajustar botões. Primeiro substituindo as paletas do tweak de cores — agora são variações de azul em modo claro:
+
+_[tool: snip]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+Agora o TopBar — o "orbe de fogo" precisa virar um círculo azul sutil, e o estilo geral ficar mais leve:
+
+_[tool: str_replace_edit]_
+
+_[tool: snip]_
+
+_[tool: str_replace_edit]_
+
+_[tool: snip]_
+
+_[tool: str_replace_edit]_
+
+_[tool: str_replace_edit]_
+
+Agora vou substituir o PanelaCard:
+
+_[tool: str_replace_edit]_
+
+_[tool: snip]_
+
+_[tool: str_replace_edit]_
+
+_[tool: snip]_
+
+Deixa eu fazer as últimas edições essenciais (fundo do modal, ActionBar footer, remove animação flicker) e entregar:
+
+_[tool: str_replace_edit]_
+
+_[tool: snip]_
+
+_[tool: done]_
+
+Identidade **Luz Branca** aplicada ao protótipo inteiro. Principais mudanças:
+
+- **Paleta invertida**: fundo papel quente (`#fafaf8`), texto grafite, azul firmamento como única cor de ação.
+- **Tipografia**: Fraunces light para serif, Inter 200–300 para texto, IBM Plex Mono para labels técnicos. Todo o app respira `font-weight: 300`.
+- **TopBar**: removi o orbe de fogo flamejante; virou círculo simples com ✦ em azul suave, sobre fundo branco. Relógio em Fraunces 44px ultralight.
+- **PanelaCard**: sem o glow de fogo por baixo, borda `1px var(--border-soft)`, barra de volume fina (6px) com marcador preto discreto, tiragem próxima em Fraunces 34 light.
+- **Tonéis**: linha horizontal fina de volume, tonelzinho ilustrativo com vidro transparente e líquido colorido sutil. Cores (cozimento/daime/água-forte) ficaram terrosas/dessaturadas — não competem com a calma geral.
+- **Modais e botões**: overlay cinza muito claro com blur (antes: marrom escuro opaco). Botões primários continuam em azul firmamento sólido; secundários são "ghost" com borda fininha. Tudo arredondado a 999px (pill).
+- **Tweaks → novas 4 paletas**: Luz Branca (padrão), Luz & Mata (verde), Firmamento (azul mais profundo), Rainha (verde claro). Todas dentro do mesmo sistema claro.
+- **Backup preservado** em `Gestao de Feitio (Fogo).html` caso queira comparar.
+
+_[tool: fork_verifier_agent]_
+
+Esses dois já estão implementados na versão atual:
+
+- **Modal de detalhe da panela** com ações tirar/repor/pausar/marcar pronto — funcional.
+- **Tweaks** expondo 4 paletas (Luz Branca, Luz & Mata, Firmamento, Rainha) + densidade + visibilidade dos tonéis.
+
+Marcando como concluídos:
+
+_[tool: update_todos]_
+
+Tudo do plano original está pronto. Quer seguir para:
+
+- **Telas secundárias** (histórico de feitios, controle de estoque de tonéis, relatório de apuração)?
+- **Refinar o modal da panela** (adicionar timeline de eventos, próximas ações sugeridas)?
+- **Versão mobile/tablet** para uso na fornalha?
+- Ou outra direção?
+
+## User
+
+na verdade quero utilizar não apenas a identidade visual mas tudo do Luz Branca. Fontes, elementos visuais, wireframe, tudo tudo
+
+## Assistant
+
+Entendi — quer que `Gestao de Feitio.html` adote **tudo** do Luz Branca: wireframe, componentes, tipografia, espaçamentos, linguagem visual. Deixa eu abrir os dois para ver o que exatamente está no Luz Branca hoje e portar integralmente.
+
+_[tool: list_files]_
+
+_[tool: list_files]_
+
+Vou ler a id3-luz-branca e o shared para entender toda a linguagem:
+
+_[tool: read_file]_
+
+_[tool: read_file]_
+
+Agora entendi. O Luz Branca é bem diferente do que está no `Gestao de Feitio.html`. Principais diferenças do wireframe Luz Branca:
+
+1. **Layout vertical com muito respiro** (40px/56px padding, gap 40 entre seções) — não tem sidebar
+2. **Header em grid 3-col**: orbe ✦ | título + eyebrow | relógio 42px + duração
+3. **Linha de "créditos"** horizontal (Feitor/Foguista/Bocas/Tonel) separada por borda fina
+4. **Panelas**: número gigante (64px ultralight) como elemento central, ring circular minúsculo no canto inferior
+5. **Tonéis em linha horizontal** com barra fina 3px (não barrinhas verticais de vidro)
+6. **Footer minimalista** com "último evento" + desfazer/nova panela
+
+Vou reescrever o `Gestao de Feitio.html` seguindo exatamente esse wireframe, mas mantendo a interatividade (modal de panela, tweaks, tonéis). Deixa eu ver o estado atual do arquivo primeiro:
+
+_[tool: read_file]_
+
+Vou fazer uma reescrita completa seguindo o wireframe do Luz Branca. Primeiro backup, depois reescrevo:
+
+_[tool: copy_files]_
+
+_[tool: read_file]_
+
+_[tool: snip]_
+
+_[tool: read_file]_
+
+_[tool: snip]_
+
+_[tool: read_file]_
+
+_[tool: snip]_
+
+_[tool: read_file]_
+
+Agora tenho o mapa completo. Vou reescrever seguindo **exatamente** o wireframe do Luz Branca:
+
+- Layout **vertical single-column** (sem sidebar), padding 40/56, gap 40 entre seções
+- Header em **grid 3-col** (orbe | título+eyebrow | relógio+duração)
+- **Linha de créditos horizontal** (Feitor/Foguista/Bocas/Tonel)
+- **Panelas**: número 64px ultralight como elemento central, ring circular mini no rodapé
+- **Tonéis horizontais** em grid 7-col com barra fina 3px
+- **Footer minimalista** com último evento + botões pill
+
+Mantendo: modal de panela clicável, tweaks, estado interativo.
+
+_[tool: write_file]_
+
+_[tool: snip]_
+
+_[tool: done]_
+
+Reescrevi o `Gestao de Feitio.html` do zero seguindo **integralmente** o wireframe do Luz Branca. Mudanças estruturais:
+
+**Layout** — agora é single-column vertical com padding 40/56 e gap 40 entre seções (antes era grid com sidebar de tonéis à direita).
+
+**Header** — grid de 3 colunas: orbe ✦ circular | título + eyebrow "Feitio · Casinha da Sede" | relógio Fraunces 42px ultralight + "Dia 2 · 31h25" em mono 11px.
+
+**Linha de créditos** — faixa horizontal com borda inferior fina: Feitor / Foguista / Bocas ao fogo / No tonel (este último em Fraunces 26 e cor azul profundo).
+
+**Panelas** — número gigante em Fraunces 64px ultralight como elemento central. "vai tirar" em eyebrow 9px + label 16px colorida. Rodapé com ring circular minúsculo (40×40) + volume/meta à direita. Sem barras de progresso horizontais.
+
+**Tonéis** — grid de 7 colunas, cada card com T1 eyebrow + volume Fraunces 20 + label + barra fina 3px com % e capacidade em mono.
+
+**Footer** — "último · <evento> · hora" à esquerda, botões pill (Desfazer ghost + Nova panela sólida azul) à direita.
+
+**Modais** — mesmo sistema minimalista: Fraunces 56 para número da panela, linhas finas separando seções, botões pill.
+
+**Tweaks** — 4 paletas dentro da família Luz Branca (Luz Branca / Luz & Mata / Firmamento / Rainha) + toggles para créditos e rodapé.
+
+**Versão anterior preservada** em `Gestao de Feitio (Dashboard).html`.
+
+_[tool: fork_verifier_agent]_
+
+Entrego o resultado. Identidade Luz Branca aplicada integralmente — wireframe, tipografia, componentes, espaçamentos e linguagem visual. A versão anterior (mais densa, com sidebar) está preservada em `Gestao de Feitio (Dashboard).html` caso queira comparar.
+
