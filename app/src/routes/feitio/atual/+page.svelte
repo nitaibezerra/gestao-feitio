@@ -78,14 +78,61 @@
   let selecionadaId = $state<string | null>(null);
   let novaOpen = $state(false);
 
+  // Modo "trocar bocas": clicar numa panela seleciona; segundo clique troca.
+  let modoTrocar = $state(false);
+  let trocarAId = $state<string | null>(null);
+
   // Passa sempre a versão atual da panela ao modal — vem da projeção.
   const selecionada = $derived(
     selecionadaId ? panelasUI.find((p) => p.id === selecionadaId) ?? null : null
   );
 
+  const selecionadasTrocar = $derived(trocarAId ? [trocarAId] : []);
+  const hintTrocar = $derived.by(() => {
+    if (!modoTrocar) return undefined;
+    if (!trocarAId) return 'selecione a primeira panela';
+    const a = panelasUI.find((p) => p.id === trocarAId);
+    return a ? `panela ${String(a.numero).padStart(2, '0')} selecionada — escolha a outra` : 'selecione a primeira panela';
+  });
+
   function abrirNova(_boca?: number) {
     // v1: a boca escolhida vem do próprio modal (PillRow quando há múltiplas).
     novaOpen = true;
+  }
+
+  function iniciarTrocar() {
+    modoTrocar = true;
+    trocarAId = null;
+    selecionadaId = null;
+  }
+
+  function cancelarTrocar() {
+    modoTrocar = false;
+    trocarAId = null;
+  }
+
+  async function onPanelaClick(p: PanelaVisao) {
+    if (!modoTrocar) {
+      selecionadaId = p.id;
+      return;
+    }
+    // Modo trocar:
+    if (!trocarAId) {
+      trocarAId = p.id;
+      return;
+    }
+    if (trocarAId === p.id) {
+      trocarAId = null; // desseleciona
+      return;
+    }
+    if (!feitio) return;
+    await comandos().trocarBocas({
+      feitioId: feitio.id,
+      panelaAId: trocarAId,
+      panelaBId: p.id
+    });
+    modoTrocar = false;
+    trocarAId = null;
   }
 
   async function onNovaConfirm(p: PayloadNovaPanela) {
@@ -192,8 +239,9 @@
     <Fornalha
       panelas={panelasUI}
       bocas={feitio.qtdBocas}
-      onPanelaClick={(p) => (selecionadaId = p.id)}
+      onPanelaClick={onPanelaClick}
       onEmptyClick={(b) => abrirNova(b)}
+      selecionadasIds={selecionadasTrocar}
     />
 
     <Toneis toneis={toneisUI} />
@@ -202,6 +250,10 @@
       {ultimoEvento}
       onNova={() => abrirNova()}
       onUndo={onUndo}
+      onTrocar={iniciarTrocar}
+      onCancelarTrocar={cancelarTrocar}
+      {modoTrocar}
+      {hintTrocar}
     />
   </div>
 

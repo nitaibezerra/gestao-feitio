@@ -9,8 +9,9 @@
     panela?: PanelaVisao;
     onclick?: () => void;
     onclickEmpty?: () => void;
+    selecionada?: boolean;
   };
-  let { boca, panela, onclick, onclickEmpty }: Props = $props();
+  let { boca, panela, onclick, onclickEmpty, selecionada = false }: Props = $props();
 
   const relogio = useRelogio();
   const CAPACIDADE_L = 120;
@@ -33,7 +34,7 @@
     <span class="plus">+</span>
   </button>
 {:else}
-  <button class="card" {onclick}>
+  <button class="card" class:selecionada {onclick}>
     <div class="topo">
       <span class="mono eyebrow">Boca {boca}</span>
       <span class="mono tempo">{fmtDuracao(tempoMs)}</span>
@@ -111,6 +112,11 @@
     box-shadow:
       0 1px 2px rgba(40, 60, 90, 0.06),
       0 12px 32px rgba(40, 60, 90, 0.05);
+  }
+  .card.selecionada {
+    border-color: var(--azul);
+    border-width: 2px;
+    animation: pulse-soft 1.6s ease-in-out infinite;
   }
 
   .topo {

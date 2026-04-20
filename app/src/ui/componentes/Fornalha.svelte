@@ -8,8 +8,15 @@
     bocas: number;
     onPanelaClick: (p: PanelaVisao) => void;
     onEmptyClick: (boca: number) => void;
+    selecionadasIds?: string[];
   };
-  let { panelas, bocas, onPanelaClick, onEmptyClick }: Props = $props();
+  let {
+    panelas,
+    bocas,
+    onPanelaClick,
+    onEmptyClick,
+    selecionadasIds = []
+  }: Props = $props();
 
   const bocasArr = $derived(Array.from({ length: bocas }, (_, i) => i + 1));
 </script>
@@ -22,6 +29,7 @@
       <Panela
         boca={b}
         {panela}
+        selecionada={panela ? selecionadasIds.includes(panela.id) : false}
         onclick={() => panela && onPanelaClick(panela)}
         onclickEmpty={() => onEmptyClick(b)}
       />

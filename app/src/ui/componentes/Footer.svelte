@@ -8,21 +8,41 @@
     ultimoEvento?: UltimoEvento;
     onNova?: () => void;
     onUndo?: () => void;
+    onTrocar?: () => void;
+    onCancelarTrocar?: () => void;
+    modoTrocar?: boolean;
+    hintTrocar?: string;
   };
-  let { ultimoEvento, onNova, onUndo }: Props = $props();
+  let {
+    ultimoEvento,
+    onNova,
+    onUndo,
+    onTrocar,
+    onCancelarTrocar,
+    modoTrocar = false,
+    hintTrocar
+  }: Props = $props();
 </script>
 
 <footer>
   <div class="evento">
-    {#if ultimoEvento}
+    {#if modoTrocar}
+      <span class="mono rotulo">trocar</span>
+      <span class="texto">{hintTrocar ?? 'clique em duas panelas para trocar as bocas'}</span>
+    {:else if ultimoEvento}
       <span class="mono rotulo">último</span>
       <span class="texto">{ultimoEvento.texto}</span>
       <span class="mono hora">{fmtHora(ultimoEvento.momento)}</span>
     {/if}
   </div>
   <div class="acoes">
-    <BtnPill variante="ghost" onclick={onUndo}>Desfazer</BtnPill>
-    <BtnPill variante="primary" onclick={onNova}>Nova panela</BtnPill>
+    {#if modoTrocar}
+      <BtnPill variante="ghost" onclick={onCancelarTrocar}>Cancelar</BtnPill>
+    {:else}
+      <BtnPill variante="ghost" onclick={onTrocar}>Trocar posição</BtnPill>
+      <BtnPill variante="ghost" onclick={onUndo}>Desfazer</BtnPill>
+      <BtnPill variante="primary" onclick={onNova}>Nova panela</BtnPill>
+    {/if}
   </div>
 </footer>
 
