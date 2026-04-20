@@ -10,6 +10,7 @@
     onUndo?: () => void;
     onTrocar?: () => void;
     onCancelarTrocar?: () => void;
+    onEncerrar?: () => void;
     modoTrocar?: boolean;
     hintTrocar?: string;
   };
@@ -19,6 +20,7 @@
     onUndo,
     onTrocar,
     onCancelarTrocar,
+    onEncerrar,
     modoTrocar = false,
     hintTrocar
   }: Props = $props();
@@ -39,6 +41,9 @@
     {#if modoTrocar}
       <BtnPill variante="ghost" onclick={onCancelarTrocar}>Cancelar</BtnPill>
     {:else}
+      {#if onEncerrar}
+        <button class="encerrar mono" onclick={onEncerrar}>Encerrar feitio</button>
+      {/if}
       <BtnPill variante="ghost" onclick={onTrocar}>Trocar posição</BtnPill>
       <BtnPill variante="ghost" onclick={onUndo}>Desfazer</BtnPill>
       <BtnPill variante="primary" onclick={onNova}>Nova panela</BtnPill>
@@ -83,5 +88,22 @@
     display: flex;
     gap: 12px;
     flex-shrink: 0;
+    align-items: center;
+  }
+  .encerrar {
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .encerrar:hover {
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 </style>

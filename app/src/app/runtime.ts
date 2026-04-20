@@ -54,6 +54,21 @@ export async function bootstrapAtivo(): Promise<string | null> {
 }
 
 /**
+ * Id do feitio encerrado mais recentemente. Usado pela tela /feitio/resumo.
+ */
+export async function ultimoEncerrado(): Promise<string | null> {
+  const eventos = await db().eventos.toArray();
+  let maisRecente: { id: string; momento: string } | null = null;
+  for (const e of eventos) {
+    if (e.tipo !== 'feitio_encerrado') continue;
+    if (!maisRecente || e.momento > maisRecente.momento) {
+      maisRecente = { id: e.feitioId, momento: e.momento };
+    }
+  }
+  return maisRecente?.id ?? null;
+}
+
+/**
  * Store reativo do feitio ativo. Se não há feitio, emite `null`. Se há,
  * assina a stream do repositório e projeta a fornalha a cada evento.
  *

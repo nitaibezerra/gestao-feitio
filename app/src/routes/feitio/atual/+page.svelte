@@ -197,6 +197,17 @@
     await comandos().desfazerUltimoEvento({ feitioId: feitio.id });
   }
 
+  async function onEncerrar() {
+    if (!feitio) return;
+    if (typeof window !== 'undefined' && !window.confirm('Encerrar este feitio? Essa ação marca o feitio como concluído.')) {
+      return;
+    }
+    const r = await comandos().encerrarFeitio({ feitioId: feitio.id });
+    if (r.ok) {
+      await goto('/feitio/resumo');
+    }
+  }
+
   function proximoNumeroPanela(panelas: Panela[]): number {
     const max = panelas.reduce((a, p) => Math.max(a, p.numero), 0);
     return max + 1;
@@ -252,6 +263,7 @@
       onUndo={onUndo}
       onTrocar={iniciarTrocar}
       onCancelarTrocar={cancelarTrocar}
+      onEncerrar={onEncerrar}
       {modoTrocar}
       {hintTrocar}
     />
