@@ -19,6 +19,7 @@
   import type { TipoTiragem, Panela } from '../../../domain/entities/panela';
   import { panelasNaFornalha, toneisVisao, type PanelaVisao } from '../../../ui/visao';
   import { resumirEvento } from '../../../ui/evento-label';
+  import { useWakeLock } from '../../../ui/wake-lock.svelte';
 
   const fornalha = feitioAtivo();
 
@@ -43,6 +44,15 @@
     if (!id) {
       await goto('/feitio/novo', { replaceState: true });
     }
+  });
+
+  // RNF-04: mantém a tela ligada enquanto esta rota estiver montada.
+  const wakeLock = useWakeLock();
+  $effect(() => {
+    void wakeLock.ativar();
+    return () => {
+      void wakeLock.liberar();
+    };
   });
 
   // Derivações da visão:
