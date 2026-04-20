@@ -62,12 +62,15 @@
 
     <div class="linha">
       <FieldGroup label="feitor">
+        <!-- autofocus: o feitor é o campo obrigatório, foco direto agiliza criar feitio -->
+        <!-- svelte-ignore a11y_autofocus -->
         <input
           type="text"
           bind:value={feitor}
           placeholder="quem comanda"
           aria-label="feitor"
           required
+          autofocus
         />
       </FieldGroup>
       <FieldGroup label="foguista">

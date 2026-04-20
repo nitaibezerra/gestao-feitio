@@ -100,7 +100,13 @@
 
       <FieldGroup label="volume">
         <div class="volume-grande">
-          <span class="serif num">{volume}</span>
+          <input
+            class="serif num input-num"
+            type="number"
+            min="0"
+            bind:value={volume}
+            aria-label="volume da panela"
+          />
           <span class="mono u">L</span>
         </div>
         <PillRow>
@@ -196,6 +202,28 @@
     font-weight: 200;
     letter-spacing: -0.03em;
     color: var(--ink);
+  }
+  .input-num {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--linha);
+    color: var(--ink);
+    font-family: inherit;
+    width: 5ch;
+    padding: 0 4px 4px;
+    text-align: left;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .input-num:focus {
+    outline: none;
+    border-bottom-color: var(--azul);
+  }
+  .input-num::-webkit-inner-spin-button,
+  .input-num::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
   .u {
     font-size: 12px;

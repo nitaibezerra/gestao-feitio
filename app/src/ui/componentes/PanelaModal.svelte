@@ -167,7 +167,14 @@
       <div class="sub-form">
         <FieldGroup label="volume da tiragem">
           <div class="volume-grande">
-            <span class="serif num">{volumeTirar}</span>
+            <input
+              class="serif num input-num"
+              type="number"
+              min="0"
+              max={panela.volumeAtualL ?? 0}
+              bind:value={volumeTirar}
+              aria-label="volume da tiragem"
+            />
             <span class="mono u">L</span>
           </div>
           <PillRow>
@@ -199,7 +206,13 @@
         </FieldGroup>
         <FieldGroup label="volume">
           <div class="volume-grande">
-            <span class="serif num">{volumeRepor}</span>
+            <input
+              class="serif num input-num"
+              type="number"
+              min="0"
+              bind:value={volumeRepor}
+              aria-label="volume da reposição"
+            />
             <span class="mono u">L</span>
           </div>
           <PillRow>
@@ -420,6 +433,30 @@
     font-weight: 200;
     letter-spacing: -0.03em;
     color: var(--ink);
+  }
+  .input-num {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--linha);
+    color: var(--ink);
+    font-family: inherit;
+    width: 5ch;
+    padding: 0 4px 4px;
+    text-align: left;
+    transition: border-color 0.15s;
+  }
+  .input-num:focus {
+    outline: none;
+    border-bottom-color: var(--azul);
+  }
+  .input-num::-webkit-inner-spin-button,
+  .input-num::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .input-num {
+    -moz-appearance: textfield;
+    appearance: textfield;
   }
   .preview {
     font-size: 11px;
