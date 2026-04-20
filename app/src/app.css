@@ -1,0 +1,65 @@
+:root {
+  /* Base — não muda com paleta */
+  --bg: #1a1410;
+  --bg-2: #221a14;
+  --bg-3: #2d2219;
+  --surface: #2a2017;
+  --surface-raised: #352820;
+  --border: #4a3a2e;
+  --border-soft: #3a2d22;
+  --text: #f3ead9;
+  --text-dim: #c4b49a;
+  --text-faint: #8a7c66;
+
+  /* Cores do domínio — fixas */
+  --agua: #4a7c8f;
+  --agua-2: #6fa3b5;
+  --cozimento: #8b5a2b;
+  --cozimento-2: #a8703a;
+  --daime: #7a2a2a;
+  --daime-2: #a03a3a;
+  --agua-forte: #5a5247;
+  --folha: #4a7c3a;
+  --success: #6b8e4e;
+  --warn: #d4a017;
+
+  /* Paleta — atualizada dinamicamente. Defaults: Rainha da Floresta */
+  --fire: oklch(0.58 0.15 145);
+  --fire-glow: oklch(0.75 0.17 140);
+  --ember: oklch(0.95 0.03 160);
+  --fire-soft-04: color-mix(in oklab, oklch(0.58 0.15 145) 4%, transparent);
+  --fire-soft-08: color-mix(in oklab, oklch(0.58 0.15 145) 8%, transparent);
+  --fire-soft-25: color-mix(in oklab, oklch(0.58 0.15 145) 25%, transparent);
+  --fire-soft-30: color-mix(in oklab, oklch(0.58 0.15 145) 30%, transparent);
+  --fire-glow-soft-35: color-mix(in oklab, oklch(0.75 0.17 140) 35%, transparent);
+  --ember-soft-08: color-mix(in oklab, oklch(0.95 0.03 160) 8%, transparent);
+  --ember-soft-12: color-mix(in oklab, oklch(0.95 0.03 160) 12%, transparent);
+  --ember-soft-15: color-mix(in oklab, oklch(0.95 0.03 160) 15%, transparent);
+  --ember-soft-25: color-mix(in oklab, oklch(0.95 0.03 160) 25%, transparent);
+  --bg-aura-1: oklch(0.62 0.14 145 / 0.10);
+  --bg-aura-2: oklch(0.82 0.04 180 / 0.04);
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #0c0906;
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -0.01em; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+button:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

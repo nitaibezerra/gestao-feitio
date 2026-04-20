@@ -1,0 +1,12 @@
+{
+  "name": "Gestão de Feitio",
+  "short_name": "Feitio",
+  "description": "Aplicativo offline para gestão de feitio de Santo Daime",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0c0906",
+  "theme_color": "#1a1410",
+  "lang": "pt-BR",
+  "icons": []
+}
