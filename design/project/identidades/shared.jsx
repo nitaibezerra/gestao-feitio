@@ -10,7 +10,7 @@ const FEITIO_DATA = {
     nome: "Feitio de Abril/2026",
     inicio: new Date(2026, 3, 16, 7, 0),
     feitor: "José",
-    foguista: "Cícero",
+    foguista: "Swidou",
     casinha: "Casinha da Sede",
   },
   fornalha: { bocas: 5 },
@@ -80,7 +80,7 @@ function fmtDuration(ms) {
   const s = Math.floor(ms / 1000);
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  return `${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
+  return `${String(h).padStart(2, '0')}h${String(m).padStart(2, '0')}`;
 }
 function fmtDurationLong(ms) {
   if (ms < 0) ms = 0;
@@ -88,10 +88,10 @@ function fmtDurationLong(ms) {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const sec = s % 60;
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 function fmtHora(d) {
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 function conteudoLabel(c) {
   if (!c) return "—";
