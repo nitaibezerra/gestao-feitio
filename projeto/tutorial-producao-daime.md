@@ -568,6 +568,7 @@ Tudo isso **sem precisar escrever à mão na panela com caneta**, como é feito 
 | **Pó** | Parte interna do jagube, mais macia, em forma de pó. Produzida na batenção e usada na camada do meio |
 | **Fornalha** | Fogão grande com várias bocas |
 | **Boca** | Cada lugar da fornalha onde cabe uma panela |
+| **Biqueira** | Espaço físico onde a panela é virada logo após a tiragem para derramar o líquido no tonel. Enquanto a panela está na biqueira, a boca do fogão fica livre e outra panela pode ocupar |
 | **Feitor** | Quem comanda o feitio |
 | **Foguista** | Quem alimenta a fornalha com lenha e controla a temperatura de cada boca |
 | **Paneleiro** | Quem carrega as panelas — tira e põe no fogo |

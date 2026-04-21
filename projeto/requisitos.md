@@ -187,7 +187,7 @@ Campos:
 - `feitio_id`
 - `numero` (ordem de entrada no feitio: panela 1, 2, 3...)
 - `boca_atual_id` (nullable)
-- `estado` — enum (ver seção 4): `montada` | `no_fogo` | `fora_do_fogo` | `tirada` | `aguardando_reposicao` | `descartada`
+- `estado` — enum (ver seção 4): `montada` | `no_fogo` | `fora_do_fogo` | `na_biqueira` | `descartada`
 - `tipo_conteudo` — enum: `agua` | `cozimento_1` | `cozimento_2` | ... | `cozimento_6` | `agua_forte`. Define o que está na panela AGORA.
 - `em_ciclo_agua_forte` (bool) — quando `true`, todas as tiragens seguintes serão registradas como `agua_forte`, mesmo que a panela seja realimentada com água. Flag derivada/cacheada do histórico.
 - `volume_atual_l` (float, litros no momento)
@@ -250,13 +250,13 @@ Tipos de evento:
 stateDiagram-v2
     [*] --> montada: criar panela
     montada --> no_fogo: entra_fogo (escolhe boca + líquido + volume)
-    no_fogo --> fora_do_fogo: sai_fogo (tira temporariamente)
-    fora_do_fogo --> no_fogo: retorna_fogo
-    no_fogo --> tirada: registrar tiragem (sai + registra volume)
-    fora_do_fogo --> tirada: registrar tiragem
-    tirada --> aguardando_reposicao: confirmar tiragem
-    aguardando_reposicao --> no_fogo: repor líquido + play
-    aguardando_reposicao --> descartada: descartar (fim de vida)
+    no_fogo --> fora_do_fogo: pausar (encostar na casinha)
+    fora_do_fogo --> no_fogo: retomar
+    no_fogo --> na_biqueira: registrar tiragem (sai do fogão, boca libera)
+    fora_do_fogo --> na_biqueira: registrar tiragem
+    na_biqueira --> no_fogo: repor líquido + play (escolhe boca)
+    na_biqueira --> fora_do_fogo: encostar (panela sai da biqueira)
+    na_biqueira --> descartada: descartar (fim de vida)
     no_fogo --> descartada: descartar (caso excepcional)
     descartada --> [*]
 ```
@@ -266,14 +266,16 @@ stateDiagram-v2
 | De | Para | Ação | Dados necessários |
 |---|---|---|---|
 | `montada` | `no_fogo` | Entrar no fogo | boca, tipo_conteudo, volume_l |
-| `no_fogo` | `fora_do_fogo` | Pausar / sair temporário | — |
+| `no_fogo` | `fora_do_fogo` | Encostar / pausar | — |
 | `fora_do_fogo` | `no_fogo` | Retomar | — |
-| `no_fogo` \| `fora_do_fogo` | `tirada` | Tirar e registrar volume | volume_l tirado, tonel_destino |
-| `tirada` | `aguardando_reposicao` | Confirmar | — |
-| `aguardando_reposicao` | `no_fogo` | Repor e dar play | tipo_conteudo novo, volume_l reposto |
-| `aguardando_reposicao` | `descartada` | Descartar | motivo opcional |
+| `no_fogo` \| `fora_do_fogo` | `na_biqueira` | Tirar e registrar volume (libera boca) | volume_l tirado, tonel_destino |
+| `na_biqueira` | `no_fogo` | Repor e dar play | boca escolhida, tipo_conteudo, volume_l |
+| `na_biqueira` | `fora_do_fogo` | Encostar (panela sai da biqueira) | — |
+| `na_biqueira` | `descartada` | Descartar | motivo opcional |
 
-> **Nota sobre água forte:** "água forte" não é um estado da panela, é uma característica do **conteúdo** (`tipo_conteudo`) e do **ciclo** em que ela está (flag `em_ciclo_agua_forte`). Uma panela em ciclo de água forte continua passando pelos mesmos estados (`no_fogo` → `tirada` → `aguardando_reposicao` → `no_fogo`...) — a diferença é que toda tiragem é registrada como `agua_forte` e toda reposição é com água. O ciclo se repete quantas vezes o feitor quiser até a transição final para `descartada`.
+> **Nota sobre a biqueira:** "biqueira" é o espaço físico onde a panela é virada para derramar o líquido no tonel após a tiragem. Enquanto estiver lá, a boca do fogão fica livre — outra panela pode entrar imediatamente. O estado `na_biqueira` substitui o antigo `aguardando_reposicao` (renomeado na Fase 8 para refletir a realidade física).
+
+> **Nota sobre água forte:** "água forte" não é um estado da panela, é uma característica do **conteúdo** (`tipo_conteudo`) e do **ciclo** em que ela está (flag `em_ciclo_agua_forte`). Uma panela em ciclo de água forte continua passando pelos mesmos estados (`no_fogo` → `na_biqueira` → `no_fogo`...) — a diferença é que toda tiragem é registrada como `agua_forte` e toda reposição é com água. O ciclo se repete quantas vezes o feitor quiser até a transição final para `descartada`.
 
 ---
 
@@ -359,7 +361,7 @@ Em uma panela no fogo, deve ser possível **acrescentar volume** (ex: +5 L, +10 
 3. Pergunta o **volume tirado**.
 4. Pergunta o **tonel destino** (pré-selecionado pelo tipo).
 5. Confirma.
-6. Panela vai para estado `aguardando_reposicao`.
+6. Panela vai para estado `na_biqueira` (sai do fogão, libera a boca).
 
 ### RF-08 — Regra de nomenclatura automática
 
@@ -406,14 +408,15 @@ O feitor pode **sobrescrever** a sugestão manualmente caso o sistema se engane.
 
 ### RF-09 — Repor líquido após tiragem
 
-Após tiragem confirmada, panela entra em `aguardando_reposicao`. Sistema pergunta:
+Quando a panela está `na_biqueira` (virada após tiragem), o feitor pode decidir repor. Sistema pergunta:
 
 - **Com o que repor?** Sugestões inteligentes baseadas no próximo passo lógico:
   - Se panela acabou de dar 1º cozimento → sugere "água" (continuar cozinhando) OU "descartar".
   - Se panela acabou de dar Daime 1º grau → sugere "3º cozimento" (para virar 2º grau na próxima).
   - Se panela está no **ciclo de água forte** → **sugere apenas "água"** (não oferece cozimento como opção principal, pois no ciclo de água forte só se repõe água).
   - Sempre permite escolher livremente, inclusive sobrescrever a sugestão.
-- **Volume a repor** (com botões de 60, 55, 50, 45, ou valor livre).
+- **Volume a repor** (com botões de 65, 60, 55, 50, 45 ou valor livre).
+- **Em qual boca voltar** (PillRow das bocas livres). Se nenhuma boca estiver livre, o botão Repor fica desabilitado com aviso.
 
 O sistema **desconta do tonel** escolhido (quando aplicável — água pura não sai de tonel).
 
@@ -425,7 +428,7 @@ Ao confirmar, as duas panelas trocam de boca. **Não há mudança de tempo ou co
 
 ### RF-11 — Descartar panela (fim de vida)
 
-Panelas em `aguardando_reposicao` ou `no_fogo` (em caso excepcional) podem ser marcadas como descartadas. A panela some da fornalha, o material é considerado fora.
+Panelas em `na_biqueira` ou `no_fogo` (em caso excepcional) podem ser marcadas como descartadas. A panela some da fornalha, o material é considerado fora.
 
 ### RF-12 — Gestão dos tonéis
 
@@ -526,7 +529,7 @@ O comando `editarFeitio` exige um `encarregado` não-vazio quando `feitorAusente
 | INV-04 | Volume inicial de panela não excede capacidade da panela (default 120 L, configurável). |
 | INV-05 | Não é possível tirar mais volume do que há na panela. |
 | INV-06 | Tiragem só em estado `no_fogo` ou `fora_do_fogo`. |
-| INV-07 | Entrada no fogo só em `montada` ou `aguardando_reposicao`. |
+| INV-07 | Entrada no fogo só em `montada`; retorno ao fogo a partir de `na_biqueira` (via Repor) ou `fora_do_fogo` (via Retomar). |
 | INV-08 | Panela `descartada` é terminal — não aceita mais transições. |
 | INV-09 | Timer de fogo só conta quando estado é `no_fogo` e `tempo_pausado == false`. |
 | INV-10 | Eventos são **append-only** — nunca se apaga evento, apenas se cria evento compensatório (desfazer = evento inverso). |
@@ -683,7 +686,7 @@ sequenceDiagram
     App->>F: Volume tirado? (sugere 30 L)
     F->>App: 31 L
     App->>T1: +31 L
-    App->>P1: estado=aguardando_reposicao
+    App->>P1: estado=na_biqueira (boca livre)
     F->>App: Repor com água, 55 L
     App->>P1: estado=no_fogo
 
@@ -714,7 +717,7 @@ sequenceDiagram
     App->>F: Tipo sugerido: Daime 1º grau. Volume tirado?
     F->>App: 18 L
     App->>F: Confirma destino: Tonel Daime 1º grau
-    App->>P3: estado=aguardando_reposicao
+    App->>P3: estado=na_biqueira (boca livre)
     F->>App: Repor com 3º cozimento, 60 L
     Note over App: próxima tiragem será Daime 2º grau
 ```

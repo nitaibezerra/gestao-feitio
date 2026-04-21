@@ -178,7 +178,7 @@ Ordem **red first**: cada arquivo `.ts` de domínio nasce de um `.test.ts` falha
 - Green: `infra/persistencia/dexie-db.ts` + `repositorio-eventos.ts`
 
 **Ciclo 2 — Command handlers**
-- Red: "comando `RegistrarTiragem` em panela `no_fogo` com volume válido → persiste evento + panela vai para `aguardando_reposicao`"
+- Red: "comando `RegistrarTiragem` em panela `no_fogo` com volume válido → persiste evento + panela vai para `na_biqueira`"
 - Red: "comando inválido (tirar de panela `descartada`) → erro claro, nada persistido"
 - Green: `app/comandos.ts` — orquestra domínio (validação) + repositório (persistência)
 
@@ -231,7 +231,7 @@ Cada comando ganha um Playwright E2E "de fora pra dentro":
 3. Refactor: extrair pequenos componentes, reduzir duplicação de modais.
 
 Comandos a ligar:
-- `Tirar` → `TiragemRegistrada` → atualiza panela e tonel destino → panela vai para `aguardando_reposicao`.
+- `Tirar` → `TiragemRegistrada` → atualiza panela e tonel destino → panela vai para `na_biqueira` (libera a boca do fogão).
 - `Repor` → desconta do tonel origem → `ReposicaoRegistrada` → panela volta para `no_fogo`.
 - `Pausar` / `Retomar` → eventos `TempoPausado` / `TempoRetomado`.
 - `Trocar boca` → seleção dupla + `TrocaBocas`.
@@ -271,6 +271,19 @@ Feedback após o feitor testar o MVP: precisa registrar quando ele mesmo se ause
 5. **7.5 — Docs**: requisitos e plano atualizados.
 
 Ao final: 190 unit + 29 E2E verdes, `pnpm check` 0/0, `pnpm build` ok.
+
+### Fase 8 — Biqueira e ajustes da máquina de estado
+
+Feedback após segunda rodada de teste com o feitor:
+
+1. **8.1 — Pills de volume/meta**: volume ganha 45 L; meta perde 50 L e ganha 20 L e 25 L (refletindo o que ele realmente tira).
+2. **8.2 — Destaque do volume da tiragem**: no sub-form de "Tirar", o volume vira elemento dominante (Fraunces 96px weight 200 centralizado) — informação mais importante do passo.
+3. **8.3 — Estado `na_biqueira` libera a boca**: renomeia `aguardando_reposicao → na_biqueira` em todo o domínio. Tiragem agora zera `bocaAtual` (panela sai do fogão, vai para a biqueira virada). Nova transição `na_biqueira → pausar → fora_do_fogo` para permitir encostar de lá. Payload de `reposicao_registrada` ganha `bocaNumero` opcional.
+4. **8.4 — Repor exige boca explícita**: `ComandoReposicao.bocaNumero` obrigatório; valida > 0 e que a boca está livre.
+5. **8.5 — Seção Biqueira + ações pós-tiragem**: novo componente `Biqueira.svelte` entre Fornalha e Tonéis, visível só quando há panelas `na_biqueira`. O `PanelaModal` passa a receber `bocasVazias` e ganhar PillRow de seleção de boca no sub-form de Repor (pré-seleciona primeira livre; desabilita se zero). Encostar funciona tanto em `no_fogo` quanto em `na_biqueira` — corrige o bug do feitor.
+6. **8.6 — E2E `biqueira.spec.ts`**: 4 cenários novos (tirar libera boca; panela na biqueira mostra Repor/Encostar/Editar; encostar da biqueira; repor em outra boca).
+
+Ao final: 198 unit + 33 E2E verdes, `pnpm check` 0/0, `pnpm build` ok.
 
 ---
 

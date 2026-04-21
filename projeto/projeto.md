@@ -331,7 +331,7 @@ export type EstadoPanela =
   | 'montada'
   | 'no_fogo'
   | 'fora_do_fogo'
-  | 'aguardando_reposicao'
+  | 'na_biqueira'
   | 'descartada'
 
 export type TipoConteudo =
