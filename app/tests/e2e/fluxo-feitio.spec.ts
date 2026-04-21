@@ -64,7 +64,7 @@ test.describe('Fluxo de feitio — Fase 4', () => {
     await expect(page.getByText('01', { exact: true })).toBeVisible();
   });
 
-  test('clicar em panela abre modal; Tirar registra tiragem e panela vai para aguardando_reposicao', async ({
+  test('clicar em panela abre modal; Tirar registra tiragem e panela vai para a biqueira', async ({
     page
   }) => {
     // Cria feitio
@@ -90,14 +90,13 @@ test.describe('Fluxo de feitio — Fase 4', () => {
     // Sub-form: aceita valores padrão e confirma
     await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
 
-    // Fecha modal
-    await detalhe.getByRole('button', { name: 'Fechar' }).click();
-
-    // Reabre panela e confere que está aguardando reposição (botão Repor disponível)
-    await page.getByText('01', { exact: true }).click();
+    // Após tiragem, panela sai do fogão e vai para a biqueira.
+    // Modal reabre no modo biqueira — o botão Repor deve estar disponível.
     await expect(
       page.getByRole('dialog', { name: /Detalhe da panela/i }).getByRole('button', { name: /Repor/i })
     ).toBeVisible();
+    // E a seção Biqueira aparece na página.
+    await expect(page.getByRole('heading', { name: /Biqueira/i })).toBeVisible();
   });
 
   test('repor traz panela de volta ao fogo', async ({ page }) => {
@@ -117,12 +116,12 @@ test.describe('Fluxo de feitio — Fase 4', () => {
     await detalhe.getByRole('button', { name: /^Tirar/i }).click();
     await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
 
-    // Agora repor
+    // Modal reabre automaticamente no modo biqueira. Clica Repor.
     await detalhe.getByRole('button', { name: /Repor/i }).click();
+    // Sub-form de repor tem seleção de boca + conteúdo + volume; valores padrão.
     await detalhe.getByRole('button', { name: /Confirmar reposição/i }).click();
 
-    // Fecha e reabre — Tirar deve estar disponível de novo
-    await detalhe.getByRole('button', { name: 'Fechar' }).click();
+    // Modal fecha. Reabre a panela — Tirar deve estar disponível de novo.
     await page.getByText('01', { exact: true }).click();
     await expect(
       page.getByRole('dialog', { name: /Detalhe da panela/i }).getByRole('button', { name: /^Tirar/i })

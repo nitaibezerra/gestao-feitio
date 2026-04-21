@@ -7,7 +7,7 @@
  *  - Editar hora da entrada no fogo
  *  - Encostar e voltar à mesma boca
  *  - Encostar e voltar a outra boca
- *  - Encostar e tirar material direto (panela fica em aguardando_reposicao
+ *  - Encostar e tirar material direto (panela fica em na_biqueira
  *    e desaparece da seção encostadas)
  *  - Tonéis sem capacidade — sem texto "%" nem "L" de capacidade
  */

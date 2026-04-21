@@ -27,10 +27,11 @@ async function limparDb(page: Page): Promise<void> {
 }
 
 async function fecharModal(page: Page): Promise<void> {
-  await page
-    .getByRole('dialog', { name: /Detalhe da panela/i })
-    .getByRole('button', { name: 'Fechar' })
-    .click();
+  const dialogo = page.getByRole('dialog', { name: /Detalhe da panela/i });
+  if ((await dialogo.count()) === 0) return;
+  if (!(await dialogo.first().isVisible().catch(() => false))) return;
+  const botao = dialogo.getByRole('button', { name: 'Fechar' });
+  await botao.first().click({ timeout: 5000 }).catch(() => {});
 }
 
 async function criarPanelaConteudoVolume(

@@ -205,18 +205,18 @@
 
   async function onTirar(p: PayloadTirar) {
     if (!feitio || !panelaAberta) return;
+    const idAlvo = panelaAberta.id;
     const tonelDestinoId = tonelDestinoPara(panelaAberta.proxTiragem, estado!);
-    await comandos().registrarTiragem({
+    const r = await comandos().registrarTiragem({
       feitioId: feitio.id,
-      panelaId: panelaAberta.id,
+      panelaId: idAlvo,
       volumeL: p.volumeL,
       tonelDestinoId
     });
-    // Tiragem joga a panela para biqueira — reabre o modal nesse modo.
-    if (selecionadaId === panelaAberta.id) {
-      selecionadaId = null;
-      biqueiraId = panelaAberta.id;
-    }
+    if (!r.ok) return;
+    // Tiragem joga a panela para a biqueira — reabre o modal nesse modo.
+    selecionadaId = null;
+    biqueiraId = idAlvo;
   }
 
   async function onRepor(p: PayloadRepor) {
