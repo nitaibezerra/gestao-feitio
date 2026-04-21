@@ -415,6 +415,56 @@ describe('projetarFornalha — volume_ajustado e pausa/retomada', () => {
   });
 });
 
+describe('projetarFornalha — meta de tiragem (Fase 6.1)', () => {
+  it('panela_entra_fogo com metaTiragemL → projeta em panela.metaTiragemL', () => {
+    const feitioId = 'f1';
+    const eventos: Evento[] = [
+      evt(feitioId, '2026-04-16T07:00:00', {
+        tipo: 'feitio_iniciado',
+        payload: { nome: 'F', feitor: 'J', qtdBocas: 5 }
+      }),
+      evt(feitioId, '2026-04-16T08:00:00', {
+        tipo: 'panela_montada',
+        payload: { panelaId: 'p1', numero: 1 }
+      }),
+      evt(feitioId, '2026-04-16T08:10:00', {
+        tipo: 'panela_entra_fogo',
+        payload: {
+          panelaId: 'p1',
+          bocaNumero: 1,
+          conteudo: { tipo: 'agua' },
+          volumeL: 60,
+          metaTiragemL: 45
+        }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.metaTiragemL).toBe(45);
+  });
+
+  it('panela_entra_fogo sem metaTiragemL → panela.metaTiragemL permanece undefined', () => {
+    const feitioId = 'f1';
+    const eventos: Evento[] = [
+      evt(feitioId, '2026-04-16T07:00:00', {
+        tipo: 'feitio_iniciado',
+        payload: { nome: 'F', feitor: 'J', qtdBocas: 5 }
+      }),
+      evt(feitioId, '2026-04-16T08:00:00', {
+        tipo: 'panela_montada',
+        payload: { panelaId: 'p1', numero: 1 }
+      }),
+      evt(feitioId, '2026-04-16T08:10:00', {
+        tipo: 'panela_entra_fogo',
+        payload: { panelaId: 'p1', bocaNumero: 1, conteudo: { tipo: 'agua' }, volumeL: 60 }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.metaTiragemL).toBeUndefined();
+  });
+});
+
 describe('projetarFornalha — troca de bocas', () => {
   it('troca_bocas inverte as bocas das duas panelas, preservando conteúdo', () => {
     const feitioId = 'f1';

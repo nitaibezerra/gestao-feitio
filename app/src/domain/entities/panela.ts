@@ -45,4 +45,15 @@ export type Panela = {
   volumeAtualL?: number;
   entradaFogoEm?: Date | null;
   tempoPausado?: boolean;
+  /**
+   * Meta de tiragem informada pelo feitor no momento em que a panela entrou no
+   * fogo. Opcional — quando ausente, UI cai em heurística.
+   */
+  metaTiragemL?: number;
+  /**
+   * Momento do último `tempo_pausado`; limpo em `tempo_retomado` ou em nova
+   * entrada no fogo. Usado para exibir há quanto tempo uma panela está
+   * encostada.
+   */
+  encostadaDesde?: Date | null;
 };

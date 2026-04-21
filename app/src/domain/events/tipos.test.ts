@@ -151,4 +151,37 @@ describe('validarEvento — payload específico por tipo', () => {
     const r = validarEvento(e);
     expect(r.ok).toBe(false);
   });
+
+  it('panela_entra_fogo com metaTiragemL positiva → ok', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'panela_entra_fogo',
+      payload: {
+        panelaId: 'p1',
+        bocaNumero: 1,
+        conteudo: { tipo: 'agua' },
+        volumeL: 60,
+        metaTiragemL: 30
+      }
+    };
+    const r = validarEvento(e);
+    expect(r.ok).toBe(true);
+  });
+
+  it('panela_entra_fogo com metaTiragemL negativa → erro', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'panela_entra_fogo',
+      payload: {
+        panelaId: 'p1',
+        bocaNumero: 1,
+        conteudo: { tipo: 'agua' },
+        volumeL: 60,
+        metaTiragemL: -5
+      }
+    };
+    const r = validarEvento(e);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.join(' ')).toMatch(/metaTiragemL/);
+  });
 });

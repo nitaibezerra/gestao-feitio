@@ -129,6 +129,38 @@ describe('montarPanela + entrarNoFogo', () => {
     });
     expect(r.ok).toBe(false);
   });
+
+  it('entrar no fogo com metaTiragemL → projeção preenche panela.metaTiragemL', async () => {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    const r = await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 1,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60,
+      metaTiragemL: 45
+    });
+    expect(r.ok).toBe(true);
+
+    const f = await estado('f1');
+    const p1 = f.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.metaTiragemL).toBe(45);
+  });
+
+  it('entrar no fogo com metaTiragemL negativa → erro', async () => {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    const r = await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 1,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60,
+      metaTiragemL: -3
+    });
+    expect(r.ok).toBe(false);
+  });
 });
 
 describe('registrarTiragem', () => {

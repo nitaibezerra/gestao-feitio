@@ -34,10 +34,11 @@ export function capacidadeDefault(tonel: Tonel): number {
 }
 
 /**
- * Meta de tiragem: heurística "metade do volume atual" — valor razoável
- * para o feitor ajustar na hora de tirar.
+ * Meta de tiragem: preferir o valor informado pelo feitor ao entrar no fogo;
+ * se ausente, heurística "metade do volume atual".
  */
 export function metaTiragemSugerida(panela: Panela): number {
+  if (typeof panela.metaTiragemL === 'number') return panela.metaTiragemL;
   return Math.floor((panela.volumeAtualL ?? 0) / 2);
 }
 

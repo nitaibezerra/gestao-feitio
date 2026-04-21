@@ -86,6 +86,10 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
       p.estado = 'no_fogo';
       p.entradaFogoEm = new Date(evento.momento);
       p.tempoPausado = false;
+      p.encostadaDesde = null;
+      if (evento.payload.metaTiragemL !== undefined) {
+        p.metaTiragemL = evento.payload.metaTiragemL;
+      }
       descontarTonelSeCozimento(estado, evento.payload.conteudo, evento.payload.volumeL);
       return;
     }

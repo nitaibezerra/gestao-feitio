@@ -33,6 +33,12 @@ export type PayloadPanelaEntraFogo = {
   bocaNumero: number;
   conteudo: TipoConteudo;
   volumeL: number;
+  /**
+   * Meta de tiragem em litros — quanto o feitor planeja tirar desta entrada.
+   * Opcional (retrocompatibilidade): projeção usa heurística `volume/2`
+   * quando ausente.
+   */
+  metaTiragemL?: number;
 };
 export type PayloadTiragemRegistrada = {
   panelaId: string;
@@ -157,6 +163,9 @@ function validarPayload(evento: Evento): string[] {
       if (!(payload.bocaNumero > 0)) erros.push('panela_entra_fogo: bocaNumero deve ser > 0');
       if (!payload.conteudo) erros.push('panela_entra_fogo: conteudo obrigatório');
       if (!(payload.volumeL >= 0)) erros.push('panela_entra_fogo: volumeL deve ser >= 0');
+      if (payload.metaTiragemL !== undefined && !(payload.metaTiragemL >= 0)) {
+        erros.push('panela_entra_fogo: metaTiragemL deve ser >= 0');
+      }
       break;
     }
     case 'tiragem_registrada': {

@@ -42,6 +42,7 @@ export type ComandoEntrarNoFogo = Ctx & {
   bocaNumero: number;
   conteudo: TipoConteudo;
   volumeL: number;
+  metaTiragemL?: number;
 };
 
 export type ComandoTiragem = Ctx & {
@@ -129,6 +130,9 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
     },
 
     async entrarNoFogo(c) {
+      if (c.metaTiragemL !== undefined && c.metaTiragemL < 0) {
+        return { ok: false, motivo: 'metaTiragemL deve ser >= 0' };
+      }
       const { fornalha } = await estadoAtual(c.feitioId);
       const panela = buscarPanela(fornalha, c.panelaId);
       if (!panela) return { ok: false, motivo: `panela ${c.panelaId} não encontrada` };
@@ -140,7 +144,8 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
           panelaId: c.panelaId,
           bocaNumero: c.bocaNumero,
           conteudo: c.conteudo,
-          volumeL: c.volumeL
+          volumeL: c.volumeL,
+          ...(c.metaTiragemL !== undefined ? { metaTiragemL: c.metaTiragemL } : {})
         }
       });
       return persistir(evento);
