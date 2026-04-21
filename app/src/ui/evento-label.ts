@@ -62,6 +62,8 @@ export function resumirEvento(e: Evento, panelas: Panela[]): EventoResumo {
       return { texto: `Panela ${nPanela(e.payload.panelaId)} — Pausada`, momento };
     case 'tempo_retomado':
       return { texto: `Panela ${nPanela(e.payload.panelaId)} — Retomada`, momento };
+    case 'panela_retirada_fogo':
+      return { texto: `Panela ${nPanela(e.payload.panelaId)} — Tirou do fogo (biqueira)`, momento };
     case 'troca_bocas':
       return {
         texto: `Trocou boca entre panela ${nPanela(e.payload.panelaAId)} e ${nPanela(e.payload.panelaBId)}`,

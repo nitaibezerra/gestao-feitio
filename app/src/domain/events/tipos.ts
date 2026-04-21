@@ -10,6 +10,7 @@ export type TipoEvento =
   | 'feitio_editado'
   | 'panela_montada'
   | 'panela_entra_fogo'
+  | 'panela_retirada_fogo'
   | 'panela_editada'
   | 'tiragem_registrada'
   | 'reposicao_registrada'
@@ -108,6 +109,7 @@ export type Evento = EventoBase &
     | { tipo: 'feitio_editado'; payload: PayloadFeitioEditado }
     | { tipo: 'panela_montada'; payload: PayloadPanelaMontada }
     | { tipo: 'panela_entra_fogo'; payload: PayloadPanelaEntraFogo }
+    | { tipo: 'panela_retirada_fogo'; payload: PayloadPanelaSimples }
     | { tipo: 'panela_editada'; payload: PayloadPanelaEditada }
     | { tipo: 'tiragem_registrada'; payload: PayloadTiragemRegistrada }
     | { tipo: 'reposicao_registrada'; payload: PayloadReposicaoRegistrada }
@@ -150,6 +152,7 @@ const TIPOS_VALIDOS = new Set<TipoEvento>([
   'feitio_editado',
   'panela_montada',
   'panela_entra_fogo',
+  'panela_retirada_fogo',
   'panela_editada',
   'tiragem_registrada',
   'reposicao_registrada',
@@ -257,6 +260,7 @@ function validarPayload(evento: Evento): string[] {
     }
     case 'tempo_pausado':
     case 'tempo_retomado':
+    case 'panela_retirada_fogo':
     case 'panela_descartada': {
       if (!p.panelaId) erros.push(`${evento.tipo}: panelaId obrigatório`);
       break;

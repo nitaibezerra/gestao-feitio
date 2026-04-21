@@ -85,18 +85,23 @@ test.describe('Fluxo de feitio — Fase 4', () => {
     const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
     await expect(detalhe).toBeVisible();
 
-    // Clica Tirar
+    // Clica Tirar — ato físico, panela sai do fogão para a biqueira e o
+    // modal fecha. Sem formulário neste momento.
     await detalhe.getByRole('button', { name: /^Tirar/i }).click();
-    // Sub-form: aceita valores padrão e confirma
-    await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
+    await expect(detalhe).toBeHidden();
 
-    // Após tiragem, panela sai do fogão e vai para a biqueira.
-    // Modal reabre no modo biqueira — o botão Repor deve estar disponível.
-    await expect(
-      page.getByRole('dialog', { name: /Detalhe da panela/i }).getByRole('button', { name: /Repor/i })
-    ).toBeVisible();
-    // E a seção Biqueira aparece na página.
+    // Seção Biqueira aparece na página.
     await expect(page.getByRole('heading', { name: /Biqueira/i })).toBeVisible();
+
+    // Reabre a panela na biqueira — o modal entra automaticamente no form
+    // obrigatório de registro do volume (volume pendente).
+    await page.getByText('01', { exact: true }).click();
+    const biqModal = page.getByRole('dialog', { name: /Detalhe da panela/i });
+    await expect(biqModal).toBeVisible();
+    await biqModal.getByRole('button', { name: /Registrar tiragem/i }).click();
+
+    // Com o volume registrado, Repor/Encostar/Editar ficam disponíveis.
+    await expect(biqModal.getByRole('button', { name: /Repor/i })).toBeVisible();
   });
 
   test('repor traz panela de volta ao fogo', async ({ page }) => {
@@ -114,12 +119,16 @@ test.describe('Fluxo de feitio — Fase 4', () => {
     await page.getByText('01', { exact: true }).click();
     const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
     await detalhe.getByRole('button', { name: /^Tirar/i }).click();
-    await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
+    await expect(detalhe).toBeHidden();
 
-    // Modal reabre automaticamente no modo biqueira. Clica Repor.
-    await detalhe.getByRole('button', { name: /Repor/i }).click();
-    // Sub-form de repor tem seleção de boca + conteúdo + volume; valores padrão.
-    await detalhe.getByRole('button', { name: /Confirmar reposição/i }).click();
+    // Reabre e registra o volume da tiragem.
+    await page.getByText('01', { exact: true }).click();
+    const biqModal = page.getByRole('dialog', { name: /Detalhe da panela/i });
+    await biqModal.getByRole('button', { name: /Registrar tiragem/i }).click();
+
+    // Agora Repor está disponível.
+    await biqModal.getByRole('button', { name: /^Repor$/i }).click();
+    await biqModal.getByRole('button', { name: /Confirmar reposição/i }).click();
 
     // Modal fecha. Reabre a panela — Tirar deve estar disponível de novo.
     await page.getByText('01', { exact: true }).click();

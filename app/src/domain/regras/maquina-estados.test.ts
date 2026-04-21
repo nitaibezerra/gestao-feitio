@@ -87,6 +87,7 @@ describe('transicao — transições proibidas', () => {
   const proibidas: Array<[EstadoPanela, Comando['tipo']]> = [
     ['montada', 'pausar'],
     ['montada', 'retomar'],
+    ['montada', 'retirar_do_fogo'],
     ['montada', 'registrar_tiragem'],
     ['montada', 'repor_e_play'],
     ['montada', 'descartar'],
@@ -102,7 +103,7 @@ describe('transicao — transições proibidas', () => {
 
     ['na_biqueira', 'entrar_no_fogo'],
     ['na_biqueira', 'retomar'],
-    ['na_biqueira', 'registrar_tiragem']
+    ['na_biqueira', 'retirar_do_fogo']
   ];
 
   for (const [estado, comando] of proibidas) {
@@ -120,6 +121,7 @@ describe('transicao — transições proibidas', () => {
       'entrar_no_fogo',
       'pausar',
       'retomar',
+      'retirar_do_fogo',
       'registrar_tiragem',
       'repor_e_play',
       'descartar'
@@ -128,6 +130,27 @@ describe('transicao — transições proibidas', () => {
       const r = transicao('descartada', { tipo } as Comando);
       expect(r.ok).toBe(false);
     }
+  });
+});
+
+describe('transicao — retirar_do_fogo e registrar_tiragem em biqueira', () => {
+  it('no_fogo + retirar_do_fogo → na_biqueira', () => {
+    expect(transicao('no_fogo', { tipo: 'retirar_do_fogo' })).toEqual<ResultadoTransicao>({
+      ok: true,
+      estado: 'na_biqueira'
+    });
+  });
+
+  it('fora_do_fogo + retirar_do_fogo → na_biqueira', () => {
+    expect(
+      transicao('fora_do_fogo', { tipo: 'retirar_do_fogo' })
+    ).toEqual<ResultadoTransicao>({ ok: true, estado: 'na_biqueira' });
+  });
+
+  it('na_biqueira + registrar_tiragem → na_biqueira (self-loop registrando volume)', () => {
+    expect(
+      transicao('na_biqueira', { tipo: 'registrar_tiragem' })
+    ).toEqual<ResultadoTransicao>({ ok: true, estado: 'na_biqueira' });
   });
 });
 

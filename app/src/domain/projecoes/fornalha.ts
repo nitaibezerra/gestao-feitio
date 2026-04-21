@@ -87,10 +87,25 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
       p.entradaFogoEm = new Date(evento.momento);
       p.tempoPausado = false;
       p.encostadaDesde = null;
+      p.saidaDoFogoEm = null;
+      p.volumeTiragemPendente = false;
       if (evento.payload.metaTiragemL !== undefined) {
         p.metaTiragemL = evento.payload.metaTiragemL;
       }
       descontarTonelSeCozimento(estado, evento.payload.conteudo, evento.payload.volumeL);
+      return;
+    }
+
+    case 'panela_retirada_fogo': {
+      // Fluxo novo: tira do fogo primeiro (sem volume), depois registra o
+      // volume via `tiragem_registrada` — mantém a panela bloqueada
+      // enquanto o feitor não mediu.
+      const p = buscarPanela(estado, evento.payload.panelaId);
+      if (!p) return;
+      p.estado = 'na_biqueira';
+      p.bocaAtual = null;
+      p.saidaDoFogoEm = new Date(evento.momento);
+      p.volumeTiragemPendente = true;
       return;
     }
 
@@ -104,9 +119,11 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
         momento: new Date(evento.momento)
       });
       p.volumeAtualL = Math.max(0, (p.volumeAtualL ?? 0) - evento.payload.volumeL);
-      // Ao tirar, a panela sai do fogão e vai para a biqueira — libera a boca.
+      // Fluxo legado: se veio direto de `no_fogo`, movemos agora.
+      // Fluxo novo: panela já está `na_biqueira`; só marcamos volume medido.
       p.estado = 'na_biqueira';
       p.bocaAtual = null;
+      p.volumeTiragemPendente = false;
       if (evento.payload.tipoTiragem.tipo === 'agua_forte') {
         p.emCicloAguaForte = true;
       }

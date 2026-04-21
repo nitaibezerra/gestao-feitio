@@ -41,6 +41,24 @@ async function criarPanelaNaBoca(page: Page, boca: number): Promise<void> {
   await expect(modal).toBeHidden();
 }
 
+/**
+ * Executa o fluxo completo de Tirar (fluxo pós-Fase 9):
+ *  1. Abre o modal da panela pelo número (padStart(2,'0'))
+ *  2. Clica "Tirar" — modal fecha, panela vai pra biqueira com volume pendente
+ *  3. Reabre a panela (clicando no card) — modal abre automaticamente no form
+ *     obrigatório de registro do volume
+ *  4. Clica "Registrar tiragem"
+ */
+async function tirarERegistrar(page: Page, numeroPanela: string): Promise<void> {
+  await page.getByText(numeroPanela, { exact: true }).click();
+  const mod1 = page.getByRole('dialog', { name: /Detalhe da panela/i });
+  await mod1.getByRole('button', { name: /^Tirar/i }).click();
+  await expect(mod1).toBeHidden();
+  await page.getByText(numeroPanela, { exact: true }).click();
+  const mod2 = page.getByRole('dialog', { name: /Detalhe da panela/i });
+  await mod2.getByRole('button', { name: /Registrar tiragem/i }).click();
+}
+
 test.describe('Biqueira — Fase 8', () => {
   test.beforeEach(async ({ page }) => {
     await limparDb(page);
@@ -51,12 +69,9 @@ test.describe('Biqueira — Fase 8', () => {
     await criarPanelaNaBoca(page, 1);
 
     // Tira a panela 01 — deve liberar a boca 1
-    await page.getByText('01', { exact: true }).click();
-    const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
-    await detalhe.getByRole('button', { name: /^Tirar/i }).click();
-    await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
+    await tirarERegistrar(page, '01');
 
-    // Modal reabre em modo biqueira — fecha para ver a fornalha
+    // Modal aberto em modo biqueira — fecha para ver a fornalha
     const botaoFechar = page
       .getByRole('dialog', { name: /Detalhe da panela/i })
       .getByRole('button', { name: 'Fechar' });
@@ -76,14 +91,11 @@ test.describe('Biqueira — Fase 8', () => {
     await criarFeitio(page, 'Feitio Biqueira Ações');
     await criarPanelaNaBoca(page, 1);
 
-    // Tira
-    await page.getByText('01', { exact: true }).click();
-    let detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
-    await detalhe.getByRole('button', { name: /^Tirar/i }).click();
-    await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
+    // Tira (novo fluxo: modal fecha → reabre → Registrar tiragem)
+    await tirarERegistrar(page, '01');
 
-    // Modal reabre em modo biqueira
-    detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
+    // Modal aberto em modo biqueira com tiragem registrada
+    const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
     await expect(detalhe.getByRole('button', { name: /^Repor$/i })).toBeVisible();
     await expect(detalhe.getByRole('button', { name: /^Encostar$/i })).toBeVisible();
     await expect(detalhe.getByRole('button', { name: /^Editar$/i })).toBeVisible();
@@ -98,13 +110,10 @@ test.describe('Biqueira — Fase 8', () => {
     await criarFeitio(page, 'Feitio Encostar Biqueira');
     await criarPanelaNaBoca(page, 1);
 
-    await page.getByText('01', { exact: true }).click();
-    let detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
-    await detalhe.getByRole('button', { name: /^Tirar/i }).click();
-    await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
+    await tirarERegistrar(page, '01');
 
     // Modal em modo biqueira — clica Encostar
-    detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
+    const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
     await detalhe.getByRole('button', { name: /^Encostar$/i }).click();
 
     // Modal fecha; seção Panelas encostadas aparece
@@ -117,13 +126,10 @@ test.describe('Biqueira — Fase 8', () => {
     await criarFeitio(page, 'Feitio Repor Outra Boca');
     await criarPanelaNaBoca(page, 1);
 
-    await page.getByText('01', { exact: true }).click();
-    let detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
-    await detalhe.getByRole('button', { name: /^Tirar/i }).click();
-    await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
+    await tirarERegistrar(page, '01');
 
     // Modal em modo biqueira — clica Repor
-    detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
+    const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
     await detalhe.getByRole('button', { name: /^Repor$/i }).click();
     // PillRow de bocas — escolhe boca 3
     await detalhe.getByRole('button', { name: /Boca 3\b/i }).click();

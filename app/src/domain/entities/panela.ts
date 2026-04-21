@@ -56,4 +56,16 @@ export type Panela = {
    * encostada.
    */
   encostadaDesde?: Date | null;
+  /**
+   * Momento em que a panela foi retirada do fogo (evento
+   * `panela_retirada_fogo`). Usado para mostrar há quanto tempo a panela
+   * está na biqueira.
+   */
+  saidaDoFogoEm?: Date | null;
+  /**
+   * Flag true quando a panela foi retirada do fogo mas o feitor ainda não
+   * registrou o volume tirado. Enquanto pendente, repor/encostar são
+   * bloqueados — forçando a medição antes de liberar a biqueira.
+   */
+  volumeTiragemPendente?: boolean;
 };

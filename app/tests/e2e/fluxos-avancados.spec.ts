@@ -180,12 +180,15 @@ test.describe('Fluxos avançados — Fase 6', () => {
     await criarFeitio(page, 'Feitio Toneis');
     await criarPanelaNaBoca(page, 1);
 
-    // Tirar para gerar um tonel
+    // Tirar para gerar um tonel (fluxo Fase 9: tirar → fechar → reabrir → registrar)
     await page.getByText('01', { exact: true }).click();
     const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
     await detalhe.getByRole('button', { name: /^Tirar/ }).click();
-    await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
-    await detalhe.getByRole('button', { name: 'Fechar' }).click();
+    await expect(detalhe).toBeHidden();
+    await page.getByText('01', { exact: true }).click();
+    const biq = page.getByRole('dialog', { name: /Detalhe da panela/i });
+    await biq.getByRole('button', { name: /Registrar tiragem/i }).click();
+    await biq.getByRole('button', { name: 'Fechar' }).click();
 
     // O card do tonel (T1) aparece, mas sem "%" (capacidade removida)
     await expect(page.getByText(/^T1$/)).toBeVisible();

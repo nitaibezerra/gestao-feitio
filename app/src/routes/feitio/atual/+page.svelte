@@ -203,6 +203,16 @@
     novaOpen = false;
   }
 
+  async function onRetirarDoFogo() {
+    if (!feitio || !panelaAberta) return;
+    await comandos().retirarDoFogo({
+      feitioId: feitio.id,
+      panelaId: panelaAberta.id
+    });
+    // Modal fecha via onClose do próprio PanelaModal. Panela move pra Biqueira
+    // com volumeTiragemPendente=true; o feitor reabre e registra depois.
+  }
+
   async function onTirar(p: PayloadTirar) {
     if (!feitio || !panelaAberta) return;
     const idAlvo = panelaAberta.id;
@@ -214,9 +224,14 @@
       tonelDestinoId
     });
     if (!r.ok) return;
-    // Tiragem joga a panela para a biqueira — reabre o modal nesse modo.
-    selecionadaId = null;
-    biqueiraId = idAlvo;
+    // Se veio do fluxo antigo (no_fogo direto), a tiragem move para a biqueira
+    // e reabrimos o modal lá. No fluxo novo a panela já estava na biqueira
+    // com volumeTiragemPendente — a projeção zera a flag e as ações (Repor/
+    // Encostar/Editar) ficam desbloqueadas.
+    if (selecionadaId === idAlvo) {
+      selecionadaId = null;
+      biqueiraId = idAlvo;
+    }
   }
 
   async function onRepor(p: PayloadRepor) {
@@ -416,6 +431,7 @@
         selecionadaId = null;
         biqueiraId = null;
       }}
+      {onRetirarDoFogo}
       {onTirar}
       {onRepor}
       {onPausar}

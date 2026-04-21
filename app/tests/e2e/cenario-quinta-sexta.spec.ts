@@ -50,11 +50,16 @@ async function criarPanelaConteudoVolume(
 }
 
 async function tirar(page: Page, panelaText: string, volume: number): Promise<void> {
+  // Novo fluxo (Fase 9): Tirar é ato físico — modal fecha e reabre com form
+  // obrigatório de registro do volume.
   await page.getByText(panelaText, { exact: true }).click();
-  const detalhe = page.getByRole('dialog', { name: /Detalhe da panela/i });
-  await detalhe.getByRole('button', { name: /^Tirar/i }).click();
-  await detalhe.getByLabel(/volume da tiragem/i).fill(String(volume));
-  await detalhe.getByRole('button', { name: /Confirmar tiragem/i }).click();
+  const mod1 = page.getByRole('dialog', { name: /Detalhe da panela/i });
+  await mod1.getByRole('button', { name: /^Tirar/i }).click();
+  await expect(mod1).toBeHidden();
+  await page.getByText(panelaText, { exact: true }).click();
+  const mod2 = page.getByRole('dialog', { name: /Detalhe da panela/i });
+  await mod2.getByLabel(/volume da tiragem/i).fill(String(volume));
+  await mod2.getByRole('button', { name: /Registrar tiragem/i }).click();
 }
 
 async function repor(
@@ -123,10 +128,14 @@ test.describe('Cenário quinta-sexta — Fase 5.7', () => {
     // Confere que o "vai tirar" mostra "1º grau"
     await expect(detalhe2.getByText(/1º grau/i).first()).toBeVisible();
     await detalhe2.getByRole('button', { name: /^Tirar/i }).click();
-    await detalhe2.getByLabel(/volume da tiragem/i).fill('18');
-    await detalhe2.getByRole('button', { name: /Confirmar tiragem/i }).click();
+    await expect(detalhe2).toBeHidden();
+    // Reabre na biqueira e registra
+    await page.getByText('02', { exact: true }).click();
+    const biq2 = page.getByRole('dialog', { name: /Detalhe da panela/i });
+    await biq2.getByLabel(/volume da tiragem/i).fill('18');
+    await biq2.getByRole('button', { name: /Registrar tiragem/i }).click();
 
     // Histórico da Panela 2 mostra "1º grau" na lista de tiragens
-    await expect(detalhe2.getByText(/1º grau/i).first()).toBeVisible();
+    await expect(biq2.getByText(/1º grau/i).first()).toBeVisible();
   });
 });

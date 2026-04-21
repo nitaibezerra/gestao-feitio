@@ -29,6 +29,7 @@
     toneis: Array<Pick<Tonel, 'tipo' | 'ordem' | 'volumeL'>>;
     bocasVazias: number[];
     onClose: () => void;
+    onRetirarDoFogo: () => void;
     onTirar: (p: PayloadTirar) => void;
     onRepor: (p: PayloadRepor) => void;
     onPausar: () => void;
@@ -41,6 +42,7 @@
     toneis,
     bocasVazias,
     onClose,
+    onRetirarDoFogo,
     onTirar,
     onRepor,
     onPausar,
@@ -124,14 +126,31 @@
 
   const pausado = $derived(panela.estado === 'fora_do_fogo' || panela.tempoPausado === true);
   const naBiqueira = $derived(panela.estado === 'na_biqueira');
+  const volumePendente = $derived(
+    naBiqueira && panela.volumeTiragemPendente === true
+  );
   const podeTirar = $derived(panela.estado === 'no_fogo');
-  const podeRepor = $derived(naBiqueira);
-  const podeEncostar = $derived(!pausado); // no_fogo e na_biqueira podem encostar
+  const podeRepor = $derived(naBiqueira && !volumePendente);
+  const podeEncostar = $derived(!pausado && !volumePendente);
   const bocasDisponiveisRepor = $derived(bocasVazias);
 
-  function confirmarTirar() {
-    onTirar({ volumeL: volumeTirar });
-    modo = 'principal';
+  // Enquanto o volume da tiragem está pendente, o modal trava em modo
+  // 'tirar'. Ao registrar (volumeTiragemPendente vira false), volta para
+  // 'principal' — a menos que o usuário esteja em outro sub-form.
+  $effect(() => {
+    if (panela.volumeTiragemPendente) {
+      if (modo !== 'tirar') modo = 'tirar';
+    } else if (modo === 'tirar') {
+      modo = 'principal';
+    }
+  });
+
+  async function confirmarTirar() {
+    // await garante que a projeção tenha atualizado volumeTiragemPendente
+    // antes do $effect reavaliar o modo. Sem isso o effect acha que a
+    // tiragem ainda está pendente e trava em 'tirar'.
+    await onTirar({ volumeL: volumeTirar });
+    if (!panela.volumeTiragemPendente) modo = 'principal';
   }
 
   function confirmarRepor() {
@@ -179,7 +198,9 @@
     <div class="cabecalho">
       <div>
         <div class="mono eyebrow">
-          {#if naBiqueira}
+          {#if volumePendente}
+            na biqueira · volume pendente
+          {:else if naBiqueira}
             na biqueira
           {:else if panela.boca}
             Boca {panela.boca}
@@ -242,7 +263,13 @@
 
     {#if modo === 'tirar'}
       <div class="sub-form sub-form-tirar">
-        <div class="mono eyebrow centrado">volume da tiragem</div>
+        <div class="mono eyebrow centrado">
+          {#if volumePendente}
+            registre o volume que saiu da panela
+          {:else}
+            volume da tiragem
+          {/if}
+        </div>
         <div class="volume-hero">
           <input
             class="serif num-hero input-num"
@@ -263,9 +290,11 @@
           Tira em <span class="forte">{tiragemLabel(panela.proxTiragem).toLowerCase()}</span> — destino automático
         </div>
         <div class="acoes">
-          <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Cancelar</BtnPill>
+          {#if !volumePendente}
+            <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Cancelar</BtnPill>
+          {/if}
           <BtnPill variante="primary" accent={cor} onclick={confirmarTirar}>
-            Confirmar tiragem
+            {volumePendente ? 'Registrar tiragem' : 'Confirmar tiragem'}
           </BtnPill>
         </div>
       </div>
@@ -372,14 +401,21 @@
     {:else}
       <div class="acoes">
         {#if podeTirar}
-          <BtnPill variante="primary" accent={cor} onclick={() => (modo = 'tirar')}>
+          <BtnPill
+            variante="primary"
+            accent={cor}
+            onclick={() => {
+              onRetirarDoFogo();
+              onClose();
+            }}
+          >
             Tirar — {tiragemLabel(panela.proxTiragem).toLowerCase()}
           </BtnPill>
         {/if}
         {#if podeRepor}
           <BtnPill variante="primary" accent={cor} onclick={() => (modo = 'repor')}>Repor</BtnPill>
         {/if}
-        {#if !pausado}
+        {#if podeEncostar}
           <BtnPill variante="ghost" onclick={onPausar}>Encostar</BtnPill>
         {/if}
         <BtnPill variante="ghost" onclick={() => (modo = 'editar')}>Editar</BtnPill>

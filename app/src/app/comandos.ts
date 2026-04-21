@@ -109,6 +109,7 @@ export type Comandos = {
   iniciarFeitio(c: ComandoIniciarFeitio): Promise<ResultadoComando>;
   montarPanela(c: ComandoMontarPanela): Promise<ResultadoComando>;
   entrarNoFogo(c: ComandoEntrarNoFogo): Promise<ResultadoComando>;
+  retirarDoFogo(c: ComandoPanelaAlvo): Promise<ResultadoComando>;
   registrarTiragem(c: ComandoTiragem): Promise<ResultadoComando>;
   reporLiquido(c: ComandoReposicao): Promise<ResultadoComando>;
   pausar(c: ComandoPanelaAlvo): Promise<ResultadoComando>;
@@ -196,6 +197,19 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
       return persistir(evento);
     },
 
+    async retirarDoFogo(c) {
+      const { fornalha } = await estadoAtual(c.feitioId);
+      const panela = buscarPanela(fornalha, c.panelaId);
+      if (!panela) return { ok: false, motivo: `panela ${c.panelaId} não encontrada` };
+      const t = transicao(panela.estado ?? 'montada', { tipo: 'retirar_do_fogo' });
+      if (!t.ok) return { ok: false, motivo: t.motivo };
+      const evento = criarEvento(c.feitioId, {
+        tipo: 'panela_retirada_fogo',
+        payload: { panelaId: c.panelaId }
+      });
+      return persistir(evento);
+    },
+
     async registrarTiragem(c) {
       if (c.volumeL < 0) return { ok: false, motivo: 'volumeL deve ser >= 0' };
       const { fornalha } = await estadoAtual(c.feitioId);
@@ -230,6 +244,12 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
       if (!panela) return { ok: false, motivo: `panela ${c.panelaId} não encontrada` };
       const t = transicao(panela.estado ?? 'montada', { tipo: 'repor_e_play' });
       if (!t.ok) return { ok: false, motivo: t.motivo };
+      if (panela.volumeTiragemPendente) {
+        return {
+          ok: false,
+          motivo: 'registre o volume da tiragem antes de repor'
+        };
+      }
       const bocaOcupada = fornalha.panelas.find(
         (p) => p.id !== c.panelaId && p.bocaAtual === c.bocaNumero && p.estado !== 'descartada'
       );
@@ -254,6 +274,12 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
       if (!panela) return { ok: false, motivo: `panela ${c.panelaId} não encontrada` };
       const t = transicao(panela.estado ?? 'montada', { tipo: 'pausar' });
       if (!t.ok) return { ok: false, motivo: t.motivo };
+      if (panela.volumeTiragemPendente) {
+        return {
+          ok: false,
+          motivo: 'registre o volume da tiragem antes de encostar'
+        };
+      }
       const evento = criarEvento(c.feitioId, {
         tipo: 'tempo_pausado',
         payload: { panelaId: c.panelaId }
