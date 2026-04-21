@@ -1,7 +1,7 @@
 /**
  * Tipos e adaptadores de *visão* (view) — derivam da projeção do domínio
  * (`Panela`, `Tonel`) e adicionam campos exclusivos da UI como `boca`,
- * `metaTiragemL`, `proxTiragem`, `capacidadeL`.
+ * `metaTiragemL`, `proxTiragem`, `numero` (do tonel).
  *
  * Os componentes visuais consomem `PanelaVisao`/`TonelVisao`, que são
  * **puramente derivados** — nenhuma fonte da verdade nova. Atualização
@@ -20,18 +20,7 @@ export type PanelaVisao = Panela & {
 
 export type TonelVisao = Tonel & {
   numero: number;
-  capacidadeL: number;
 };
-
-/**
- * Capacidade padrão por tipo de tonel. Fase 4: valores fixos razoáveis;
- * Fase 5+ pode permitir edição.
- */
-export function capacidadeDefault(tonel: Tonel): number {
-  if (tonel.tipo === 'daime') return 60;
-  if (tonel.tipo === 'agua_forte') return 40;
-  return 120;
-}
 
 /**
  * Meta de tiragem: preferir o valor informado pelo feitor ao entrar no fogo;
@@ -65,7 +54,6 @@ export function panelasNaFornalha(panelas: Panela[]): PanelaVisao[] {
 export function toneisVisao(toneis: Tonel[]): TonelVisao[] {
   return toneis.map((t, i) => ({
     ...t,
-    numero: i + 1,
-    capacidadeL: capacidadeDefault(t)
+    numero: i + 1
   }));
 }

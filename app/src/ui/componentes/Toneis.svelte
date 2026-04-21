@@ -8,13 +8,13 @@
 </script>
 
 <section>
-  <SectionHead title="Tonéis" subtitle="colheita guardada" />
+  <SectionHead title="Tonéis" subtitle="tiragem guardada" />
   {#if toneis.length === 0}
     <div class="empty mono">
       nenhum tonel ainda — aparece após a primeira tiragem.
     </div>
   {:else}
-    <div class="grid" style:grid-template-columns="repeat({toneis.length}, 1fr)">
+    <div class="grid">
       {#each toneis as tonel (tonel.id)}
         <Tonel {tonel} />
       {/each}
@@ -24,8 +24,10 @@
 
 <style>
   .grid {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     gap: 14px;
+    overflow-x: auto;
   }
   .empty {
     padding: 24px 16px;
