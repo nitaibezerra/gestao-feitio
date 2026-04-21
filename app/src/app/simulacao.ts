@@ -48,7 +48,7 @@ export async function carregarSimulacao(
     feitioId,
     nome: 'Feitio de Demonstração',
     feitor: 'Tiago',
-    foguista: 'Cícero',
+    foguista: 'Swidou',
     casinha: 'Casinha da Sede',
     qtdBocas: 5
   });

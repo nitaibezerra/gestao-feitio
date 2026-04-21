@@ -477,6 +477,13 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
       if (fornalha.feitio.status === 'encerrado') {
         return { ok: false, motivo: 'feitio já encerrado' };
       }
+      const panelasAtivas = fornalha.panelas.filter((p) => p.estado !== 'descartada');
+      if (panelasAtivas.length > 0) {
+        return {
+          ok: false,
+          motivo: `ainda há ${panelasAtivas.length} panela${panelasAtivas.length > 1 ? 's' : ''} no feitio — descarte todas antes de encerrar`
+        };
+      }
       const evento = criarEvento(c.feitioId, {
         tipo: 'feitio_encerrado',
         payload: {}

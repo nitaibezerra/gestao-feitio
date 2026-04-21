@@ -730,7 +730,7 @@ describe('desfazerUltimoEvento', () => {
 });
 
 describe('encerrarFeitio', () => {
-  it('encerra feitio → status encerrado', async () => {
+  it('encerra feitio sem panelas → status encerrado', async () => {
     await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
     const r = await comandos.encerrarFeitio({ feitioId: 'f1' });
     expect(r.ok).toBe(true);
@@ -742,6 +742,36 @@ describe('encerrarFeitio', () => {
   it('encerrar feitio inexistente → erro', async () => {
     const r = await comandos.encerrarFeitio({ feitioId: 'fantasma' });
     expect(r.ok).toBe(false);
+  });
+
+  it('encerrar com panela ainda ativa → erro descritivo', async () => {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 1,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60
+    });
+    const r = await comandos.encerrarFeitio({ feitioId: 'f1' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivo).toMatch(/descarte/i);
+  });
+
+  it('encerrar após descartar todas as panelas → ok', async () => {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 1,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60
+    });
+    await comandos.descartarPanela({ feitioId: 'f1', panelaId: 'p1' });
+    const r = await comandos.encerrarFeitio({ feitioId: 'f1' });
+    expect(r.ok).toBe(true);
   });
 });
 

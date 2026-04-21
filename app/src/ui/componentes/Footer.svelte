@@ -13,6 +13,11 @@
     onEncerrar?: () => void;
     modoTrocar?: boolean;
     hintTrocar?: string;
+    /**
+     * Quantas panelas ainda não foram descartadas. Encerrar só é permitido
+     * quando zero — o botão fica desabilitado com hint.
+     */
+    panelasAtivas?: number;
   };
   let {
     ultimoEvento,
@@ -22,8 +27,16 @@
     onCancelarTrocar,
     onEncerrar,
     modoTrocar = false,
-    hintTrocar
+    hintTrocar,
+    panelasAtivas = 0
   }: Props = $props();
+
+  const podeEncerrar = $derived(panelasAtivas === 0);
+  const hintEncerrar = $derived(
+    panelasAtivas === 0
+      ? 'encerra o feitio e abre o resumo'
+      : `descarte ${panelasAtivas} panela${panelasAtivas > 1 ? 's' : ''} antes de encerrar`
+  );
 </script>
 
 <footer>
@@ -42,7 +55,15 @@
       <BtnPill variante="ghost" onclick={onCancelarTrocar}>Cancelar</BtnPill>
     {:else}
       {#if onEncerrar}
-        <button class="encerrar mono" onclick={onEncerrar}>Encerrar feitio</button>
+        <button
+          class="encerrar mono"
+          class:disabled={!podeEncerrar}
+          disabled={!podeEncerrar}
+          onclick={onEncerrar}
+          title={hintEncerrar}
+        >
+          Encerrar feitio
+        </button>
       {/if}
       <BtnPill variante="ghost" onclick={onTrocar}>Trocar posição</BtnPill>
       <BtnPill variante="ghost" onclick={onUndo}>Desfazer</BtnPill>
@@ -101,9 +122,13 @@
     cursor: pointer;
     transition: color 0.15s;
   }
-  .encerrar:hover {
+  .encerrar:hover:not(.disabled) {
     color: var(--ink-soft);
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+  .encerrar.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 </style>

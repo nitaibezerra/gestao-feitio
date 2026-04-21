@@ -419,6 +419,7 @@
       onEncerrar={onEncerrar}
       {modoTrocar}
       {hintTrocar}
+      panelasAtivas={(estado?.panelas ?? []).filter((p) => p.estado !== 'descartada').length}
     />
   </div>
 
