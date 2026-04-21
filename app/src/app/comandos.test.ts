@@ -424,6 +424,108 @@ describe('editarPanela (Fase 6.2)', () => {
   });
 });
 
+describe('voltarAoFogo (Fase 6.4)', () => {
+  async function prepararPanelaEncostada(
+    bocaInicial = 1,
+    conteudo: { tipo: 'agua' } | { tipo: 'cozimento'; ordem: 1 | 2 | 3 | 4 | 5 | 6 } = {
+      tipo: 'agua'
+    }
+  ) {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: bocaInicial,
+      conteudo,
+      volumeL: 60,
+      metaTiragemL: 30
+    });
+    await comandos.pausar({ feitioId: 'f1', panelaId: 'p1' });
+  }
+
+  it('voltar à mesma boca → panela no_fogo, bocaAtual reposicionada', async () => {
+    await prepararPanelaEncostada(1);
+    const r = await comandos.voltarAoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 1
+    });
+    expect(r.ok).toBe(true);
+
+    const f = await estado('f1');
+    const p1 = f.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.estado).toBe('no_fogo');
+    expect(p1.bocaAtual).toBe(1);
+    expect(p1.volumeAtualL).toBe(60);
+    expect(p1.metaTiragemL).toBe(30);
+  });
+
+  it('voltar para outra boca → panela entra na nova boca', async () => {
+    await prepararPanelaEncostada(1);
+    const r = await comandos.voltarAoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 5
+    });
+    expect(r.ok).toBe(true);
+
+    const f = await estado('f1');
+    expect(f.panelas.find((p) => p.id === 'p1')!.bocaAtual).toBe(5);
+  });
+
+  it('voltar para boca ocupada por outra panela → erro', async () => {
+    await prepararPanelaEncostada(1);
+    // Monta outra e ocupa a boca 3
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p2', numero: 2 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p2',
+      bocaNumero: 3,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60
+    });
+    const r = await comandos.voltarAoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 3
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('voltar panela que está no fogo → erro', async () => {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 1,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60
+    });
+    const r = await comandos.voltarAoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 2
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('conteudo e volume omitidos → mantém os anteriores', async () => {
+    await prepararPanelaEncostada(1, { tipo: 'cozimento', ordem: 1 });
+    const r = await comandos.voltarAoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 2
+    });
+    expect(r.ok).toBe(true);
+
+    const f = await estado('f1');
+    const p1 = f.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.conteudo).toEqual({ tipo: 'cozimento', ordem: 1 });
+  });
+});
+
 describe('desfazerUltimoEvento', () => {
   it('desfaz tiragem → panela volta ao estado anterior', async () => {
     await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });

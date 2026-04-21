@@ -73,6 +73,20 @@ export type ComandoEditarPanela = Ctx & {
   };
 };
 
+/**
+ * Voltar uma panela encostada ao fogo numa boca (possivelmente outra).
+ * Composto de dois eventos atomicamente: `tempo_retomado` + `panela_entra_fogo`.
+ * `conteudo` e `volumeL` são opcionais — se ausentes, a projeção atual da panela
+ * fornece os valores (mantém o conteúdo/volume da última entrada).
+ */
+export type ComandoVoltarAoFogo = Ctx & {
+  panelaId: string;
+  bocaNumero: number;
+  conteudo?: TipoConteudo;
+  volumeL?: number;
+  metaTiragemL?: number;
+};
+
 export type Comandos = {
   iniciarFeitio(c: ComandoIniciarFeitio): Promise<ResultadoComando>;
   montarPanela(c: ComandoMontarPanela): Promise<ResultadoComando>;
@@ -85,6 +99,7 @@ export type Comandos = {
   descartarPanela(c: ComandoPanelaAlvo): Promise<ResultadoComando>;
   ajustarVolume(c: ComandoAjusteVolume): Promise<ResultadoComando>;
   editarPanela(c: ComandoEditarPanela): Promise<ResultadoComando>;
+  voltarAoFogo(c: ComandoVoltarAoFogo): Promise<ResultadoComando>;
   desfazerUltimoEvento(c: Ctx): Promise<ResultadoComando>;
   encerrarFeitio(c: Ctx): Promise<ResultadoComando>;
 };
@@ -302,6 +317,59 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
         payload: { panelaId: c.panelaId, campos }
       });
       return persistir(evento);
+    },
+
+    async voltarAoFogo(c) {
+      const { fornalha } = await estadoAtual(c.feitioId);
+      const panela = buscarPanela(fornalha, c.panelaId);
+      if (!panela) return { ok: false, motivo: `panela ${c.panelaId} não encontrada` };
+      if (panela.estado !== 'fora_do_fogo') {
+        return {
+          ok: false,
+          motivo: `voltarAoFogo requer panela encostada; estado atual: ${panela.estado ?? 'desconhecido'}`
+        };
+      }
+      if (!(c.bocaNumero > 0)) return { ok: false, motivo: 'bocaNumero deve ser > 0' };
+      const bocaOcupada = fornalha.panelas.find(
+        (p) => p.id !== c.panelaId && p.bocaAtual === c.bocaNumero && p.estado !== 'descartada'
+      );
+      if (bocaOcupada) {
+        return { ok: false, motivo: `boca ${c.bocaNumero} já está ocupada` };
+      }
+      const conteudo = c.conteudo ?? panela.conteudo;
+      if (!conteudo) return { ok: false, motivo: 'panela sem conteúdo; informe conteudo' };
+      const volumeL = c.volumeL ?? panela.volumeAtualL ?? 0;
+      if (volumeL < 0) return { ok: false, motivo: 'volumeL deve ser >= 0' };
+      if (c.metaTiragemL !== undefined && c.metaTiragemL < 0) {
+        return { ok: false, motivo: 'metaTiragemL deve ser >= 0' };
+      }
+
+      // 1. tempo_retomado — estado volta a no_fogo (antes do entra_fogo).
+      const tRetomar = transicao(panela.estado, { tipo: 'retomar' });
+      if (!tRetomar.ok) return { ok: false, motivo: tRetomar.motivo };
+      const eRetomar = criarEvento(c.feitioId, {
+        tipo: 'tempo_retomado',
+        payload: { panelaId: c.panelaId }
+      });
+      const rRet = await persistir(eRetomar);
+      if (!rRet.ok) return rRet;
+
+      // 2. panela_entra_fogo na boca escolhida.
+      const eEntrar = criarEvento(c.feitioId, {
+        tipo: 'panela_entra_fogo',
+        payload: {
+          panelaId: c.panelaId,
+          bocaNumero: c.bocaNumero,
+          conteudo,
+          volumeL,
+          ...(c.metaTiragemL !== undefined
+            ? { metaTiragemL: c.metaTiragemL }
+            : panela.metaTiragemL !== undefined
+              ? { metaTiragemL: panela.metaTiragemL }
+              : {})
+        }
+      });
+      return persistir(eEntrar);
     },
 
     async desfazerUltimoEvento(c) {
