@@ -8,7 +8,8 @@
   import Footer from '../../../ui/componentes/Footer.svelte';
   import PanelaModal, {
     type PayloadTirar,
-    type PayloadRepor
+    type PayloadRepor,
+    type PayloadEditar
   } from '../../../ui/componentes/PanelaModal.svelte';
   import NovaPanelaModal, {
     type PayloadNovaPanela
@@ -150,7 +151,8 @@
       panelaId,
       bocaNumero: p.bocaNumero,
       conteudo: p.conteudo,
-      volumeL: p.volumeL
+      volumeL: p.volumeL,
+      metaTiragemL: p.metaTiragemL
     });
     novaOpen = false;
   }
@@ -190,6 +192,15 @@
     if (!feitio || !selecionada) return;
     await comandos().descartarPanela({ feitioId: feitio.id, panelaId: selecionada.id });
     selecionadaId = null;
+  }
+
+  async function onEditar(p: PayloadEditar) {
+    if (!feitio || !selecionada) return;
+    await comandos().editarPanela({
+      feitioId: feitio.id,
+      panelaId: selecionada.id,
+      campos: p
+    });
   }
 
   async function onUndo() {
@@ -279,6 +290,7 @@
       {onPausar}
       {onRetomar}
       {onDescartar}
+      {onEditar}
     />
   {/if}
 

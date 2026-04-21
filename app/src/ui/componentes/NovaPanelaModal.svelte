@@ -11,6 +11,7 @@
     bocaNumero: number;
     conteudo: TipoConteudo;
     volumeL: number;
+    metaTiragemL: number;
   };
 
   type Props = {
@@ -24,6 +25,7 @@
   let bocaSelecionada = $state<number>(0);
   let conteudoKey = $state<string>('agua');
   let volume = $state<number>(60);
+  let meta = $state<number>(30);
 
   $effect(() => {
     if (bocaSelecionada === 0 || !bocasVazias.includes(bocaSelecionada)) {
@@ -56,7 +58,8 @@
     onConfirm({
       bocaNumero: bocaSelecionada,
       conteudo: conteudoSelecionado.c,
-      volumeL: volume
+      volumeL: volume,
+      metaTiragemL: meta
     });
   }
 </script>
@@ -116,10 +119,29 @@
         </PillRow>
       </FieldGroup>
 
+      <FieldGroup label="vai tirar em">
+        <div class="volume-grande">
+          <input
+            class="serif num-m input-num"
+            type="number"
+            min="0"
+            bind:value={meta}
+            aria-label="meta de tiragem"
+          />
+          <span class="mono u">L</span>
+        </div>
+        <PillRow>
+          {#each [30, 40, 50] as v (v)}
+            <Pill active={meta === v} onclick={() => (meta = v)}>{v} L</Pill>
+          {/each}
+        </PillRow>
+      </FieldGroup>
+
       <div class="preview mono">
         Vai entrar <span class="forte">{conteudoLabel(conteudoSelecionado.c)}</span>
         na <span class="forte">boca {bocaSelecionada}</span> com
-        <span class="forte">{volume} L</span>
+        <span class="forte">{volume} L</span>, meta
+        <span class="forte">{meta} L</span>
       </div>
     </div>
 
@@ -199,6 +221,12 @@
   }
   .num {
     font-size: 48px;
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .num-m {
+    font-size: 32px;
     font-weight: 200;
     letter-spacing: -0.03em;
     color: var(--ink);

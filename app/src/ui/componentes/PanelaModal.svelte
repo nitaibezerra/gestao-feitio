@@ -17,6 +17,12 @@
 
   export type PayloadTirar = { volumeL: number };
   export type PayloadRepor = { conteudo: TipoConteudo; volumeL: number };
+  export type PayloadEditar = {
+    numero?: number;
+    volumeAtualL?: number;
+    metaTiragemL?: number;
+    entradaFogoEm?: string;
+  };
 
   type Props = {
     panela: PanelaVisao;
@@ -27,6 +33,7 @@
     onPausar: () => void;
     onRetomar: () => void;
     onDescartar: () => void;
+    onEditar: (p: PayloadEditar) => void;
   };
   let {
     panela,
@@ -36,7 +43,8 @@
     onRepor,
     onPausar,
     onRetomar,
-    onDescartar
+    onDescartar,
+    onEditar
   }: Props = $props();
 
   const relogio = useRelogio();
@@ -46,7 +54,7 @@
   const cor = $derived(tiragemCor(panela.proxTiragem));
 
   // Sub-formulários:
-  type Modo = 'principal' | 'tirar' | 'repor';
+  type Modo = 'principal' | 'tirar' | 'repor' | 'editar';
   let modo = $state<Modo>('principal');
 
   // Estado do sub-form de Tirar
@@ -61,6 +69,27 @@
   // Estado do sub-form de Repor
   let volumeRepor = $state(60);
   let conteudoReporKey = $state<string>('agua');
+
+  // Estado do sub-form de Editar
+  let editarNumero = $state(0);
+  let editarVolume = $state(0);
+  let editarMeta = $state(0);
+  let editarEntrada = $state<string>('');
+  $effect(() => {
+    if (modo === 'editar') {
+      editarNumero = panela.numero;
+      editarVolume = panela.volumeAtualL ?? 0;
+      editarMeta = panela.metaTiragemL ?? 0;
+      editarEntrada = panela.entradaFogoEm
+        ? toLocalDatetimeInput(panela.entradaFogoEm)
+        : '';
+    }
+  });
+
+  function toLocalDatetimeInput(d: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
 
   const opcoesConteudoRepor = $derived.by<Array<{ key: string; label: string; c: TipoConteudo }>>(() => {
     const base: Array<{ key: string; label: string; c: TipoConteudo }> = [
@@ -93,6 +122,26 @@
   function confirmarRepor() {
     if (!conteudoReporSelecionado) return;
     onRepor({ conteudo: conteudoReporSelecionado.c, volumeL: volumeRepor });
+    modo = 'principal';
+  }
+
+  function confirmarEditar() {
+    const p: PayloadEditar = {};
+    if (editarNumero !== panela.numero) p.numero = editarNumero;
+    if (editarVolume !== (panela.volumeAtualL ?? 0)) p.volumeAtualL = editarVolume;
+    if (editarMeta !== (panela.metaTiragemL ?? 0)) p.metaTiragemL = editarMeta;
+    if (editarEntrada) {
+      const novoIso = new Date(editarEntrada).toISOString();
+      const atualIso = panela.entradaFogoEm
+        ? panela.entradaFogoEm.toISOString()
+        : '';
+      if (novoIso !== atualIso) p.entradaFogoEm = novoIso;
+    }
+    if (Object.keys(p).length === 0) {
+      modo = 'principal';
+      return;
+    }
+    onEditar(p);
     modo = 'principal';
   }
 
@@ -226,6 +275,54 @@
           <BtnPill variante="primary" onclick={confirmarRepor}>Confirmar reposição</BtnPill>
         </div>
       </div>
+    {:else if modo === 'editar'}
+      <div class="sub-form">
+        <FieldGroup label="número da panela">
+          <input
+            class="serif num-m input-num"
+            type="number"
+            min="1"
+            bind:value={editarNumero}
+            aria-label="número da panela"
+          />
+        </FieldGroup>
+        <FieldGroup label="volume atual">
+          <div class="volume-grande">
+            <input
+              class="serif num-m input-num"
+              type="number"
+              min="0"
+              bind:value={editarVolume}
+              aria-label="volume atual"
+            />
+            <span class="mono u">L</span>
+          </div>
+        </FieldGroup>
+        <FieldGroup label="meta de tiragem">
+          <div class="volume-grande">
+            <input
+              class="serif num-m input-num"
+              type="number"
+              min="0"
+              bind:value={editarMeta}
+              aria-label="meta de tiragem"
+            />
+            <span class="mono u">L</span>
+          </div>
+        </FieldGroup>
+        <FieldGroup label="hora da entrada no fogo">
+          <input
+            class="mono datetime"
+            type="datetime-local"
+            bind:value={editarEntrada}
+            aria-label="hora da entrada no fogo"
+          />
+        </FieldGroup>
+        <div class="acoes">
+          <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Cancelar</BtnPill>
+          <BtnPill variante="primary" onclick={confirmarEditar}>Salvar</BtnPill>
+        </div>
+      </div>
     {:else}
       <div class="acoes">
         {#if podeTirar}
@@ -236,11 +333,10 @@
         {#if podeRepor}
           <BtnPill variante="primary" accent={cor} onclick={() => (modo = 'repor')}>Repor</BtnPill>
         {/if}
-        {#if pausado}
-          <BtnPill variante="ghost" onclick={onRetomar}>Retomar</BtnPill>
-        {:else}
-          <BtnPill variante="ghost" onclick={onPausar}>Pausar</BtnPill>
+        {#if !pausado}
+          <BtnPill variante="ghost" onclick={onPausar}>Encostar</BtnPill>
         {/if}
+        <BtnPill variante="ghost" onclick={() => (modo = 'editar')}>Editar</BtnPill>
         <div class="espaco"></div>
         <button class="link" onclick={descartar}>descartar panela</button>
       </div>
