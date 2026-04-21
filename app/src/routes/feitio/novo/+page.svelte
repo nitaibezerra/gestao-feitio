@@ -5,6 +5,7 @@
   import Pill from '../../../ui/componentes/primitivos/Pill.svelte';
   import PillRow from '../../../ui/componentes/primitivos/PillRow.svelte';
   import { comandos, novoId } from '../../../app/runtime';
+  import { carregarSimulacao } from '../../../app/simulacao';
 
   let nome = $state(
     `Feitio de ${new Date().toLocaleString('pt-BR', { month: 'long' })}/${new Date().getFullYear()}`
@@ -15,6 +16,20 @@
   let qtdBocas = $state(5);
   let erro = $state<string | null>(null);
   let enviando = $state(false);
+  let carregandoSim = $state(false);
+
+  async function usarSimulacao() {
+    if (carregandoSim) return;
+    carregandoSim = true;
+    erro = null;
+    const r = await carregarSimulacao(comandos(), novoId);
+    carregandoSim = false;
+    if (r.ok) {
+      await goto('/feitio/atual');
+    } else {
+      erro = `simulação: ${r.motivo}`;
+    }
+  }
 
   async function enviar(e: SubmitEvent) {
     e.preventDefault();
@@ -54,6 +69,24 @@
       </p>
     </div>
   </header>
+
+  <aside class="simulacao">
+    <div>
+      <div class="mono eyebrow">demonstração</div>
+      <p class="sim-lead">
+        Carrega um feitio em andamento com panelas no fogo, na biqueira e
+        encostadas — útil para ver o app com estado cheio sem precisar
+        clicar até lá.
+      </p>
+    </div>
+    <BtnPill variante="ghost" onclick={usarSimulacao}>
+      {carregandoSim ? 'Carregando…' : 'Carregar simulação de teste'}
+    </BtnPill>
+  </aside>
+
+  <div class="separador">
+    <span class="mono">ou crie um feitio novo</span>
+  </div>
 
   <form class="formulario" onsubmit={enviar}>
     <FieldGroup label="nome do feitio">
@@ -140,6 +173,52 @@
     line-height: 1.6;
     color: var(--ink-soft);
     font-weight: 300;
+  }
+
+  .simulacao {
+    max-width: 680px;
+    padding: 18px 22px;
+    background: var(--surface);
+    border: 1px solid var(--linha);
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: center;
+  }
+  .simulacao .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .sim-lead {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    font-weight: 300;
+  }
+
+  .separador {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 680px;
+    color: var(--ink-faint);
+  }
+  .separador::before,
+  .separador::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--linha);
+  }
+  .separador span {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
   }
 
   .formulario {
