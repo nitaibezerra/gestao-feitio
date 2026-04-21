@@ -53,13 +53,38 @@ Na primeira abertura instalada, a tela trava em modo standalone landscape;
 a IndexedDB persiste entre sessões. Wake Lock mantém a tela acesa enquanto
 a rota `/feitio/atual` está aberta (RNF-04).
 
+## Fluxos avançados (Fase 6)
+
+### Editar panela (correção append-only)
+Ao clicar numa panela no fogo, o modal mostra botão **Editar**. O sub-form
+permite mudar número, volume atual, meta de tiragem e hora da entrada no fogo
+(`datetime-local`). Ao salvar, o sistema emite um evento `panela_editada`
+com apenas os campos alterados — eventos históricos permanecem intactos, o
+override é aplicado pela projeção.
+
+### Encostar + voltar ao fogo
+"Encostar" substitui "Pausar" — ao encostar, a panela sai da fornalha,
+**libera a boca** e aparece na seção **"Panelas encostadas"** (abaixo dos
+Tonéis). O card mostra volume, conteúdo e "parada há HHhMM". Clique abre
+modal com duas ações:
+- **Voltar ao fogo** → escolhe uma boca livre → emite `tempo_retomado` +
+  `panela_entra_fogo` atomicamente.
+- **Tirar material direto** → sub-form de tiragem; `registrar_tiragem` é
+  permitido em `fora_do_fogo` pela máquina de estados.
+
+### Meta de tiragem no formulário de nova panela
+`NovaPanelaModal` ganha seção "vai tirar em" com pills 30/40/50 L + input
+livre. O valor é opcional — quando ausente, a UI usa heurística `volume/2`.
+O campo acompanha a panela entre entradas no fogo e é exibido como
+"meta NN" no card.
+
 ## Documentação relacionada
 
-- [Plano de implementação](../projeto/plano-implementacao.md) — fases 0 a 5
+- [Plano de implementação](../projeto/plano-implementacao.md) — fases 0 a 6
 - [Tutorial de produção](../projeto/tutorial-producao-daime.md)
 - [Requisitos](../projeto/requisitos.md)
 - [Projeto](../projeto/projeto.md)
 
 ## Status
 
-MVP completo (Fases 0-5). 145+ testes unit + 21 E2E verdes.
+Fase 6 completa (iteração pós-testes do MVP). 175 testes unit + 26 E2E verdes.

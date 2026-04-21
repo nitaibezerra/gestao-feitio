@@ -318,6 +318,7 @@ Deve ser legível a pelo menos **2 metros** (fontes grandes, alto contraste).
   - 2º cozimento (idem)
   - 3º cozimento... etc.
 - Volume inicial (com sugestões: 60 L, 55 L, 50 L, ou valor livre)
+- **Meta de tiragem** (Fase 6): pergunta quanto o feitor pretende tirar desta entrada — pills rápidas 30/40/50 L ou valor livre. Campo **opcional**; quando ausente, o sistema usa heurística `volume/2`.
 
 O sistema deve **validar** que o tonel escolhido tem volume suficiente e **descontar** do tonel.
 
@@ -325,9 +326,17 @@ O sistema deve **validar** que o tonel escolhido tem volume suficiente e **desco
 
 Ao confirmar entrada no fogo, o timer da panela começa a contar. Mostra `HH:MM:SS` desde a entrada.
 
-### RF-05 — Pausar / retomar tempo
+### RF-05 — Encostar panela / voltar ao fogo
 
-Ao clicar em uma panela **no fogo**, deve haver opção **Pausar tempo** — usada quando a panela sai do fogo temporariamente (não para tirar, mas por outro motivo). Ao retomar, o timer continua de onde parou.
+Ao clicar em uma panela **no fogo**, deve haver opção **Encostar** — usada quando a panela sai do fogo temporariamente (não para tirar, mas por outro motivo). Ao encostar:
+
+- A panela sai da fornalha, **liberando a boca** para outra panela.
+- Aparece na seção **"Panelas encostadas"** (abaixo dos Tonéis) com volume, conteúdo e "parada há HHhMM".
+- Clique na panela encostada abre modal com duas opções:
+  - **Voltar ao fogo**: pergunta qual boca livre — composição atômica `tempo_retomado` + `panela_entra_fogo`.
+  - **Tirar material direto**: abre o sub-form de tiragem mesmo com a panela encostada (`registrar_tiragem` é permitido em `fora_do_fogo`).
+
+O timer da entrada no fogo reseta ao voltar ao fogo (nova entrada). O timer "parada há" marca o tempo desde o último `tempo_pausado`.
 
 ### RF-06 — Adicionar líquido
 
@@ -476,6 +485,22 @@ Ao final, feitor marca `feitio_encerrado`. Sistema gera:
 ### RF-20 — Desfazer última ação
 
 Dada a probabilidade de erros de operação em ambiente estressante, deve haver **"desfazer"** para pelo menos a última ação. Desfazer reverte o evento mais recente.
+
+### RF-21 — Editar panela (correção append-only)
+
+Ao clicar numa panela **no fogo**, o modal de detalhe deve oferecer um botão **Editar** que abre um sub-form com os campos:
+
+- Número da panela
+- Volume atual (L)
+- Meta de tiragem (L)
+- Hora da entrada no fogo (`datetime-local`)
+
+Ao salvar, o sistema emite um evento `panela_editada` append-only com apenas os campos alterados. A projeção aplica os overrides **sem apagar eventos históricos** — é um ajuste corretivo, não uma mutação.
+
+Validações:
+- pelo menos um campo precisa mudar;
+- valores numéricos `> 0` (número) ou `>= 0` (volumes, meta);
+- `entradaFogoEm` deve ser ISO válido.
 
 ---
 

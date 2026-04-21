@@ -245,6 +245,21 @@ Comandos a ligar:
 - Export JSON do feitio.
 - Teste E2E Playwright dos 3 fluxos do tutorial (quinta, sexta-Daime, água forte).
 
+### Fase 6 — Iteração pós-testes (MVP → V1)
+
+Feedback do feitor após testar o MVP localmente produziu 7 ajustes (nenhum muda a arquitetura event-sourced — apenas refina modelo + UI). Implementado em 8 commits sequenciais:
+
+1. **6.1 — Meta de tiragem no payload de `panela_entra_fogo`**: campo opcional `metaTiragemL` no evento (retrocompatível); projeção preenche `panela.metaTiragemL`; `metaTiragemSugerida` prefere o valor informado.
+2. **6.2 — Evento `panela_editada` + comando `editarPanela`**: correção append-only com payload `{panelaId, campos: {numero?, volumeAtualL?, metaTiragemL?, entradaFogoEm?}}`. Projeção aplica overrides.
+3. **6.3 — `tempo_pausado` libera boca + `encostadaDesde`**: mudança de semântica — encostar agora também faz `bocaAtual = null` e marca o momento em `encostadaDesde`. Permite que outra panela ocupe a mesma boca.
+4. **6.4 — Comando `voltarAoFogo` composto**: emite `tempo_retomado` + `panela_entra_fogo` atomicamente. Aceita nova boca e preserva conteúdo/volume/meta da última entrada quando omitidos.
+5. **6.5 — Tonéis sem capacidade + largura fixa**: remove `capacidadeL`/`capacidadeDefault` de `TonelVisao`; cards de 180px, sem barra; subtítulo "tiragem guardada".
+6. **6.6 — Editar panela no modal + meta na nova panela**: `NovaPanelaModal` ganha campo "vai tirar em" (PillRow 30/40/50 L + input). `PanelaModal` ganha botão Editar com sub-form. Renomeia "Pausar" → "Encostar"; remove "Retomar" (sem boca não faz sentido isolado).
+7. **6.7 — Seção "Panelas encostadas" + modal encostada**: renderizada entre Tonéis e Footer quando `panelasEncostadas.length > 0`. Clique abre modal com "Voltar ao fogo" (escolhe boca) ou "Tirar material direto" (sub-form de tiragem).
+8. **6.8 — E2E fluxos avançados**: `tests/e2e/fluxos-avancados.spec.ts` com 8 cenários cobrindo os ajustes acima.
+
+Ao final: 175 unit + 26 E2E verdes, `pnpm check` 0/0, `pnpm build` ok.
+
 ---
 
 ## 4. Arquivos-chave a criar
