@@ -135,6 +135,9 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
       if (!p) return;
       p.tempoPausado = true;
       p.estado = 'fora_do_fogo';
+      // Encostar libera a boca e marca o momento — outra panela pode ocupar.
+      p.bocaAtual = null;
+      p.encostadaDesde = new Date(evento.momento);
       return;
     }
 
@@ -143,6 +146,7 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
       if (!p) return;
       p.tempoPausado = false;
       p.estado = 'no_fogo';
+      p.encostadaDesde = null;
       return;
     }
 

@@ -415,6 +415,92 @@ describe('projetarFornalha — volume_ajustado e pausa/retomada', () => {
   });
 });
 
+describe('projetarFornalha — encostar libera boca (Fase 6.3)', () => {
+  const feitioId = 'f1';
+
+  function eventosComUmaEncostada(): Evento[] {
+    return [
+      evt(feitioId, '2026-04-16T07:00:00', {
+        tipo: 'feitio_iniciado',
+        payload: { nome: 'F', feitor: 'J', qtdBocas: 5 }
+      }),
+      evt(feitioId, '2026-04-16T08:00:00', {
+        tipo: 'panela_montada',
+        payload: { panelaId: 'p1', numero: 1 }
+      }),
+      evt(feitioId, '2026-04-16T08:10:00', {
+        tipo: 'panela_entra_fogo',
+        payload: { panelaId: 'p1', bocaNumero: 1, conteudo: { tipo: 'agua' }, volumeL: 60 }
+      }),
+      evt(feitioId, '2026-04-16T09:00:00', {
+        tipo: 'tempo_pausado',
+        payload: { panelaId: 'p1' }
+      })
+    ];
+  }
+
+  it('após tempo_pausado, bocaAtual fica null e encostadaDesde preenchido', () => {
+    const r = projetarFornalha(eventosComUmaEncostada());
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.bocaAtual).toBeNull();
+    expect(p1.estado).toBe('fora_do_fogo');
+    expect(p1.encostadaDesde?.toISOString()).toBe(at('2026-04-16T09:00:00'));
+  });
+
+  it('após encostar, outra panela pode ocupar a mesma boca', () => {
+    const eventos: Evento[] = [
+      ...eventosComUmaEncostada(),
+      evt(feitioId, '2026-04-16T09:15:00', {
+        tipo: 'panela_montada',
+        payload: { panelaId: 'p2', numero: 2 }
+      }),
+      evt(feitioId, '2026-04-16T09:20:00', {
+        tipo: 'panela_entra_fogo',
+        payload: { panelaId: 'p2', bocaNumero: 1, conteudo: { tipo: 'agua' }, volumeL: 60 }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p2 = r.panelas.find((p) => p.id === 'p2')!;
+    expect(p2.bocaAtual).toBe(1);
+    expect(p2.estado).toBe('no_fogo');
+    // p1 continua encostada, sem boca
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.bocaAtual).toBeNull();
+  });
+
+  it('tempo_retomado limpa encostadaDesde', () => {
+    const eventos: Evento[] = [
+      ...eventosComUmaEncostada(),
+      evt(feitioId, '2026-04-16T09:30:00', {
+        tipo: 'tempo_retomado',
+        payload: { panelaId: 'p1' }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.encostadaDesde).toBeNull();
+    expect(p1.tempoPausado).toBe(false);
+  });
+
+  it('panela_entra_fogo em panela encostada limpa encostadaDesde', () => {
+    const eventos: Evento[] = [
+      ...eventosComUmaEncostada(),
+      evt(feitioId, '2026-04-16T09:30:00', {
+        tipo: 'tempo_retomado',
+        payload: { panelaId: 'p1' }
+      }),
+      evt(feitioId, '2026-04-16T09:31:00', {
+        tipo: 'panela_entra_fogo',
+        payload: { panelaId: 'p1', bocaNumero: 3, conteudo: { tipo: 'agua' }, volumeL: 60 }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.encostadaDesde).toBeNull();
+    expect(p1.bocaAtual).toBe(3);
+  });
+});
+
 describe('projetarFornalha — meta de tiragem (Fase 6.1)', () => {
   it('panela_entra_fogo com metaTiragemL → projeta em panela.metaTiragemL', () => {
     const feitioId = 'f1';
