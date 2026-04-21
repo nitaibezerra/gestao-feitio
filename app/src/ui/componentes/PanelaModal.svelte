@@ -213,26 +213,25 @@
     </div>
 
     {#if modo === 'tirar'}
-      <div class="sub-form">
-        <FieldGroup label="volume da tiragem">
-          <div class="volume-grande">
-            <input
-              class="serif num input-num"
-              type="number"
-              min="0"
-              max={panela.volumeAtualL ?? 0}
-              bind:value={volumeTirar}
-              aria-label="volume da tiragem"
-            />
-            <span class="mono u">L</span>
-          </div>
-          <PillRow>
-            {#each [metaSugerida, metaSugerida - 5, metaSugerida + 5, metaSugerida * 2].filter((v) => v > 0 && v <= (panela.volumeAtualL ?? 0)) as v (v)}
-              <Pill active={volumeTirar === v} onclick={() => (volumeTirar = v)}>{v} L</Pill>
-            {/each}
-          </PillRow>
-        </FieldGroup>
-        <div class="preview mono">
+      <div class="sub-form sub-form-tirar">
+        <div class="mono eyebrow centrado">volume da tiragem</div>
+        <div class="volume-hero">
+          <input
+            class="serif num-hero input-num"
+            type="number"
+            min="0"
+            max={panela.volumeAtualL ?? 0}
+            bind:value={volumeTirar}
+            aria-label="volume da tiragem"
+          />
+          <span class="mono u-hero">L</span>
+        </div>
+        <PillRow>
+          {#each [metaSugerida, metaSugerida - 5, metaSugerida + 5, metaSugerida * 2].filter((v) => v > 0 && v <= (panela.volumeAtualL ?? 0)) as v (v)}
+            <Pill active={volumeTirar === v} onclick={() => (volumeTirar = v)}>{v} L</Pill>
+          {/each}
+        </PillRow>
+        <div class="preview mono centrado">
           Tira em <span class="forte">{tiragemLabel(panela.proxTiragem).toLowerCase()}</span> — destino automático
         </div>
         <div class="acoes">
@@ -518,6 +517,34 @@
     flex-direction: column;
     gap: 18px;
   }
+  .sub-form-tirar {
+    align-items: center;
+    padding: 28px 32px 24px;
+    gap: 14px;
+  }
+  .centrado {
+    text-align: center;
+  }
+  .volume-hero {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    margin: 4px 0 8px;
+  }
+  .num-hero {
+    font-size: 96px;
+    font-weight: 200;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--ink);
+    width: 4ch;
+    text-align: center;
+  }
+  .u-hero {
+    font-size: 18px;
+    color: var(--ink-faint);
+  }
   .volume-grande {
     display: flex;
     align-items: baseline;
@@ -575,6 +602,11 @@
     padding: 0;
     border-top: 0;
     justify-content: flex-end;
+  }
+  .sub-form-tirar .acoes {
+    justify-content: center;
+    margin-top: 8px;
+    width: 100%;
   }
   .espaco {
     flex: 1;
