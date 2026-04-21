@@ -176,7 +176,7 @@ describe('registrarTiragem', () => {
     });
   }
 
-  it('tiragem em panela no_fogo → evento persistido, panela em aguardando_reposicao', async () => {
+  it('tiragem em panela no_fogo → evento persistido, panela em na_biqueira (boca liberada)', async () => {
     await prepararPanelaNoFogo();
     const r = await comandos.registrarTiragem({
       feitioId: 'f1',
@@ -188,7 +188,8 @@ describe('registrarTiragem', () => {
 
     const f = await estado('f1');
     const p1 = f.panelas.find((p) => p.id === 'p1')!;
-    expect(p1.estado).toBe('aguardando_reposicao');
+    expect(p1.estado).toBe('na_biqueira');
+    expect(p1.bocaAtual).toBeNull();
     expect(p1.tiragens).toHaveLength(1);
     expect(p1.tiragens[0].tipo).toEqual({ tipo: 'cozimento', ordem: 1 });
   });
@@ -238,6 +239,7 @@ describe('registrarTiragem', () => {
     await comandos.reporLiquido({
       feitioId: 'f1',
       panelaId: 'p1',
+      bocaNumero: 1,
       conteudo: { tipo: 'agua' },
       volumeL: 55
     });
@@ -702,12 +704,14 @@ describe('cenário integrado quinta + sexta via comandos', () => {
     await comandos.reporLiquido({
       feitioId: 'fq',
       panelaId: 'p1',
+      bocaNumero: 1,
       conteudo: { tipo: 'agua' },
       volumeL: 55
     });
     await comandos.reporLiquido({
       feitioId: 'fq',
       panelaId: 'p2',
+      bocaNumero: 2,
       conteudo: { tipo: 'agua' },
       volumeL: 55
     });
@@ -727,6 +731,7 @@ describe('cenário integrado quinta + sexta via comandos', () => {
     await comandos.reporLiquido({
       feitioId: 'fq',
       panelaId: 'p1',
+      bocaNumero: 1,
       conteudo: { tipo: 'cozimento', ordem: 1 },
       volumeL: 60
     });

@@ -52,6 +52,13 @@ export type PayloadReposicaoRegistrada = {
   panelaId: string;
   conteudo: TipoConteudo;
   volumeL: number;
+  /**
+   * Boca em que a panela volta ao fogo após a reposição. Opcional para
+   * retrocompatibilidade com eventos antigos gravados antes da Fase 8 (quando
+   * a panela nunca liberava a boca ao tirar). Nos novos eventos é obrigatório
+   * porque `tiragem_registrada` agora solta a boca.
+   */
+  bocaNumero?: number;
 };
 export type PayloadVolumeAjustado = { panelaId: string; deltaL: number };
 export type PayloadPanelaSimples = { panelaId: string };
@@ -238,6 +245,9 @@ function validarPayload(evento: Evento): string[] {
       if (!payload.panelaId) erros.push('reposicao_registrada: panelaId obrigatório');
       if (!payload.conteudo) erros.push('reposicao_registrada: conteudo obrigatório');
       if (!(payload.volumeL >= 0)) erros.push('reposicao_registrada: volumeL deve ser >= 0');
+      if (payload.bocaNumero !== undefined && !(payload.bocaNumero > 0)) {
+        erros.push('reposicao_registrada: bocaNumero deve ser > 0');
+      }
       break;
     }
     case 'volume_ajustado': {

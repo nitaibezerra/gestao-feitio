@@ -55,6 +55,12 @@ export type ComandoReposicao = Ctx & {
   panelaId: string;
   conteudo: TipoConteudo;
   volumeL: number;
+  /**
+   * Panela na biqueira está sem boca — ao repor, o feitor precisa dizer em
+   * qual boca ela volta. Opcional para retrocompat com a mudança incremental
+   * (Fase 8.3 afrouxada), virou obrigatório na Fase 8.4.
+   */
+  bocaNumero?: number;
 };
 
 export type ComandoPanelaAlvo = Ctx & { panelaId: string };
@@ -225,7 +231,12 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
       if (!t.ok) return { ok: false, motivo: t.motivo };
       const evento = criarEvento(c.feitioId, {
         tipo: 'reposicao_registrada',
-        payload: { panelaId: c.panelaId, conteudo: c.conteudo, volumeL: c.volumeL }
+        payload: {
+          panelaId: c.panelaId,
+          conteudo: c.conteudo,
+          volumeL: c.volumeL,
+          ...(c.bocaNumero !== undefined ? { bocaNumero: c.bocaNumero } : {})
+        }
       });
       return persistir(evento);
     },

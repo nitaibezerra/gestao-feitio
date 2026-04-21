@@ -31,15 +31,16 @@ const TRANSICOES: TransicoesMap = {
   },
   no_fogo: {
     pausar: 'fora_do_fogo',
-    registrar_tiragem: 'aguardando_reposicao',
+    registrar_tiragem: 'na_biqueira',
     descartar: 'descartada'
   },
   fora_do_fogo: {
     retomar: 'no_fogo',
-    registrar_tiragem: 'aguardando_reposicao'
+    registrar_tiragem: 'na_biqueira'
   },
-  aguardando_reposicao: {
+  na_biqueira: {
     repor_e_play: 'no_fogo',
+    pausar: 'fora_do_fogo',
     descartar: 'descartada'
   },
   descartada: {}

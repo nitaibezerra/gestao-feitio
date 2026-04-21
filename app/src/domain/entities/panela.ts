@@ -7,7 +7,7 @@ export type EstadoPanela =
   | 'montada'
   | 'no_fogo'
   | 'fora_do_fogo'
-  | 'aguardando_reposicao'
+  | 'na_biqueira'
   | 'descartada';
 
 export type OrdemCozimento = 1 | 2 | 3 | 4 | 5 | 6;

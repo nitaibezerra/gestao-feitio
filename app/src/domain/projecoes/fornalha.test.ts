@@ -95,11 +95,11 @@ describe('projetarFornalha — cenário QUINTA do tutorial', () => {
     // Reposição de ambas com água
     evt(feitioId, '2026-04-16T10:25:00', {
       tipo: 'reposicao_registrada',
-      payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 55 }
+      payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 55, bocaNumero: 1 }
     }),
     evt(feitioId, '2026-04-16T10:30:00', {
       tipo: 'reposicao_registrada',
-      payload: { panelaId: 'p2', conteudo: { tipo: 'agua' }, volumeL: 55 }
+      payload: { panelaId: 'p2', conteudo: { tipo: 'agua' }, volumeL: 55, bocaNumero: 2 }
     }),
     // 2º cozimento de cada → tonel t-c2
     evt(feitioId, '2026-04-16T14:40:00', {
@@ -262,7 +262,7 @@ describe('projetarFornalha — transição para água forte', () => {
         }),
         evt(feitioId, `2026-04-16T${String(10 + i).padStart(2, '0')}:05:00`, {
           tipo: 'reposicao_registrada',
-          payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 55 }
+          payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 55, bocaNumero: 1 }
         })
       );
     }
@@ -293,7 +293,7 @@ describe('projetarFornalha — transição para água forte', () => {
     const mais = [
       evt(feitioId, '2026-04-16T19:00:00', {
         tipo: 'reposicao_registrada',
-        payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 55 }
+        payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 55, bocaNumero: 1 }
       }),
       evt(feitioId, '2026-04-16T21:00:00', {
         tipo: 'tiragem_registrada',
@@ -306,7 +306,7 @@ describe('projetarFornalha — transição para água forte', () => {
       }),
       evt(feitioId, '2026-04-16T22:00:00', {
         tipo: 'reposicao_registrada',
-        payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 50 }
+        payload: { panelaId: 'p1', conteudo: { tipo: 'agua' }, volumeL: 50, bocaNumero: 1 }
       }),
       evt(feitioId, '2026-04-17T01:00:00', {
         tipo: 'tiragem_registrada',
@@ -697,6 +697,93 @@ describe('projetarFornalha — feitio_editado (Fase 7.1)', () => {
     ];
     const r = projetarFornalha(eventos);
     expect(r.feitio?.foguista).toBeUndefined();
+  });
+});
+
+describe('projetarFornalha — tiragem libera boca (Fase 8.3)', () => {
+  const feitioId = 'f1';
+
+  function eventosPanelaTirada(): Evento[] {
+    return [
+      evt(feitioId, '2026-04-16T07:00:00', {
+        tipo: 'feitio_iniciado',
+        payload: { nome: 'F', feitor: 'J', qtdBocas: 5 }
+      }),
+      evt(feitioId, '2026-04-16T08:00:00', {
+        tipo: 'panela_montada',
+        payload: { panelaId: 'p1', numero: 1 }
+      }),
+      evt(feitioId, '2026-04-16T08:10:00', {
+        tipo: 'panela_entra_fogo',
+        payload: { panelaId: 'p1', bocaNumero: 1, conteudo: { tipo: 'agua' }, volumeL: 60 }
+      }),
+      evt(feitioId, '2026-04-16T10:00:00', {
+        tipo: 'tiragem_registrada',
+        payload: {
+          panelaId: 'p1',
+          volumeL: 30,
+          tonelDestinoId: 't-c1',
+          tipoTiragem: { tipo: 'cozimento', ordem: 1 }
+        }
+      })
+    ];
+  }
+
+  it('após tiragem, panela fica em na_biqueira e bocaAtual vira null', () => {
+    const r = projetarFornalha(eventosPanelaTirada());
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.estado).toBe('na_biqueira');
+    expect(p1.bocaAtual).toBeNull();
+  });
+
+  it('com panela tirada, outra panela pode ocupar a mesma boca', () => {
+    const eventos: Evento[] = [
+      ...eventosPanelaTirada(),
+      evt(feitioId, '2026-04-16T10:10:00', {
+        tipo: 'panela_montada',
+        payload: { panelaId: 'p2', numero: 2 }
+      }),
+      evt(feitioId, '2026-04-16T10:15:00', {
+        tipo: 'panela_entra_fogo',
+        payload: { panelaId: 'p2', bocaNumero: 1, conteudo: { tipo: 'agua' }, volumeL: 60 }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    expect(r.panelas.find((p) => p.id === 'p2')!.bocaAtual).toBe(1);
+  });
+
+  it('reposição com bocaNumero ressitua a panela na boca escolhida', () => {
+    const eventos: Evento[] = [
+      ...eventosPanelaTirada(),
+      evt(feitioId, '2026-04-16T10:30:00', {
+        tipo: 'reposicao_registrada',
+        payload: {
+          panelaId: 'p1',
+          conteudo: { tipo: 'agua' },
+          volumeL: 55,
+          bocaNumero: 3
+        }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.estado).toBe('no_fogo');
+    expect(p1.bocaAtual).toBe(3);
+  });
+
+  it('panela na_biqueira que recebe tempo_pausado vira fora_do_fogo (encostada)', () => {
+    const eventos: Evento[] = [
+      ...eventosPanelaTirada(),
+      evt(feitioId, '2026-04-16T10:45:00', {
+        tipo: 'tempo_pausado',
+        payload: { panelaId: 'p1' }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.estado).toBe('fora_do_fogo');
+    expect(p1.bocaAtual).toBeNull();
+    expect(p1.encostadaDesde).not.toBeNull();
   });
 });
 

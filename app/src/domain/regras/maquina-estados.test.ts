@@ -8,10 +8,11 @@ import type { EstadoPanela } from '../entities/panela';
  *   montada              → no_fogo              via 'entrar_no_fogo'
  *   no_fogo              → fora_do_fogo         via 'pausar'
  *   fora_do_fogo         → no_fogo              via 'retomar'
- *   no_fogo              → aguardando_reposicao via 'registrar_tiragem'
- *   fora_do_fogo         → aguardando_reposicao via 'registrar_tiragem'
- *   aguardando_reposicao → no_fogo              via 'repor_e_play'
- *   aguardando_reposicao → descartada           via 'descartar'
+ *   no_fogo              → na_biqueira          via 'registrar_tiragem'
+ *   fora_do_fogo         → na_biqueira          via 'registrar_tiragem'
+ *   na_biqueira          → no_fogo              via 'repor_e_play'
+ *   na_biqueira          → fora_do_fogo         via 'pausar' (encostar da biqueira)
+ *   na_biqueira          → descartada           via 'descartar'
  *   no_fogo              → descartada           via 'descartar' (excepcional)
  *
  * Tudo o mais é proibido.
@@ -39,28 +40,35 @@ describe('transicao — transições permitidas', () => {
     });
   });
 
-  it('no_fogo + registrar_tiragem → aguardando_reposicao', () => {
+  it('no_fogo + registrar_tiragem → na_biqueira', () => {
     expect(transicao('no_fogo', { tipo: 'registrar_tiragem' })).toEqual<ResultadoTransicao>({
       ok: true,
-      estado: 'aguardando_reposicao'
+      estado: 'na_biqueira'
     });
   });
 
-  it('fora_do_fogo + registrar_tiragem → aguardando_reposicao', () => {
+  it('fora_do_fogo + registrar_tiragem → na_biqueira', () => {
     expect(
       transicao('fora_do_fogo', { tipo: 'registrar_tiragem' })
-    ).toEqual<ResultadoTransicao>({ ok: true, estado: 'aguardando_reposicao' });
+    ).toEqual<ResultadoTransicao>({ ok: true, estado: 'na_biqueira' });
   });
 
-  it('aguardando_reposicao + repor_e_play → no_fogo', () => {
-    expect(transicao('aguardando_reposicao', { tipo: 'repor_e_play' })).toEqual<ResultadoTransicao>({
+  it('na_biqueira + repor_e_play → no_fogo', () => {
+    expect(transicao('na_biqueira', { tipo: 'repor_e_play' })).toEqual<ResultadoTransicao>({
       ok: true,
       estado: 'no_fogo'
     });
   });
 
-  it('aguardando_reposicao + descartar → descartada', () => {
-    expect(transicao('aguardando_reposicao', { tipo: 'descartar' })).toEqual<ResultadoTransicao>({
+  it('na_biqueira + pausar → fora_do_fogo (encostar a panela da biqueira)', () => {
+    expect(transicao('na_biqueira', { tipo: 'pausar' })).toEqual<ResultadoTransicao>({
+      ok: true,
+      estado: 'fora_do_fogo'
+    });
+  });
+
+  it('na_biqueira + descartar → descartada', () => {
+    expect(transicao('na_biqueira', { tipo: 'descartar' })).toEqual<ResultadoTransicao>({
       ok: true,
       estado: 'descartada'
     });
@@ -92,10 +100,9 @@ describe('transicao — transições proibidas', () => {
     ['fora_do_fogo', 'repor_e_play'],
     ['fora_do_fogo', 'descartar'],
 
-    ['aguardando_reposicao', 'entrar_no_fogo'],
-    ['aguardando_reposicao', 'pausar'],
-    ['aguardando_reposicao', 'retomar'],
-    ['aguardando_reposicao', 'registrar_tiragem']
+    ['na_biqueira', 'entrar_no_fogo'],
+    ['na_biqueira', 'retomar'],
+    ['na_biqueira', 'registrar_tiragem']
   ];
 
   for (const [estado, comando] of proibidas) {

@@ -112,7 +112,7 @@
 
   const pausado = $derived(panela.estado === 'fora_do_fogo' || panela.tempoPausado === true);
   const podeTirar = $derived(panela.estado === 'no_fogo');
-  const podeRepor = $derived(panela.estado === 'aguardando_reposicao');
+  const podeRepor = $derived(panela.estado === 'na_biqueira');
 
   function confirmarTirar() {
     onTirar({ volumeL: volumeTirar });

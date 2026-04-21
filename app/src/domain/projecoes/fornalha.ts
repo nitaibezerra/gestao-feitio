@@ -104,7 +104,9 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
         momento: new Date(evento.momento)
       });
       p.volumeAtualL = Math.max(0, (p.volumeAtualL ?? 0) - evento.payload.volumeL);
-      p.estado = 'aguardando_reposicao';
+      // Ao tirar, a panela sai do fogão e vai para a biqueira — libera a boca.
+      p.estado = 'na_biqueira';
+      p.bocaAtual = null;
       if (evento.payload.tipoTiragem.tipo === 'agua_forte') {
         p.emCicloAguaForte = true;
       }
@@ -119,6 +121,9 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
       p.volumeAtualL = evento.payload.volumeL;
       p.estado = 'no_fogo';
       p.entradaFogoEm = new Date(evento.momento);
+      if (evento.payload.bocaNumero !== undefined) {
+        p.bocaAtual = evento.payload.bocaNumero;
+      }
       descontarTonelSeCozimento(estado, evento.payload.conteudo, evento.payload.volumeL);
       return;
     }
