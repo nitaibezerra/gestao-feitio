@@ -14,6 +14,11 @@
   import NovaPanelaModal, {
     type PayloadNovaPanela
   } from '../../../ui/componentes/NovaPanelaModal.svelte';
+  import PanelasEncostadas from '../../../ui/componentes/PanelasEncostadas.svelte';
+  import PanelaEncostadaModal, {
+    type PayloadVoltarAoFogo,
+    type PayloadTirarDireto
+  } from '../../../ui/componentes/PanelaEncostadaModal.svelte';
   import { bootstrapAtivo, comandos, feitioAtivo, novoId, repo } from '../../../app/runtime';
   import type { EstadoFornalha } from '../../../domain/projecoes/fornalha';
   import type { Evento } from '../../../domain/events/tipos';
@@ -21,6 +26,7 @@
   import { panelasNaFornalha, toneisVisao, type PanelaVisao } from '../../../ui/visao';
   import { resumirEvento } from '../../../ui/evento-label';
   import { useWakeLock } from '../../../ui/wake-lock.svelte';
+  import { calcularTipoTiragem } from '../../../domain/regras/nomenclatura';
 
   const fornalha = feitioAtivo();
 
@@ -78,6 +84,7 @@
 
   let selecionadaId = $state<string | null>(null);
   let novaOpen = $state(false);
+  let encostadaId = $state<string | null>(null);
 
   // Modo "trocar bocas": clicar numa panela seleciona; segundo clique troca.
   let modoTrocar = $state(false);
@@ -86,6 +93,13 @@
   // Passa sempre a versão atual da panela ao modal — vem da projeção.
   const selecionada = $derived(
     selecionadaId ? panelasUI.find((p) => p.id === selecionadaId) ?? null : null
+  );
+
+  const panelasEncostadas = $derived(
+    estado?.panelas.filter((p) => p.estado === 'fora_do_fogo') ?? []
+  );
+  const encostadaSelecionada = $derived(
+    encostadaId ? panelasEncostadas.find((p) => p.id === encostadaId) ?? null : null
   );
 
   const selecionadasTrocar = $derived(trocarAId ? [trocarAId] : []);
@@ -203,6 +217,41 @@
     });
   }
 
+  async function onVoltarAoFogo(p: PayloadVoltarAoFogo) {
+    if (!feitio || !encostadaSelecionada) return;
+    const r = await comandos().voltarAoFogo({
+      feitioId: feitio.id,
+      panelaId: encostadaSelecionada.id,
+      bocaNumero: p.bocaNumero
+    });
+    if (r.ok) encostadaId = null;
+  }
+
+  async function onTirarDireto(p: PayloadTirarDireto) {
+    if (!feitio || !encostadaSelecionada) return;
+    const tipoT = tonelDestinoParaTiragemDeEncostada(encostadaSelecionada);
+    const r = await comandos().registrarTiragem({
+      feitioId: feitio.id,
+      panelaId: encostadaSelecionada.id,
+      volumeL: p.volumeL,
+      tonelDestinoId: tipoT
+    });
+    if (r.ok) encostadaId = null;
+  }
+
+  function tonelDestinoParaTiragemDeEncostada(p: Panela): string {
+    // Reusa a lógica de `tonelDestinoPara` simulando a proxTiragem via calcularTipoTiragem
+    // já aplicada em panelasNaFornalha; aqui chamamos via helper compartilhado.
+    // Para manter simples, usamos o mesmo helper em estado atual.
+    const tipo = proxTiragemDe(p);
+    return tonelDestinoPara(tipo, estado!);
+  }
+
+  function proxTiragemDe(p: Panela): TipoTiragem {
+    // import dinâmico seria custoso; reusa import estático.
+    return calcularTipoTiragem(p);
+  }
+
   async function onUndo() {
     if (!feitio) return;
     await comandos().desfazerUltimoEvento({ feitioId: feitio.id });
@@ -268,6 +317,11 @@
 
     <Toneis toneis={toneisUI} />
 
+    <PanelasEncostadas
+      panelas={panelasEncostadas}
+      onClick={(p) => (encostadaId = p.id)}
+    />
+
     <Footer
       {ultimoEvento}
       onNova={() => abrirNova()}
@@ -300,6 +354,16 @@
       toneis={estado?.toneis ?? []}
       onClose={() => (novaOpen = false)}
       onConfirm={onNovaConfirm}
+    />
+  {/if}
+
+  {#if encostadaSelecionada}
+    <PanelaEncostadaModal
+      panela={encostadaSelecionada}
+      {bocasVazias}
+      onClose={() => (encostadaId = null)}
+      onVoltar={onVoltarAoFogo}
+      onTirarDireto={onTirarDireto}
     />
   {/if}
 {/if}
