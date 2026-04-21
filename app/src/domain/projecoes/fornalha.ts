@@ -164,6 +164,19 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
       return;
     }
 
+    case 'panela_editada': {
+      const p = buscarPanela(estado, evento.payload.panelaId);
+      if (!p) return;
+      const campos = evento.payload.campos;
+      if (campos.numero !== undefined) p.numero = campos.numero;
+      if (campos.volumeAtualL !== undefined) p.volumeAtualL = campos.volumeAtualL;
+      if (campos.metaTiragemL !== undefined) p.metaTiragemL = campos.metaTiragemL;
+      if (campos.entradaFogoEm !== undefined) {
+        p.entradaFogoEm = new Date(campos.entradaFogoEm);
+      }
+      return;
+    }
+
     case 'evento_desfeito':
       // já tratado no pré-filtro
       return;

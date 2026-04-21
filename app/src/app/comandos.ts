@@ -63,6 +63,16 @@ export type ComandoTrocaBocas = Ctx & { panelaAId: string; panelaBId: string };
 
 export type ComandoAjusteVolume = Ctx & { panelaId: string; deltaL: number };
 
+export type ComandoEditarPanela = Ctx & {
+  panelaId: string;
+  campos: {
+    numero?: number;
+    volumeAtualL?: number;
+    metaTiragemL?: number;
+    entradaFogoEm?: string; // ISO datetime
+  };
+};
+
 export type Comandos = {
   iniciarFeitio(c: ComandoIniciarFeitio): Promise<ResultadoComando>;
   montarPanela(c: ComandoMontarPanela): Promise<ResultadoComando>;
@@ -74,6 +84,7 @@ export type Comandos = {
   trocarBocas(c: ComandoTrocaBocas): Promise<ResultadoComando>;
   descartarPanela(c: ComandoPanelaAlvo): Promise<ResultadoComando>;
   ajustarVolume(c: ComandoAjusteVolume): Promise<ResultadoComando>;
+  editarPanela(c: ComandoEditarPanela): Promise<ResultadoComando>;
   desfazerUltimoEvento(c: Ctx): Promise<ResultadoComando>;
   encerrarFeitio(c: Ctx): Promise<ResultadoComando>;
 };
@@ -256,6 +267,39 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
       const evento = criarEvento(c.feitioId, {
         tipo: 'volume_ajustado',
         payload: { panelaId: c.panelaId, deltaL: c.deltaL }
+      });
+      return persistir(evento);
+    },
+
+    async editarPanela(c) {
+      const { fornalha } = await estadoAtual(c.feitioId);
+      const panela = buscarPanela(fornalha, c.panelaId);
+      if (!panela) return { ok: false, motivo: `panela ${c.panelaId} não encontrada` };
+      const campos = c.campos ?? {};
+      const chaves = Object.keys(campos).filter(
+        (k) => (campos as Record<string, unknown>)[k] !== undefined
+      );
+      if (chaves.length === 0) {
+        return { ok: false, motivo: 'nenhum campo para editar' };
+      }
+      if (campos.numero !== undefined && !(campos.numero > 0)) {
+        return { ok: false, motivo: 'numero deve ser > 0' };
+      }
+      if (campos.volumeAtualL !== undefined && !(campos.volumeAtualL >= 0)) {
+        return { ok: false, motivo: 'volumeAtualL deve ser >= 0' };
+      }
+      if (campos.metaTiragemL !== undefined && !(campos.metaTiragemL >= 0)) {
+        return { ok: false, motivo: 'metaTiragemL deve ser >= 0' };
+      }
+      if (campos.entradaFogoEm !== undefined) {
+        const t = new Date(campos.entradaFogoEm).getTime();
+        if (Number.isNaN(t)) {
+          return { ok: false, motivo: 'entradaFogoEm inválido' };
+        }
+      }
+      const evento = criarEvento(c.feitioId, {
+        tipo: 'panela_editada',
+        payload: { panelaId: c.panelaId, campos }
       });
       return persistir(evento);
     },

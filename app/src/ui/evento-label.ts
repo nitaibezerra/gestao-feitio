@@ -62,6 +62,13 @@ export function resumirEvento(e: Evento, panelas: Panela[]): EventoResumo {
       };
     case 'panela_descartada':
       return { texto: `Panela ${nPanela(e.payload.panelaId)} — Descartada`, momento };
+    case 'panela_editada': {
+      const mudancas = Object.keys(e.payload.campos ?? {});
+      return {
+        texto: `Panela ${nPanela(e.payload.panelaId)} — Editada (${mudancas.join(', ') || '—'})`,
+        momento
+      };
+    }
     case 'evento_desfeito':
       return { texto: `Desfeito: evento anterior revertido`, momento };
     case 'feitio_encerrado':

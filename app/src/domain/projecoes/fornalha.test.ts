@@ -465,6 +465,87 @@ describe('projetarFornalha — meta de tiragem (Fase 6.1)', () => {
   });
 });
 
+describe('projetarFornalha — panela_editada (Fase 6.2)', () => {
+  function base(feitioId: string, iso: string): Evento[] {
+    return [
+      evt(feitioId, iso, {
+        tipo: 'feitio_iniciado',
+        payload: { nome: 'F', feitor: 'J', qtdBocas: 5 }
+      }),
+      evt(feitioId, iso, {
+        tipo: 'panela_montada',
+        payload: { panelaId: 'p1', numero: 1 }
+      }),
+      evt(feitioId, iso, {
+        tipo: 'panela_entra_fogo',
+        payload: {
+          panelaId: 'p1',
+          bocaNumero: 1,
+          conteudo: { tipo: 'agua' },
+          volumeL: 60,
+          metaTiragemL: 30
+        }
+      })
+    ];
+  }
+
+  it('edita volumeAtualL e metaTiragemL — overrides aplicados', () => {
+    const feitioId = 'f1';
+    const eventos: Evento[] = [
+      ...base(feitioId, '2026-04-16T08:00:00'),
+      evt(feitioId, '2026-04-16T09:00:00', {
+        tipo: 'panela_editada',
+        payload: { panelaId: 'p1', campos: { volumeAtualL: 65, metaTiragemL: 40 } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.volumeAtualL).toBe(65);
+    expect(p1.metaTiragemL).toBe(40);
+  });
+
+  it('edita entradaFogoEm — projeção reflete novo timestamp', () => {
+    const feitioId = 'f1';
+    const eventos: Evento[] = [
+      ...base(feitioId, '2026-04-16T08:00:00'),
+      evt(feitioId, '2026-04-16T09:00:00', {
+        tipo: 'panela_editada',
+        payload: { panelaId: 'p1', campos: { entradaFogoEm: '2026-04-16T07:30:00.000Z' } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.entradaFogoEm?.toISOString()).toBe('2026-04-16T07:30:00.000Z');
+  });
+
+  it('edita numero', () => {
+    const feitioId = 'f1';
+    const eventos: Evento[] = [
+      ...base(feitioId, '2026-04-16T08:00:00'),
+      evt(feitioId, '2026-04-16T09:00:00', {
+        tipo: 'panela_editada',
+        payload: { panelaId: 'p1', campos: { numero: 7 } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    expect(r.panelas.find((p) => p.id === 'p1')?.numero).toBe(7);
+  });
+
+  it('panela_editada em panela inexistente → ignora silenciosamente', () => {
+    const feitioId = 'f1';
+    const eventos: Evento[] = [
+      ...base(feitioId, '2026-04-16T08:00:00'),
+      evt(feitioId, '2026-04-16T09:00:00', {
+        tipo: 'panela_editada',
+        payload: { panelaId: 'fantasma', campos: { volumeAtualL: 10 } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    const p1 = r.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.volumeAtualL).toBe(60);
+  });
+});
+
 describe('projetarFornalha — troca de bocas', () => {
   it('troca_bocas inverte as bocas das duas panelas, preservando conteúdo', () => {
     const feitioId = 'f1';

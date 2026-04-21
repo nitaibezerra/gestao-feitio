@@ -349,6 +349,81 @@ describe('ajustarVolume', () => {
   });
 });
 
+describe('editarPanela (Fase 6.2)', () => {
+  async function prepararPanelaNoFogo() {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 1,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60,
+      metaTiragemL: 30
+    });
+  }
+
+  it('edita volumeAtualL e metaTiragemL → projeção reflete mudanças', async () => {
+    await prepararPanelaNoFogo();
+    const r = await comandos.editarPanela({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      campos: { volumeAtualL: 65, metaTiragemL: 40 }
+    });
+    expect(r.ok).toBe(true);
+
+    const f = await estado('f1');
+    const p1 = f.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.volumeAtualL).toBe(65);
+    expect(p1.metaTiragemL).toBe(40);
+  });
+
+  it('edita entradaFogoEm com ISO válido → aplicado', async () => {
+    await prepararPanelaNoFogo();
+    const novo = '2026-04-16T05:00:00.000Z';
+    const r = await comandos.editarPanela({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      campos: { entradaFogoEm: novo }
+    });
+    expect(r.ok).toBe(true);
+
+    const f = await estado('f1');
+    const p1 = f.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.entradaFogoEm?.toISOString()).toBe(novo);
+  });
+
+  it('editar panela inexistente → erro', async () => {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    const r = await comandos.editarPanela({
+      feitioId: 'f1',
+      panelaId: 'fantasma',
+      campos: { volumeAtualL: 10 }
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('editar com campos vazio → erro', async () => {
+    await prepararPanelaNoFogo();
+    const r = await comandos.editarPanela({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      campos: {}
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('editar com valor negativo → erro', async () => {
+    await prepararPanelaNoFogo();
+    const r = await comandos.editarPanela({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      campos: { volumeAtualL: -1 }
+    });
+    expect(r.ok).toBe(false);
+  });
+});
+
 describe('desfazerUltimoEvento', () => {
   it('desfaz tiragem → panela volta ao estado anterior', async () => {
     await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });

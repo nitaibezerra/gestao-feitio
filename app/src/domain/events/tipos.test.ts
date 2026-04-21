@@ -67,6 +67,7 @@ describe('validarEvento — tipos válidos', () => {
     ['tempo_retomado', { panelaId: 'p1' }],
     ['troca_bocas', { panelaAId: 'p1', panelaBId: 'p2' }],
     ['panela_descartada', { panelaId: 'p1' }],
+    ['panela_editada', { panelaId: 'p1', campos: { volumeAtualL: 58 } }],
     ['evento_desfeito', { eventoRevertidoId: 'evt-99' }],
     ['feitio_encerrado', {}]
   ];
@@ -183,5 +184,59 @@ describe('validarEvento — payload específico por tipo', () => {
     const r = validarEvento(e);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.erros.join(' ')).toMatch(/metaTiragemL/);
+  });
+
+  it('panela_editada sem panelaId → erro', () => {
+    const e = {
+      ...base(),
+      tipo: 'panela_editada',
+      payload: { campos: { volumeAtualL: 50 } }
+    } as unknown as Evento;
+    const r = validarEvento(e);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.join(' ')).toMatch(/panelaId/);
+  });
+
+  it('panela_editada com campos vazio → erro', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'panela_editada',
+      payload: { panelaId: 'p1', campos: {} }
+    };
+    const r = validarEvento(e);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.join(' ')).toMatch(/campo/i);
+  });
+
+  it('panela_editada com valor negativo → erro', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'panela_editada',
+      payload: { panelaId: 'p1', campos: { volumeAtualL: -5 } }
+    };
+    const r = validarEvento(e);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.join(' ')).toMatch(/volumeAtualL/);
+  });
+
+  it('panela_editada com entradaFogoEm inválido → erro', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'panela_editada',
+      payload: { panelaId: 'p1', campos: { entradaFogoEm: 'not-a-date' } }
+    };
+    const r = validarEvento(e);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.join(' ')).toMatch(/entradaFogoEm/);
+  });
+
+  it('panela_editada apenas com metaTiragemL → ok', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'panela_editada',
+      payload: { panelaId: 'p1', campos: { metaTiragemL: 40 } }
+    };
+    const r = validarEvento(e);
+    expect(r.ok).toBe(true);
   });
 });
