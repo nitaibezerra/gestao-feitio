@@ -74,6 +74,19 @@ export type ComandoEditarPanela = Ctx & {
 };
 
 /**
+ * Editar dados do feitio (papéis). `foguista` com string vazia limpa.
+ * Para sinalizar ausência do feitor é necessário ter (ou definir no mesmo
+ * comando) um `encarregado` não-vazio.
+ */
+export type ComandoEditarFeitio = Ctx & {
+  campos: {
+    foguista?: string;
+    encarregado?: string;
+    feitorAusente?: boolean;
+  };
+};
+
+/**
  * Voltar uma panela encostada ao fogo numa boca (possivelmente outra).
  * Composto de dois eventos atomicamente: `tempo_retomado` + `panela_entra_fogo`.
  * `conteudo` e `volumeL` são opcionais — se ausentes, a projeção atual da panela
@@ -99,6 +112,7 @@ export type Comandos = {
   descartarPanela(c: ComandoPanelaAlvo): Promise<ResultadoComando>;
   ajustarVolume(c: ComandoAjusteVolume): Promise<ResultadoComando>;
   editarPanela(c: ComandoEditarPanela): Promise<ResultadoComando>;
+  editarFeitio(c: ComandoEditarFeitio): Promise<ResultadoComando>;
   voltarAoFogo(c: ComandoVoltarAoFogo): Promise<ResultadoComando>;
   desfazerUltimoEvento(c: Ctx): Promise<ResultadoComando>;
   encerrarFeitio(c: Ctx): Promise<ResultadoComando>;
@@ -315,6 +329,33 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
       const evento = criarEvento(c.feitioId, {
         tipo: 'panela_editada',
         payload: { panelaId: c.panelaId, campos }
+      });
+      return persistir(evento);
+    },
+
+    async editarFeitio(c) {
+      const { fornalha } = await estadoAtual(c.feitioId);
+      if (!fornalha.feitio) return { ok: false, motivo: 'feitio não existe' };
+      const campos = c.campos ?? {};
+      const chaves = Object.keys(campos).filter(
+        (k) => (campos as Record<string, unknown>)[k] !== undefined
+      );
+      if (chaves.length === 0) {
+        return { ok: false, motivo: 'nenhum campo para editar' };
+      }
+      if (campos.feitorAusente === true) {
+        const encarregadoFinal =
+          campos.encarregado !== undefined ? campos.encarregado : fornalha.feitio.encarregado;
+        if (!encarregadoFinal || !encarregadoFinal.trim()) {
+          return {
+            ok: false,
+            motivo: 'encarregado obrigatório quando feitor está ausente'
+          };
+        }
+      }
+      const evento = criarEvento(c.feitioId, {
+        tipo: 'feitio_editado',
+        payload: { campos }
       });
       return persistir(evento);
     },

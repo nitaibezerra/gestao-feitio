@@ -424,6 +424,93 @@ describe('editarPanela (Fase 6.2)', () => {
   });
 });
 
+describe('editarFeitio (Fase 7.2)', () => {
+  async function prepararFeitio() {
+    await comandos.iniciarFeitio({
+      feitioId: 'f1',
+      nome: 'F',
+      feitor: 'Tiago',
+      foguista: 'Ana',
+      qtdBocas: 5
+    });
+  }
+
+  it('happy path — editar foguista → projeção reflete', async () => {
+    await prepararFeitio();
+    const r = await comandos.editarFeitio({
+      feitioId: 'f1',
+      campos: { foguista: 'Maria' }
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+
+    const f = await estado('f1');
+    expect(f.feitio?.foguista).toBe('Maria');
+  });
+
+  it('definir encarregado + feitorAusente numa única chamada → ok', async () => {
+    await prepararFeitio();
+    const r = await comandos.editarFeitio({
+      feitioId: 'f1',
+      campos: { encarregado: 'João', feitorAusente: true }
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+
+    const f = await estado('f1');
+    expect(f.feitio?.feitorAusente).toBe(true);
+    expect(f.feitio?.encarregado).toBe('João');
+  });
+
+  it('feitorAusente: true sem encarregado (e sem encarregado prévio) → erro', async () => {
+    await prepararFeitio();
+    const r = await comandos.editarFeitio({
+      feitioId: 'f1',
+      campos: { feitorAusente: true }
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivo).toMatch(/encarregado/i);
+  });
+
+  it('feitorAusente: true com encarregado já existente na projeção → ok', async () => {
+    await prepararFeitio();
+    await comandos.editarFeitio({
+      feitioId: 'f1',
+      campos: { encarregado: 'João', feitorAusente: true }
+    });
+    // Voltar feitor e depois marcar ausência novamente sem repassar encarregado:
+    await comandos.editarFeitio({ feitioId: 'f1', campos: { feitorAusente: false } });
+    const r = await comandos.editarFeitio({
+      feitioId: 'f1',
+      campos: { feitorAusente: true }
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+  });
+
+  it('feitio inexistente → erro', async () => {
+    const r = await comandos.editarFeitio({
+      feitioId: 'fantasma',
+      campos: { foguista: 'X' }
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('campos vazio → erro', async () => {
+    await prepararFeitio();
+    const r = await comandos.editarFeitio({ feitioId: 'f1', campos: {} });
+    expect(r.ok).toBe(false);
+  });
+
+  it('limpar foguista com string vazia → projeção volta undefined', async () => {
+    await prepararFeitio();
+    const r = await comandos.editarFeitio({
+      feitioId: 'f1',
+      campos: { foguista: '' }
+    });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const f = await estado('f1');
+    expect(f.feitio?.foguista).toBeUndefined();
+  });
+});
+
 describe('voltarAoFogo (Fase 6.4)', () => {
   async function prepararPanelaEncostada(
     bocaInicial = 1,
