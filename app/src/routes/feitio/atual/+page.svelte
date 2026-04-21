@@ -19,6 +19,12 @@
     type PayloadVoltarAoFogo,
     type PayloadTirarDireto
   } from '../../../ui/componentes/PanelaEncostadaModal.svelte';
+  import EditarFeitorModal, {
+    type PayloadEditarFeitor
+  } from '../../../ui/componentes/EditarFeitorModal.svelte';
+  import EditarFoguistaModal, {
+    type PayloadEditarFoguista
+  } from '../../../ui/componentes/EditarFoguistaModal.svelte';
   import { bootstrapAtivo, comandos, feitioAtivo, novoId, repo } from '../../../app/runtime';
   import type { EstadoFornalha } from '../../../domain/projecoes/fornalha';
   import type { Evento } from '../../../domain/events/tipos';
@@ -85,6 +91,8 @@
   let selecionadaId = $state<string | null>(null);
   let novaOpen = $state(false);
   let encostadaId = $state<string | null>(null);
+  let editarFeitorOpen = $state(false);
+  let editarFoguistaOpen = $state(false);
 
   // Modo "trocar bocas": clicar numa panela seleciona; segundo clique troca.
   let modoTrocar = $state(false);
@@ -227,6 +235,24 @@
     if (r.ok) encostadaId = null;
   }
 
+  async function onEditarFeitorConfirm(p: PayloadEditarFeitor) {
+    if (!feitio) return;
+    const campos: Parameters<ReturnType<typeof comandos>['editarFeitio']>[0]['campos'] = {};
+    if (p.encarregado !== undefined) campos.encarregado = p.encarregado;
+    if (p.feitorAusente !== undefined) campos.feitorAusente = p.feitorAusente;
+    const r = await comandos().editarFeitio({ feitioId: feitio.id, campos });
+    if (r.ok) editarFeitorOpen = false;
+  }
+
+  async function onEditarFoguistaConfirm(p: PayloadEditarFoguista) {
+    if (!feitio) return;
+    const r = await comandos().editarFeitio({
+      feitioId: feitio.id,
+      campos: { foguista: p.foguista }
+    });
+    if (r.ok) editarFoguistaOpen = false;
+  }
+
   async function onTirarDireto(p: PayloadTirarDireto) {
     if (!feitio || !encostadaSelecionada) return;
     const tipoT = tonelDestinoParaTiragemDeEncostada(encostadaSelecionada);
@@ -305,6 +331,8 @@
       qtdPanelasAtivas={panelasUI.length}
       bocas={feitio.qtdBocas}
       toneis={toneisUI}
+      onEditarFeitor={() => (editarFeitorOpen = true)}
+      onEditarFoguista={() => (editarFoguistaOpen = true)}
     />
 
     <Fornalha
@@ -364,6 +392,22 @@
       onClose={() => (encostadaId = null)}
       onVoltar={onVoltarAoFogo}
       onTirarDireto={onTirarDireto}
+    />
+  {/if}
+
+  {#if editarFeitorOpen}
+    <EditarFeitorModal
+      {feitio}
+      onClose={() => (editarFeitorOpen = false)}
+      onConfirm={onEditarFeitorConfirm}
+    />
+  {/if}
+
+  {#if editarFoguistaOpen}
+    <EditarFoguistaModal
+      {feitio}
+      onClose={() => (editarFoguistaOpen = false)}
+      onConfirm={onEditarFoguistaConfirm}
     />
   {/if}
 {/if}

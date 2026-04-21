@@ -8,15 +8,41 @@
     qtdPanelasAtivas: number;
     bocas: number;
     toneis: Array<Pick<Tonel, 'volumeL'>>;
+    onEditarFeitor?: () => void;
+    onEditarFoguista?: () => void;
   };
-  let { feitio, qtdPanelasAtivas, bocas, toneis }: Props = $props();
+  let {
+    feitio,
+    qtdPanelasAtivas,
+    bocas,
+    toneis,
+    onEditarFeitor,
+    onEditarFoguista
+  }: Props = $props();
 
   const noTonel = $derived(toneis.reduce((a, t) => a + t.volumeL, 0));
+  const feitorLabel = $derived(
+    feitio.feitorAusente ? `${feitio.feitor} (ausente)` : feitio.feitor
+  );
+  const feitorSubvalue = $derived(
+    feitio.feitorAusente && feitio.encarregado
+      ? `encarregado: ${feitio.encarregado}`
+      : undefined
+  );
 </script>
 
 <div>
-  <Field label="Feitor" value={feitio.feitor} />
-  <Field label="Foguista" value={feitio.foguista ?? '—'} />
+  <Field
+    label="Feitor"
+    value={feitorLabel}
+    subvalue={feitorSubvalue}
+    onclick={onEditarFeitor}
+  />
+  <Field
+    label="Foguista"
+    value={feitio.foguista ?? '—'}
+    onclick={onEditarFoguista}
+  />
   <Field label="Bocas ao fogo" value={`${qtdPanelasAtivas} / ${bocas}`} />
   <Field label="No tonel" value={`${noTonel} L`} highlight />
 </div>
