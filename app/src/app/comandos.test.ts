@@ -257,6 +257,87 @@ describe('registrarTiragem', () => {
   });
 });
 
+describe('reporLiquido (Fase 8.4)', () => {
+  async function prepararPanelaNaBiqueira(boca = 1) {
+    await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p1', numero: 1 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: boca,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60
+    });
+    await comandos.registrarTiragem({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      volumeL: 30,
+      tonelDestinoId: 't-c1'
+    });
+  }
+
+  it('repor com bocaNumero válido → panela no_fogo, bocaAtual preenchida', async () => {
+    await prepararPanelaNaBiqueira(1);
+    const r = await comandos.reporLiquido({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 3,
+      conteudo: { tipo: 'agua' },
+      volumeL: 55
+    });
+    expect(r.ok).toBe(true);
+
+    const f = await estado('f1');
+    const p1 = f.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.estado).toBe('no_fogo');
+    expect(p1.bocaAtual).toBe(3);
+    expect(p1.volumeAtualL).toBe(55);
+  });
+
+  it('repor sem bocaNumero → erro', async () => {
+    await prepararPanelaNaBiqueira(1);
+    const r = await comandos.reporLiquido({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 0,
+      conteudo: { tipo: 'agua' },
+      volumeL: 55
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('repor para boca ocupada por outra panela → erro', async () => {
+    await prepararPanelaNaBiqueira(1);
+    // Monta outra panela e ocupa a boca 3
+    await comandos.montarPanela({ feitioId: 'f1', panelaId: 'p2', numero: 2 });
+    await comandos.entrarNoFogo({
+      feitioId: 'f1',
+      panelaId: 'p2',
+      bocaNumero: 3,
+      conteudo: { tipo: 'agua' },
+      volumeL: 60
+    });
+    const r = await comandos.reporLiquido({
+      feitioId: 'f1',
+      panelaId: 'p1',
+      bocaNumero: 3,
+      conteudo: { tipo: 'agua' },
+      volumeL: 55
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it('encostar panela na biqueira → vira fora_do_fogo', async () => {
+    await prepararPanelaNaBiqueira(1);
+    const r = await comandos.pausar({ feitioId: 'f1', panelaId: 'p1' });
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+
+    const f = await estado('f1');
+    const p1 = f.panelas.find((p) => p.id === 'p1')!;
+    expect(p1.estado).toBe('fora_do_fogo');
+  });
+});
+
 describe('pausar + retomar', () => {
   async function prepararPanelaNoFogo() {
     await comandos.iniciarFeitio({ feitioId: 'f1', nome: 'F', feitor: 'J', qtdBocas: 5 });

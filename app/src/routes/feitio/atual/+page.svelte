@@ -192,9 +192,15 @@
 
   async function onRepor(p: PayloadRepor) {
     if (!feitio || !selecionada) return;
+    // Na Fase 8.5 o modal de repor expõe a seleção explícita de boca via
+    // PillRow. Aqui mantemos o stub que cai na bocaAtual atual (panela ainda
+    // no fogo) ou na primeira boca livre.
+    const boca = selecionada.bocaAtual ?? bocasVazias[0];
+    if (!boca) return;
     await comandos().reporLiquido({
       feitioId: feitio.id,
       panelaId: selecionada.id,
+      bocaNumero: boca,
       conteudo: p.conteudo,
       volumeL: p.volumeL
     });

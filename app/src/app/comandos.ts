@@ -57,10 +57,9 @@ export type ComandoReposicao = Ctx & {
   volumeL: number;
   /**
    * Panela na biqueira está sem boca — ao repor, o feitor precisa dizer em
-   * qual boca ela volta. Opcional para retrocompat com a mudança incremental
-   * (Fase 8.3 afrouxada), virou obrigatório na Fase 8.4.
+   * qual boca ela volta. Obrigatório desde a Fase 8.4.
    */
-  bocaNumero?: number;
+  bocaNumero: number;
 };
 
 export type ComandoPanelaAlvo = Ctx & { panelaId: string };
@@ -224,18 +223,26 @@ export function criarComandos(repo: RepositorioEventos): Comandos {
     },
 
     async reporLiquido(c) {
+      if (!(c.bocaNumero > 0)) return { ok: false, motivo: 'bocaNumero deve ser > 0' };
+      if (c.volumeL < 0) return { ok: false, motivo: 'volumeL deve ser >= 0' };
       const { fornalha } = await estadoAtual(c.feitioId);
       const panela = buscarPanela(fornalha, c.panelaId);
       if (!panela) return { ok: false, motivo: `panela ${c.panelaId} não encontrada` };
       const t = transicao(panela.estado ?? 'montada', { tipo: 'repor_e_play' });
       if (!t.ok) return { ok: false, motivo: t.motivo };
+      const bocaOcupada = fornalha.panelas.find(
+        (p) => p.id !== c.panelaId && p.bocaAtual === c.bocaNumero && p.estado !== 'descartada'
+      );
+      if (bocaOcupada) {
+        return { ok: false, motivo: `boca ${c.bocaNumero} já está ocupada` };
+      }
       const evento = criarEvento(c.feitioId, {
         tipo: 'reposicao_registrada',
         payload: {
           panelaId: c.panelaId,
           conteudo: c.conteudo,
           volumeL: c.volumeL,
-          ...(c.bocaNumero !== undefined ? { bocaNumero: c.bocaNumero } : {})
+          bocaNumero: c.bocaNumero
         }
       });
       return persistir(evento);
