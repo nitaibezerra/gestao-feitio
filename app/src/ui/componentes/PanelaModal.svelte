@@ -265,7 +265,7 @@
             <span class="mono u">L</span>
           </div>
           <PillRow>
-            {#each [50, 55, 60, 65] as v (v)}
+            {#each [45, 50, 55, 60, 65] as v (v)}
               <Pill active={volumeRepor === v} onclick={() => (volumeRepor = v)}>{v} L</Pill>
             {/each}
           </PillRow>
