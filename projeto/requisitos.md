@@ -45,6 +45,7 @@ Usar os termos exatamente como o feitor usa. Referência no [tutorial](./tutoria
 | Boca | `boca` |
 | Panela | `panela` |
 | Feitor | `feitor` |
+| Encarregado (substitui o feitor em ausência) | `encarregado` |
 | Foguista | `foguista` |
 | Paneleiro | `paneleiro` |
 | Baldeiro | `baldeiro` |
@@ -501,6 +502,17 @@ Validações:
 - pelo menos um campo precisa mudar;
 - valores numéricos `> 0` (número) ou `>= 0` (volumes, meta);
 - `entradaFogoEm` deve ser ISO válido.
+
+### RF-22 — Editar papéis ativos (feitor ausente + foguista)
+
+Nos créditos do dashboard, o feitor pode **clicar no nome do feitor ou do foguista** para ajustar o papel durante o feitio:
+
+- **Foguista**: abre input livre com o nome atual; salvar emite `feitio_editado` com `{foguista}`. String vazia limpa o foguista.
+- **Feitor**: abre modal com dois modos:
+  - *Presente* (padrão quando `feitorAusente !== true`) — CTA "Definir encarregado" (o feitor está saindo).
+  - *Ausente* — input para o nome do encarregado + botão "Feitor voltou" (desmarca ausência).
+
+O comando `editarFeitio` exige um `encarregado` não-vazio quando `feitorAusente=true` (pode vir no próprio comando ou já estar persistido na projeção). Visualmente, quando `feitorAusente=true`, o campo Feitor mostra `"Tiago (ausente)"` e, se existe encarregado, a linha `"encarregado: <nome>"` aparece logo abaixo.
 
 ---
 

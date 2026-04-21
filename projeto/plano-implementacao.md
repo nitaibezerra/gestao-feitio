@@ -260,6 +260,18 @@ Feedback do feitor após testar o MVP localmente produziu 7 ajustes (nenhum muda
 
 Ao final: 175 unit + 26 E2E verdes, `pnpm check` 0/0, `pnpm build` ok.
 
+### Fase 7 — Papel do encarregado + foguista editável
+
+Feedback após o feitor testar o MVP: precisa registrar quando ele mesmo se ausenta (aí quem comanda é o **encarregado**) e ajustar o nome do foguista durante o trabalho. Cinco commits sequenciais:
+
+1. **7.1 — `encarregado` no Feitio + evento `feitio_editado`**: campos opcionais `Feitio.encarregado` e `Feitio.feitorAusente`; novo evento análogo a `panela_editada` com payload `{campos: {foguista?, encarregado?, feitorAusente?}}`. String vazia em `foguista`/`encarregado` limpa o campo na projeção. Validador rejeita `campos` vazio.
+2. **7.2 — Comando `editarFeitio`**: handler valida existência do feitio e exige encarregado não-vazio quando `feitorAusente=true` (pode vir no próprio comando ou já estar na projeção).
+3. **7.3 — Edição inline via clique nos créditos**: `Field` primitivo aceita `onclick` (vira botão) + `subvalue` (linha auxiliar). `Creditos` expõe callbacks `onEditarFeitor`/`onEditarFoguista`; quando ausente, feitor mostra "(ausente)" e o encarregado aparece abaixo. Novos componentes `EditarFeitorModal` (modos presente/ausente) e `EditarFoguistaModal` (input livre).
+4. **7.4 — E2E `editar-papeis.spec.ts`**: 3 cenários — trocar nome do foguista, definir encarregado (feitor sai), feitor voltou.
+5. **7.5 — Docs**: requisitos e plano atualizados.
+
+Ao final: 190 unit + 29 E2E verdes, `pnpm check` 0/0, `pnpm build` ok.
+
 ---
 
 ## 4. Arquivos-chave a criar
