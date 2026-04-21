@@ -17,7 +17,11 @@
   );
 </script>
 
-<button class="card" {onclick}>
+<button
+  class="card"
+  {onclick}
+  aria-label="Panela encostada {String(panela.numero).padStart(2, '0')}"
+>
   <div class="topo">
     <span class="mono eyebrow">Panela</span>
     <span class="serif numero">{String(panela.numero).padStart(2, '0')}</span>
