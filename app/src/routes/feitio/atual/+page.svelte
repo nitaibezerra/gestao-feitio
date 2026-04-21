@@ -15,6 +15,7 @@
     type PayloadNovaPanela
   } from '../../../ui/componentes/NovaPanelaModal.svelte';
   import PanelasEncostadas from '../../../ui/componentes/PanelasEncostadas.svelte';
+  import Biqueira from '../../../ui/componentes/Biqueira.svelte';
   import PanelaEncostadaModal, {
     type PayloadVoltarAoFogo,
     type PayloadTirarDireto
@@ -29,7 +30,12 @@
   import type { EstadoFornalha } from '../../../domain/projecoes/fornalha';
   import type { Evento } from '../../../domain/events/tipos';
   import type { TipoTiragem, Panela } from '../../../domain/entities/panela';
-  import { panelasNaFornalha, toneisVisao, type PanelaVisao } from '../../../ui/visao';
+  import {
+    panelasNaFornalha,
+    panelaVisao,
+    toneisVisao,
+    type PanelaVisao
+  } from '../../../ui/visao';
   import { resumirEvento } from '../../../ui/evento-label';
   import { useWakeLock } from '../../../ui/wake-lock.svelte';
   import { calcularTipoTiragem } from '../../../domain/regras/nomenclatura';
@@ -89,6 +95,7 @@
   });
 
   let selecionadaId = $state<string | null>(null);
+  let biqueiraId = $state<string | null>(null);
   let novaOpen = $state(false);
   let encostadaId = $state<string | null>(null);
   let editarFeitorOpen = $state(false);
@@ -109,6 +116,23 @@
   const encostadaSelecionada = $derived(
     encostadaId ? panelasEncostadas.find((p) => p.id === encostadaId) ?? null : null
   );
+
+  const panelasNaBiqueira = $derived(
+    estado?.panelas.filter((p) => p.estado === 'na_biqueira') ?? []
+  );
+  const biqueiraSelecionada = $derived(
+    biqueiraId
+      ? (panelasNaBiqueira.find((p) => p.id === biqueiraId) ?? null)
+      : null
+  );
+  const biqueiraSelecionadaVisao = $derived(
+    biqueiraSelecionada ? panelaVisao(biqueiraSelecionada) : null
+  );
+
+  // A panela aberta pode vir da fornalha ou da biqueira (depois de uma
+  // tiragem). Um único PanelaModal é aberto a cada vez — `panelaAberta` é o
+  // alvo atual das ações (Tirar/Repor/Encostar/Editar).
+  const panelaAberta = $derived<PanelaVisao | null>(selecionada ?? biqueiraSelecionadaVisao);
 
   const selecionadasTrocar = $derived(trocarAId ? [trocarAId] : []);
   const hintTrocar = $derived.by(() => {
@@ -180,53 +204,63 @@
   }
 
   async function onTirar(p: PayloadTirar) {
-    if (!feitio || !selecionada) return;
-    const tonelDestinoId = tonelDestinoPara(selecionada.proxTiragem, estado!);
+    if (!feitio || !panelaAberta) return;
+    const tonelDestinoId = tonelDestinoPara(panelaAberta.proxTiragem, estado!);
     await comandos().registrarTiragem({
       feitioId: feitio.id,
-      panelaId: selecionada.id,
+      panelaId: panelaAberta.id,
       volumeL: p.volumeL,
       tonelDestinoId
     });
+    // Tiragem joga a panela para biqueira — reabre o modal nesse modo.
+    if (selecionadaId === panelaAberta.id) {
+      selecionadaId = null;
+      biqueiraId = panelaAberta.id;
+    }
   }
 
   async function onRepor(p: PayloadRepor) {
-    if (!feitio || !selecionada) return;
-    // Na Fase 8.5 o modal de repor expõe a seleção explícita de boca via
-    // PillRow. Aqui mantemos o stub que cai na bocaAtual atual (panela ainda
-    // no fogo) ou na primeira boca livre.
-    const boca = selecionada.bocaAtual ?? bocasVazias[0];
-    if (!boca) return;
-    await comandos().reporLiquido({
+    if (!feitio || !panelaAberta) return;
+    const r = await comandos().reporLiquido({
       feitioId: feitio.id,
-      panelaId: selecionada.id,
-      bocaNumero: boca,
+      panelaId: panelaAberta.id,
+      bocaNumero: p.bocaNumero,
       conteudo: p.conteudo,
       volumeL: p.volumeL
     });
+    if (r.ok) {
+      // Panela volta para o fogo — fecha o modal da biqueira.
+      biqueiraId = null;
+    }
   }
 
   async function onPausar() {
-    if (!feitio || !selecionada) return;
-    await comandos().pausar({ feitioId: feitio.id, panelaId: selecionada.id });
+    if (!feitio || !panelaAberta) return;
+    const r = await comandos().pausar({ feitioId: feitio.id, panelaId: panelaAberta.id });
+    if (r.ok) {
+      // Encostar (de no_fogo ou da biqueira) fecha o modal.
+      selecionadaId = null;
+      biqueiraId = null;
+    }
   }
 
   async function onRetomar() {
-    if (!feitio || !selecionada) return;
-    await comandos().retomar({ feitioId: feitio.id, panelaId: selecionada.id });
+    if (!feitio || !panelaAberta) return;
+    await comandos().retomar({ feitioId: feitio.id, panelaId: panelaAberta.id });
   }
 
   async function onDescartar() {
-    if (!feitio || !selecionada) return;
-    await comandos().descartarPanela({ feitioId: feitio.id, panelaId: selecionada.id });
+    if (!feitio || !panelaAberta) return;
+    await comandos().descartarPanela({ feitioId: feitio.id, panelaId: panelaAberta.id });
     selecionadaId = null;
+    biqueiraId = null;
   }
 
   async function onEditar(p: PayloadEditar) {
-    if (!feitio || !selecionada) return;
+    if (!feitio || !panelaAberta) return;
     await comandos().editarPanela({
       feitioId: feitio.id,
-      panelaId: selecionada.id,
+      panelaId: panelaAberta.id,
       campos: p
     });
   }
@@ -349,6 +383,11 @@
       selecionadasIds={selecionadasTrocar}
     />
 
+    <Biqueira
+      panelas={panelasNaBiqueira}
+      onClick={(p) => (biqueiraId = p.id)}
+    />
+
     <Toneis toneis={toneisUI} />
 
     <PanelasEncostadas
@@ -368,11 +407,15 @@
     />
   </div>
 
-  {#if selecionada}
+  {#if panelaAberta}
     <PanelaModal
-      panela={selecionada}
+      panela={panelaAberta}
       toneis={estado?.toneis ?? []}
-      onClose={() => (selecionadaId = null)}
+      {bocasVazias}
+      onClose={() => {
+        selecionadaId = null;
+        biqueiraId = null;
+      }}
       {onTirar}
       {onRepor}
       {onPausar}

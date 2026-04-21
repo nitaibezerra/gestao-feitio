@@ -13,7 +13,11 @@ import type { Tonel } from '../domain/entities/tonel';
 import { calcularTipoTiragem } from '../domain/regras/nomenclatura';
 
 export type PanelaVisao = Panela & {
-  boca: number;
+  /**
+   * Boca do fogão em que a panela está, ou `null` se estiver na biqueira
+   * (fora do fogão, derramando o líquido no tonel).
+   */
+  boca: number | null;
   metaTiragemL: number;
   proxTiragem: TipoTiragem;
 };
@@ -49,6 +53,20 @@ export function panelasNaFornalha(panelas: Panela[]): PanelaVisao[] {
     });
   }
   return visiveis;
+}
+
+/**
+ * Transforma uma panela do domínio em `PanelaVisao` com `boca = null`, para
+ * uso quando a panela está na biqueira (fora do fogão). Mantém a mesma forma
+ * do objeto que o modal `PanelaModal` já consome.
+ */
+export function panelaVisao(p: Panela): PanelaVisao {
+  return {
+    ...p,
+    boca: p.bocaAtual ?? null,
+    metaTiragemL: metaTiragemSugerida(p),
+    proxTiragem: calcularTipoTiragem(p)
+  };
 }
 
 export function toneisVisao(toneis: Tonel[]): TonelVisao[] {

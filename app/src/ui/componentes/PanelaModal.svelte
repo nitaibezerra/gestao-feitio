@@ -16,7 +16,7 @@
   import FieldGroup from './primitivos/FieldGroup.svelte';
 
   export type PayloadTirar = { volumeL: number };
-  export type PayloadRepor = { conteudo: TipoConteudo; volumeL: number };
+  export type PayloadRepor = { conteudo: TipoConteudo; volumeL: number; bocaNumero: number };
   export type PayloadEditar = {
     numero?: number;
     volumeAtualL?: number;
@@ -27,6 +27,7 @@
   type Props = {
     panela: PanelaVisao;
     toneis: Array<Pick<Tonel, 'tipo' | 'ordem' | 'volumeL'>>;
+    bocasVazias: number[];
     onClose: () => void;
     onTirar: (p: PayloadTirar) => void;
     onRepor: (p: PayloadRepor) => void;
@@ -38,6 +39,7 @@
   let {
     panela,
     toneis,
+    bocasVazias,
     onClose,
     onTirar,
     onRepor,
@@ -69,6 +71,16 @@
   // Estado do sub-form de Repor
   let volumeRepor = $state(60);
   let conteudoReporKey = $state<string>('agua');
+  let bocaReporSelecionada = $state<number>(0);
+  $effect(() => {
+    if (modo === 'repor') {
+      // Pré-seleciona: mantém a boca original da panela se ainda livre,
+      // senão a primeira boca vazia.
+      if (bocaReporSelecionada === 0 || !bocasVazias.includes(bocaReporSelecionada)) {
+        bocaReporSelecionada = bocasVazias[0] ?? 0;
+      }
+    }
+  });
 
   // Estado do sub-form de Editar
   let editarNumero = $state(0);
@@ -111,8 +123,11 @@
   );
 
   const pausado = $derived(panela.estado === 'fora_do_fogo' || panela.tempoPausado === true);
+  const naBiqueira = $derived(panela.estado === 'na_biqueira');
   const podeTirar = $derived(panela.estado === 'no_fogo');
-  const podeRepor = $derived(panela.estado === 'na_biqueira');
+  const podeRepor = $derived(naBiqueira);
+  const podeEncostar = $derived(!pausado); // no_fogo e na_biqueira podem encostar
+  const bocasDisponiveisRepor = $derived(bocasVazias);
 
   function confirmarTirar() {
     onTirar({ volumeL: volumeTirar });
@@ -121,7 +136,12 @@
 
   function confirmarRepor() {
     if (!conteudoReporSelecionado) return;
-    onRepor({ conteudo: conteudoReporSelecionado.c, volumeL: volumeRepor });
+    if (!(bocaReporSelecionada > 0)) return;
+    onRepor({
+      conteudo: conteudoReporSelecionado.c,
+      volumeL: volumeRepor,
+      bocaNumero: bocaReporSelecionada
+    });
     modo = 'principal';
   }
 
@@ -158,14 +178,22 @@
   <div class="modal" role="dialog" aria-modal="true" aria-label="Detalhe da panela {panela.numero}">
     <div class="cabecalho">
       <div>
-        <div class="mono eyebrow">Boca {panela.boca}</div>
+        <div class="mono eyebrow">
+          {#if naBiqueira}
+            na biqueira
+          {:else if panela.boca}
+            Boca {panela.boca}
+          {/if}
+        </div>
         <div class="serif titulo">
           Panela {String(panela.numero).padStart(2, '0')}
         </div>
         <div class="subt">
           com <span class="forte">{conteudoLabel(panela.conteudo).toLowerCase()}</span>
-          <span class="sep">·</span>
-          há <span class="mono forte">{fmtDuracao(tempoMs)}</span> no fogo
+          {#if !naBiqueira}
+            <span class="sep">·</span>
+            há <span class="mono forte">{fmtDuracao(tempoMs)}</span> no fogo
+          {/if}
         </div>
       </div>
       <button class="fechar" onclick={onClose} aria-label="Fechar">×</button>
@@ -243,36 +271,55 @@
       </div>
     {:else if modo === 'repor'}
       <div class="sub-form">
-        <FieldGroup label="repor com">
-          <PillRow>
-            {#each opcoesConteudoRepor as o (o.key)}
-              <Pill active={conteudoReporKey === o.key} onclick={() => (conteudoReporKey = o.key)}>
-                {o.label}
-              </Pill>
-            {/each}
-          </PillRow>
-        </FieldGroup>
-        <FieldGroup label="volume">
-          <div class="volume-grande">
-            <input
-              class="serif num input-num"
-              type="number"
-              min="0"
-              bind:value={volumeRepor}
-              aria-label="volume da reposição"
-            />
-            <span class="mono u">L</span>
+        {#if bocasDisponiveisRepor.length === 0}
+          <div class="aviso mono">Nenhuma boca livre — libere uma antes de repor.</div>
+          <div class="acoes">
+            <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Voltar</BtnPill>
           </div>
-          <PillRow>
-            {#each [45, 50, 55, 60, 65] as v (v)}
-              <Pill active={volumeRepor === v} onclick={() => (volumeRepor = v)}>{v} L</Pill>
-            {/each}
-          </PillRow>
-        </FieldGroup>
-        <div class="acoes">
-          <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Cancelar</BtnPill>
-          <BtnPill variante="primary" onclick={confirmarRepor}>Confirmar reposição</BtnPill>
-        </div>
+        {:else}
+          <FieldGroup label="volta para qual boca">
+            <PillRow>
+              {#each bocasDisponiveisRepor as b (b)}
+                <Pill
+                  active={bocaReporSelecionada === b}
+                  onclick={() => (bocaReporSelecionada = b)}
+                >
+                  Boca {b}
+                </Pill>
+              {/each}
+            </PillRow>
+          </FieldGroup>
+          <FieldGroup label="repor com">
+            <PillRow>
+              {#each opcoesConteudoRepor as o (o.key)}
+                <Pill active={conteudoReporKey === o.key} onclick={() => (conteudoReporKey = o.key)}>
+                  {o.label}
+                </Pill>
+              {/each}
+            </PillRow>
+          </FieldGroup>
+          <FieldGroup label="volume">
+            <div class="volume-grande">
+              <input
+                class="serif num input-num"
+                type="number"
+                min="0"
+                bind:value={volumeRepor}
+                aria-label="volume da reposição"
+              />
+              <span class="mono u">L</span>
+            </div>
+            <PillRow>
+              {#each [45, 50, 55, 60, 65] as v (v)}
+                <Pill active={volumeRepor === v} onclick={() => (volumeRepor = v)}>{v} L</Pill>
+              {/each}
+            </PillRow>
+          </FieldGroup>
+          <div class="acoes">
+            <BtnPill variante="ghost" onclick={() => (modo = 'principal')}>Cancelar</BtnPill>
+            <BtnPill variante="primary" onclick={confirmarRepor}>Confirmar reposição</BtnPill>
+          </div>
+        {/if}
       </div>
     {:else if modo === 'editar'}
       <div class="sub-form">
@@ -619,5 +666,12 @@
   }
   .link:hover {
     color: var(--ink-soft);
+  }
+  .aviso {
+    font-size: 12px;
+    color: var(--ink-soft);
+    padding: 12px;
+    background: var(--surface-mute, var(--linha));
+    border-radius: 8px;
   }
 </style>
