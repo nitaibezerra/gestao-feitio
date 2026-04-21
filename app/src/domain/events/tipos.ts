@@ -7,6 +7,7 @@ import type { TipoConteudo, TipoTiragem } from '../entities/panela';
 
 export type TipoEvento =
   | 'feitio_iniciado'
+  | 'feitio_editado'
   | 'panela_montada'
   | 'panela_entra_fogo'
   | 'panela_editada'
@@ -71,6 +72,21 @@ export type PayloadPanelaEditada = {
   };
 };
 
+/**
+ * Payload de `feitio_editado` — mesma forma append-only de `panela_editada`.
+ * `campos` registra apenas o que mudou.
+ *   - `foguista` com string vazia significa **limpar** (remove o foguista).
+ *   - `encarregado` com string vazia significa **limpar**.
+ *   - `feitorAusente` liga/desliga a sinalização de ausência do feitor.
+ */
+export type PayloadFeitioEditado = {
+  campos: {
+    foguista?: string;
+    encarregado?: string;
+    feitorAusente?: boolean;
+  };
+};
+
 // ----- Evento (união discriminada) -----
 export type EventoBase = {
   id: string;
@@ -82,6 +98,7 @@ export type EventoBase = {
 export type Evento = EventoBase &
   (
     | { tipo: 'feitio_iniciado'; payload: PayloadFeitioIniciado }
+    | { tipo: 'feitio_editado'; payload: PayloadFeitioEditado }
     | { tipo: 'panela_montada'; payload: PayloadPanelaMontada }
     | { tipo: 'panela_entra_fogo'; payload: PayloadPanelaEntraFogo }
     | { tipo: 'panela_editada'; payload: PayloadPanelaEditada }
@@ -123,6 +140,7 @@ export type ResultadoValidacao = { ok: true } | { ok: false; erros: string[] };
 
 const TIPOS_VALIDOS = new Set<TipoEvento>([
   'feitio_iniciado',
+  'feitio_editado',
   'panela_montada',
   'panela_entra_fogo',
   'panela_editada',
@@ -165,6 +183,28 @@ function validarPayload(evento: Evento): string[] {
       if (!payload.nome) erros.push('feitio_iniciado: nome obrigatório');
       if (!payload.feitor) erros.push('feitio_iniciado: feitor obrigatório');
       if (!(payload.qtdBocas > 0)) erros.push('feitio_iniciado: qtdBocas deve ser > 0');
+      break;
+    }
+    case 'feitio_editado': {
+      const payload = evento.payload;
+      if (!payload.campos || typeof payload.campos !== 'object') {
+        erros.push('feitio_editado: campos obrigatório');
+        break;
+      }
+      const campos = payload.campos;
+      const chaves = Object.keys(campos);
+      if (chaves.length === 0) {
+        erros.push('feitio_editado: nada para editar');
+      }
+      if (campos.feitorAusente !== undefined && typeof campos.feitorAusente !== 'boolean') {
+        erros.push('feitio_editado: feitorAusente deve ser boolean');
+      }
+      if (campos.foguista !== undefined && typeof campos.foguista !== 'string') {
+        erros.push('feitio_editado: foguista deve ser string');
+      }
+      if (campos.encarregado !== undefined && typeof campos.encarregado !== 'string') {
+        erros.push('feitio_editado: encarregado deve ser string');
+      }
       break;
     }
     case 'panela_montada': {

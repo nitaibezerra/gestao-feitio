@@ -632,6 +632,74 @@ describe('projetarFornalha — panela_editada (Fase 6.2)', () => {
   });
 });
 
+describe('projetarFornalha — feitio_editado (Fase 7.1)', () => {
+  const feitioId = 'f1';
+
+  function baseFeitio(): Evento[] {
+    return [
+      evt(feitioId, '2026-04-20T07:00:00', {
+        tipo: 'feitio_iniciado',
+        payload: { nome: 'F', feitor: 'Tiago', foguista: 'Ana', qtdBocas: 5 }
+      })
+    ];
+  }
+
+  it('feitio_editado com foguista "Maria" → foguista atualizado', () => {
+    const eventos: Evento[] = [
+      ...baseFeitio(),
+      evt(feitioId, '2026-04-20T08:00:00', {
+        tipo: 'feitio_editado',
+        payload: { campos: { foguista: 'Maria' } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    expect(r.feitio?.foguista).toBe('Maria');
+  });
+
+  it('feitio_editado com feitorAusente: true e encarregado: "João" → campos refletidos', () => {
+    const eventos: Evento[] = [
+      ...baseFeitio(),
+      evt(feitioId, '2026-04-20T08:00:00', {
+        tipo: 'feitio_editado',
+        payload: { campos: { feitorAusente: true, encarregado: 'João' } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    expect(r.feitio?.feitorAusente).toBe(true);
+    expect(r.feitio?.encarregado).toBe('João');
+  });
+
+  it('feitio_editado com feitorAusente: false → limpa ausência (encarregado segue no log)', () => {
+    const eventos: Evento[] = [
+      ...baseFeitio(),
+      evt(feitioId, '2026-04-20T08:00:00', {
+        tipo: 'feitio_editado',
+        payload: { campos: { feitorAusente: true, encarregado: 'João' } }
+      }),
+      evt(feitioId, '2026-04-20T09:00:00', {
+        tipo: 'feitio_editado',
+        payload: { campos: { feitorAusente: false } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    expect(r.feitio?.feitorAusente).toBe(false);
+    // encarregado permanece no estado (histórico)
+    expect(r.feitio?.encarregado).toBe('João');
+  });
+
+  it('feitio_editado com foguista "" (string vazia) → limpa o foguista', () => {
+    const eventos: Evento[] = [
+      ...baseFeitio(),
+      evt(feitioId, '2026-04-20T08:00:00', {
+        tipo: 'feitio_editado',
+        payload: { campos: { foguista: '' } }
+      })
+    ];
+    const r = projetarFornalha(eventos);
+    expect(r.feitio?.foguista).toBeUndefined();
+  });
+});
+
 describe('projetarFornalha — troca de bocas', () => {
   it('troca_bocas inverte as bocas das duas panelas, preservando conteúdo', () => {
     const feitioId = 'f1';

@@ -181,6 +181,15 @@ function aplicarEvento(estado: EstadoFornalha, evento: Evento): void {
       return;
     }
 
+    case 'feitio_editado': {
+      if (!estado.feitio) return;
+      const c = evento.payload.campos;
+      if (c.foguista !== undefined) estado.feitio.foguista = c.foguista || undefined;
+      if (c.encarregado !== undefined) estado.feitio.encarregado = c.encarregado || undefined;
+      if (c.feitorAusente !== undefined) estado.feitio.feitorAusente = c.feitorAusente;
+      return;
+    }
+
     case 'evento_desfeito':
       // já tratado no pré-filtro
       return;

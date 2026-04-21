@@ -44,6 +44,7 @@ describe('criarEvento — fabrica eventos com id e momento preenchidos', () => {
 describe('validarEvento — tipos válidos', () => {
   const casos: Array<[TipoEvento, object]> = [
     ['feitio_iniciado', { nome: 'Feitio Abril/2026', feitor: 'José', qtdBocas: 5 }],
+    ['feitio_editado', { campos: { foguista: 'Pedro' } }],
     ['panela_montada', { panelaId: 'p1', numero: 1 }],
     [
       'panela_entra_fogo',
@@ -238,5 +239,36 @@ describe('validarEvento — payload específico por tipo', () => {
     };
     const r = validarEvento(e);
     expect(r.ok).toBe(true);
+  });
+
+  it('feitio_editado com payload válido (encarregado + feitorAusente) → ok', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'feitio_editado',
+      payload: { campos: { encarregado: 'João', feitorAusente: true } }
+    };
+    const r = validarEvento(e);
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+  });
+
+  it('feitio_editado com campos vazio → erro', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'feitio_editado',
+      payload: { campos: {} }
+    };
+    const r = validarEvento(e);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erros.join(' ')).toMatch(/nada para editar/i);
+  });
+
+  it('feitio_editado com foguista string vazia → ok (permite limpar)', () => {
+    const e: Evento = {
+      ...base(),
+      tipo: 'feitio_editado',
+      payload: { campos: { foguista: '' } }
+    };
+    const r = validarEvento(e);
+    expect(r.ok, JSON.stringify(r)).toBe(true);
   });
 });

@@ -23,6 +23,13 @@ export function resumirEvento(e: Evento, panelas: Panela[]): EventoResumo {
   switch (e.tipo) {
     case 'feitio_iniciado':
       return { texto: `Feitio iniciado — ${e.payload.nome}`, momento };
+    case 'feitio_editado': {
+      const mudancas = Object.keys(e.payload.campos ?? {});
+      return {
+        texto: `Feitio — Editado (${mudancas.join(', ') || '—'})`,
+        momento
+      };
+    }
     case 'panela_montada':
       return { texto: `Panela ${String(e.payload.numero).padStart(2, '0')} montada`, momento };
     case 'panela_entra_fogo':
